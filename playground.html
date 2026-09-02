@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playground — PyLearn</title>
+  <meta name="description" content="พื้นที่สำหรับฝึกเขียนโค้ด Python อย่างอิสระ">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
+  <style>
+    /* Playground specific styles */
+    .playground-container {
+      max-width: 1400px;
+      margin: 84px auto 40px;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: calc(100vh - 140px);
+      min-height: 600px;
+    }
+    .playground-header {
+      text-align: center;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .playground-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--cyan), var(--purple-light));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .playground-card {
+      background: rgba(13, 17, 23, 0.7);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: row;
+      gap: 24px;
+      flex: 1;
+      min-height: 0; /* important for flex children to scroll */
+    }
+    .playground-left, .playground-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .playground-right {
+      background: #080a10;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+      box-shadow: inset 0 4px 24px rgba(0,0,0,0.4);
+    }
+    .playground-editor-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      cursor: text;
+      border-radius: 0 0 12px 12px;
+      border: 1px solid var(--glass-border);
+      border-top: none;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .playground-left .editor-toolbar {
+      border-radius: 12px 12px 0 0;
+      flex-shrink: 0;
+    }
+    .playground-editor-wrap .code-textarea-wrap {
+      flex: 1;
+      max-height: none;
+      height: 100%;
+    }
+    .playground-editor-wrap .code-textarea {
+      max-height: none;
+      height: 100%;
+      font-size: 15px;
+    }
+    .output-header {
+      padding: 12px 20px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+    .output-content {
+      padding: 20px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      color: #e2e8f0;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .output-content.error {
+      color: #f87171;
+    }
+    @media (max-width: 900px) {
+      .playground-container { height: auto; min-height: 0; }
+      .playground-card {
+        flex-direction: column;
+        height: auto;
+        padding: 16px;
+      }
+      .playground-left, .playground-right { height: 400px; flex: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1" style="opacity:0.5;"></div>
+<div class="bg-orb bg-orb-2" style="opacity:0.5;"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-icon">🐍</div>
+    PyLearn
+  </a>
+  <div class="nav-links">
+    <a href="index.html">หน้าแรก</a>
+    <a href="index.html#curriculum">หลักสูตร</a>
+    <a href="playground.html" class="active">ลองเขียนโค้ด (Playground)</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="nav-xp" style="font-size:0.85rem;font-weight:700;color:var(--purple-light);">⭐ 0 XP</span>
+  </div>
+</nav>
+
+<!-- Pyodide loading bar -->
+<div class="nav-progress-bar" id="py-progress-bar" style="width:0%"></div>
+
+<div class="playground-container">
+  <div class="playground-header">
+    <h1 class="playground-title">Python Playground</h1>
+    <p style="color:var(--text-secondary); font-size:1.1rem;">พื้นที่สำหรับทดลองเขียนโค้ด Python ได้อย่างอิสระ รันผลลัพธ์ได้ทันที 🚀</p>
+  </div>
+
+  <div class="playground-card">
+    <!-- Code Editor Side -->
+    <div class="playground-left">
+      <div class="editor-toolbar">
+        <div class="editor-lang">🐍 Python 3</div>
+        <div class="editor-actions">
+          <button class="btn-reset" onclick="installLibrary()" title="ติดตั้ง Library เสริมผ่าน micropip (เช่น numpy)">📦 ติดตั้ง Library</button>
+          <button class="btn-reset" onclick="resetPlaygroundCode()" title="ล้างโค้ดใหม่ทั้งหมด">🗑️ ล้างโค้ด</button>
+          <button class="btn-run" onclick="runPlayground()" id="run-btn">▶ Run</button>
+        </div>
+      </div>
+      <div class="playground-editor-wrap textarea-holder" id="playground-editor"></div>
+    </div>
+
+    <!-- Output Side -->
+    <div class="playground-right">
+      <div class="output-header">
+        <span><span style="margin-right:8px">💻</span>Terminal Output</span>
+        <span id="output-status"></span>
+      </div>
+      <div class="output-content" id="output-console">รันโค้ดเพื่อดูผลลัพธ์...</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<script src="js/app.js?v=3"></script>
+<script src="js/editor.js?v=3"></script>
+<script>
+  let editor;
+  const STORAGE_KEY = 'playground_code';
+  const DEFAULT_CODE = `# ยินดีต้อนรับสู่ Python Playground!
+# พื้นที่นี้เปิดให้คุณเขียนโค้ดทดสอบไอเดียได้อย่างอิสระ
+# โค้ดจะถูกบันทึกอัตโนมัติ
+
+def greet(name):
+    print(f"Hello, {name}! 🚀")
+
+greet("Python Developer")
+`;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    updateXPDisplay();
+
+    // Initialize Editor
+    const container = document.getElementById('playground-editor');
+    const savedCode = localStorage.getItem(STORAGE_KEY) || DEFAULT_CODE;
+    editor = createEditor(container, savedCode);
+
+    // Auto-save logic
+    editor._textarea.addEventListener('input', () => {
+      localStorage.setItem(STORAGE_KEY, editor._textarea.value);
+    });
+
+    // Focus editor when clicking anywhere in the wrap
+    container.addEventListener('click', () => {
+      editor._textarea.focus();
+    });
+
+    // Initialize Pyodide with UI feedback
+    const bar = document.getElementById('py-progress-bar');
+    bar.style.width = '30%';
+    try {
+      await initPyodide((msg) => {
+        bar.style.width = '80%';
+      });
+      bar.style.width = '100%';
+      window.pyodideReady = true;
+      setTimeout(() => { bar.style.opacity = '0'; }, 500);
+      if (typeof showToast === 'function') showToast('Python Runtime พร้อมแล้ว! 🐍', 'success');
+    } catch(e) {
+      bar.style.background = 'var(--red)';
+      document.getElementById('output-console').textContent = '⚠️ โหลด Python Environment ไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ';
+      if (typeof showToast === 'function') showToast('โหลด Python ล้มเหลว ลองรีเฟรชหน้า', 'error');
+    }
+  });
+
+  async function installLibrary() {
+    if (!window.pyodideReady) {
+      alert("ระบบกำลังโหลด Python กรุณารอซักครู่...");
+      return;
+    }
+    const pkg = await createInputDialog("ใส่ชื่อ Library ที่ต้องการติดตั้ง (เช่น numpy):");
+    if (!pkg) return;
+    
+    const outputEl = document.getElementById('output-console');
+    const statusEl = document.getElementById('output-status');
+    outputEl.className = 'output-content';
+    outputEl.textContent = `กำลังติดตั้ง ${pkg}...\n(อาจใช้เวลาสักครู่)`;
+    statusEl.textContent = '⏳ Installing...';
+
+    try {
+      await pyodide.loadPackage("micropip");
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install(pkg);
+      outputEl.textContent += `\n\n✅ ติดตั้ง ${pkg} สำเร็จแล้ว!`;
+      statusEl.textContent = '✅ Success';
+      statusEl.style.color = 'var(--green)';
+    } catch (e) {
+      outputEl.className = 'output-content error';
+      outputEl.textContent += `\n\n❌ ติดตั้งไม่สำเร็จ: ${e.message || String(e)}`;
+      statusEl.textContent = '❌ Error';
+      statusEl.style.color = 'var(--red)';
+    }
+  }
+
+  async function runPlayground() {
+    if (!window.pyodideReady) {
+      alert("ระบบกำลังโหลด Python กรุณารอซักครู่...");
+      return;
+    }
+    const code = editor._textarea.value;
+    const runBtn = document.getElementById('run-btn');
+    const outputEl = document.getElementById('output-console');
+    const statusEl = document.getElementById('output-status');
+
+    runBtn.disabled = true;
+    runBtn.innerHTML = '<div class="spinner" style="width:14px;height:14px;margin:0;display:inline-block;"></div> Running...';
+    outputEl.textContent = 'Running...';
+    outputEl.className = 'output-content';
+    statusEl.textContent = '';
+
+    const startTime = Date.now();
+    try {
+      // Provide generic input prompt fallback for Playground with custom UI
+      const result = await runPython(
+        code,
+        (partialOutput) => {
+          outputEl.textContent = partialOutput || '(รอพิมพ์...)';
+        },
+        createInputDialog
+      );
+      const time = Date.now() - startTime;
+      
+      if (result.success) {
+        outputEl.textContent = result.output || '(ไม่มีผลลัพธ์จากคำสั่ง print)';
+        statusEl.textContent = `✅ Success (${time}ms)`;
+        statusEl.style.color = 'var(--green)';
+      } else {
+        outputEl.textContent = result.output;
+        outputEl.className = 'output-content error';
+        statusEl.textContent = '❌ Error';
+        statusEl.style.color = 'var(--red)';
+      }
+    } catch(e) {
+      outputEl.textContent = e.message;
+      outputEl.className = 'output-content error';
+      statusEl.textContent = '❌ Error';
+      statusEl.style.color = 'var(--red)';
+    }
+
+    runBtn.disabled = false;
+    runBtn.innerHTML = '▶ Run';
+  }
+
+  function resetPlaygroundCode() {
+    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างโค้ดทั้งหมด?')) {
+      editor._textarea.value = DEFAULT_CODE;
+      localStorage.setItem(STORAGE_KEY, DEFAULT_CODE);
+      if (editor._updateLineNumbers) editor._updateLineNumbers();
+      document.getElementById('output-console').textContent = 'รันโค้ดเพื่อดูผลลัพธ์...';
+      document.getElementById('output-status').textContent = '';
+      document.getElementById('output-console').className = 'output-content';
+    }
+  }
+</script>
+</body>
+</html>
