@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net https://files.pythonhosted.org; worker-src blob:;">
   <title>Playground — PyLearn</title>
   <meta name="description" content="พื้นที่สำหรับฝึกเขียนโค้ด Python อย่างอิสระ">
   <link rel="stylesheet" href="css/style.css">
@@ -230,25 +231,48 @@ greet("Python Developer")
     }
   });
 
+  // Whitelist of allowed packages for security
+  const ALLOWED_PACKAGES = [
+    'numpy', 'pandas', 'matplotlib', 'scipy', 'sympy',
+    'networkx', 'scikit-learn', 'sklearn', 'seaborn',
+    'pillow', 'pil', 'regex', 'beautifulsoup4', 'bs4',
+    'requests', 'lxml', 'html5lib', 'jsonschema',
+    'pyyaml', 'yaml', 'toml', 'msgpack',
+    'statistics', 'more-itertools', 'toolz',
+    'pytz', 'dateutil', 'python-dateutil'
+  ];
+
   async function installLibrary() {
     if (!window.pyodideReady) {
       alert("ระบบกำลังโหลด Python กรุณารอซักครู่...");
       return;
     }
-    const pkg = await createInputDialog("ใส่ชื่อ Library ที่ต้องการติดตั้ง (เช่น numpy):");
+    const pkg = await createInputDialog(`ใส่ชื่อ Library ที่ต้องการติดตั้ง:\n\n📦 Library ที่รองรับ: ${ALLOWED_PACKAGES.slice(0, 8).join(', ')} เป็นต้น`);
     if (!pkg) return;
+
+    const pkgClean = pkg.trim().toLowerCase();
+    if (!ALLOWED_PACKAGES.includes(pkgClean)) {
+      const outputEl = document.getElementById('output-console');
+      const statusEl = document.getElementById('output-status');
+      outputEl.className = 'output-content error';
+      outputEl.textContent = `❌ ไม่อนุญาตให้ติดตั้ง "${pkg}"\n\n📦 Library ที่รองรับ:\n${ALLOWED_PACKAGES.join(', ')}`;
+      statusEl.textContent = '❌ ไม่อนุญาต';
+      statusEl.style.color = 'var(--red)';
+      if (typeof showToast === 'function') showToast(`ไม่รองรับ library "${pkg}"`, 'error');
+      return;
+    }
     
     const outputEl = document.getElementById('output-console');
     const statusEl = document.getElementById('output-status');
     outputEl.className = 'output-content';
-    outputEl.textContent = `กำลังติดตั้ง ${pkg}...\n(อาจใช้เวลาสักครู่)`;
+    outputEl.textContent = `กำลังติดตั้ง ${pkgClean}...\n(อาจใช้เวลาสักครู่)`;
     statusEl.textContent = '⏳ Installing...';
 
     try {
       await pyodide.loadPackage("micropip");
       const micropip = pyodide.pyimport("micropip");
-      await micropip.install(pkg);
-      outputEl.textContent += `\n\n✅ ติดตั้ง ${pkg} สำเร็จแล้ว!`;
+      await micropip.install(pkgClean);
+      outputEl.textContent += `\n\n✅ ติดตั้ง ${pkgClean} สำเร็จแล้ว!`;
       statusEl.textContent = '✅ Success';
       statusEl.style.color = 'var(--green)';
     } catch (e) {

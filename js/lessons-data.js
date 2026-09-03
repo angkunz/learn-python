@@ -433,7 +433,7 @@ print(str(42))           # "42"</code></pre>
         starterCode: "a = 10\nb = 20\nprint(f'ก่อน: a={a}, b={b}')\n\n# แลกค่า a และ b\n\n\nprint(f'หลัง: a={a}, b={b}')",
         hint: "ใน Python สามารถแลกค่าได้ง่ายๆ ด้วย: a, b = b, a",
         solution: "a = 10\nb = 20\nprint(f'ก่อน: a={a}, b={b}')\na, b = b, a\nprint(f'หลัง: a={a}, b={b}')",
-        expectedOutput: ""
+        expectedOutput: "ก่อน: a=10, b=20\nหลัง: a=20, b=10"
       },
       {
         id: "b2e3", title: "คำนวณพื้นที่วงกลม", difficulty: "medium",
@@ -441,7 +441,7 @@ print(str(42))           # "42"</code></pre>
         starterCode: "pi = 3.14159\nradius = 7\n\n# คำนวณพื้นที่\narea = \n\nprint(f'พื้นที่ = {area:.2f}')",
         hint: "พื้นที่วงกลม = pi * radius * radius หรือ pi * radius**2",
         solution: "pi = 3.14159\nradius = 7\narea = pi * radius ** 2\nprint(f'พื้นที่ = {area:.2f}')",
-        expectedOutput: ""
+        expectedOutput: "พื้นที่ = 153.94"
       }
     ]
   },
@@ -509,7 +509,7 @@ print("Line1\\nLine2")          # ขึ้นบรรทัดใหม่ด�
         id: "b3e3", title: "ตาราง multiplication", difficulty: "hard",
         description: "รับตัวเลข n จากผู้ใช้ แสดงตาราง n ถึง 10 ในรูปแบบ 'n x 1 = n'",
         starterCode: "n = int(input('ป้อนตัวเลข: '))\n# แสดงสูตรคูณ\nfor i in range(1, 11):\n    print(f'{n} x {i} = ???')",
-        hint: "แก้ ??? ให้เป็น n * i",
+        hint: "แทน ??? ด้วย {n * i} ภายใน f-string",
         solution: "n = int(input('ป้อนตัวเลข: '))\nfor i in range(1, 11):\n    print(f'{n} x {i} = {n * i}')",
         expectedOutput: ""
       }
@@ -714,7 +714,7 @@ while True:
         id: "b6e1", title: "รอรหัสถูก", difficulty: "easy",
         description: "โปรแกรมรอรหัสผ่าน PIN = '1234' วนถามจนกว่าจะถูก แล้วพิมพ์ 'เข้าสู่ระบบสำเร็จ'",
         starterCode: "PIN = '1234'\n\nwhile True:\n    code = input('ใส่รหัส: ')\n    if code == PIN:\n        # สำเร็จ\n        break\n    else:\n        print('รหัสผิด ลองใหม่')",
-        hint: "เพิ่ม print สำเร็จหลัง break",
+        hint: "เพิ่ม print สำเร็จก่อน break ไม่ใช่หลัง break",
         solution: "PIN = '1234'\nwhile True:\n    code = input('ใส่รหัส: ')\n    if code == PIN:\n        print('เข้าสู่ระบบสำเร็จ! ✓')\n        break\n    else:\n        print('รหัสผิด ลองใหม่')",
         expectedOutput: ""
       },
@@ -724,7 +724,7 @@ while True:
         starterCode: "balance = 10000\nrate = 0.05\nyears = 0\n\nwhile balance < 15000:\n    balance = balance * (1 + rate)\n    years += 1\n\nprint(f'ใช้เวลา {years} ปี')\nprint(f'เงินสุดท้าย {balance:.2f} บาท')",
         hint: "โค้ดนี้เกือบสมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
         solution: "balance = 10000\nrate = 0.05\nyears = 0\nwhile balance < 15000:\n    balance = balance * (1 + rate)\n    years += 1\nprint(f'ใช้เวลา {years} ปี')\nprint(f'เงินสุดท้าย {balance:.2f} บาท')",
-        expectedOutput: ""
+        expectedOutput: "ใช้เวลา 9 ปี\nเงินสุดท้าย 15513.28 บาท"
       },
       {
         id: "b6e3", title: "เกมทายตัวเลข", difficulty: "hard",
@@ -796,7 +796,7 @@ my_func()
         starterCode: "def get_grade(score):\n    # เขียน logic ของคุณ\n    pass\n\n# ทดสอบ\nprint(get_grade(95))  # A\nprint(get_grade(75))  # B\nprint(get_grade(55))  # D\nprint(get_grade(45))  # F",
         hint: "ใช้ if/elif/else แล้ว return เกรด",
         solution: "def get_grade(score):\n    if score >= 80:\n        return 'A'\n    elif score >= 70:\n        return 'B'\n    elif score >= 60:\n        return 'C'\n    elif score >= 50:\n        return 'D'\n    else:\n        return 'F'\nprint(get_grade(95))\nprint(get_grade(75))\nprint(get_grade(55))\nprint(get_grade(45))",
-        expectedOutput: ""
+        expectedOutput: "A\nB\nD\nF"
       },
       {
         id: "b7e2", title: "เครื่องคิดเลข", difficulty: "medium",
@@ -804,7 +804,7 @@ my_func()
         starterCode: "def calculate(a, op, b):\n    if op == '+':\n        return a + b\n    # เพิ่ม -, *, /\n    \n\nprint(calculate(10, '+', 5))  # 15\nprint(calculate(10, '-', 3))  # 7\nprint(calculate(4, '*', 6))   # 24\nprint(calculate(15, '/', 3))  # 5.0",
         hint: "เพิ่ม elif สำหรับ '-', '*', '/' และระวัง division by zero",
         solution: "def calculate(a, op, b):\n    if op == '+':\n        return a + b\n    elif op == '-':\n        return a - b\n    elif op == '*':\n        return a * b\n    elif op == '/':\n        if b != 0:\n            return a / b\n        else:\n            return 'หารด้วยศูนย์ไม่ได้!'\nprint(calculate(10, '+', 5))\nprint(calculate(10, '-', 3))\nprint(calculate(4, '*', 6))\nprint(calculate(15, '/', 3))",
-        expectedOutput: ""
+        expectedOutput: "15\n7\n24\n5.0"
       },
       {
         id: "b7e3", title: "ฟังก์ชัน Fibonacci", difficulty: "hard",
@@ -812,7 +812,7 @@ my_func()
         starterCode: "def fibonacci(n):\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    \n    sequence = [0, 1]\n    while len(sequence) < n:\n        # คำนวณตัวถัดไป\n        next_num = ???\n        sequence.append(next_num)\n    return sequence\n\nprint(fibonacci(8))\nprint(fibonacci(10))",
         hint: "ตัวถัดไปของ Fibonacci = ผลรวมสองตัวก่อนหน้า sequence[-1] + sequence[-2]",
         solution: "def fibonacci(n):\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    sequence = [0, 1]\n    while len(sequence) < n:\n        next_num = sequence[-1] + sequence[-2]\n        sequence.append(next_num)\n    return sequence\nprint(fibonacci(8))\nprint(fibonacci(10))",
-        expectedOutput: ""
+        expectedOutput: "[0, 1, 1, 2, 3, 5, 8, 13]\n[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]"
       }
     ]
   },
@@ -879,7 +879,7 @@ print(evens)    # [2, 4, 6, 8, 10]</code></pre>
         starterCode: "scores = [85, 92, 78, 65, 90, 88, 72]\n\nprint(f'สูงสุด: {max(scores)}')\nprint(f'ต่ำสุด: ???')\nprint(f'เฉลี่ย: {sum(scores)/len(scores):.1f}')\n\nscores.sort()\nprint(f'เรียงแล้ว: {scores}')",
         hint: "ใช้ min() สำหรับค่าต่ำสุด",
         solution: "scores = [85, 92, 78, 65, 90, 88, 72]\nprint(f'สูงสุด: {max(scores)}')\nprint(f'ต่ำสุด: {min(scores)}')\nprint(f'เฉลี่ย: {sum(scores)/len(scores):.1f}')\nscores.sort()\nprint(f'เรียงแล้ว: {scores}')",
-        expectedOutput: ""
+        expectedOutput: "สูงสุด: 92\nต่ำสุด: 65\nเฉลี่ย: 81.4\nเรียงแล้ว: [65, 72, 78, 85, 88, 90, 92]"
       },
       {
         id: "b8e2", title: "กรองตัวเลข", difficulty: "medium",
@@ -887,7 +887,7 @@ print(evens)    # [2, 4, 6, 8, 10]</code></pre>
         starterCode: "numbers = list(range(1, 21))\n\n# List Comprehension\nevens = [n for n in numbers if ???]\ndiv3 = [n for n in numbers if ???]\n\nprint('เลขคู่:', evens)\nprint('หารด้วย 3:', div3)",
         hint: "เลขคู่: n % 2 == 0, หารด้วย 3: n % 3 == 0",
         solution: "numbers = list(range(1, 21))\nevens = [n for n in numbers if n % 2 == 0]\ndiv3 = [n for n in numbers if n % 3 == 0]\nprint('เลขคู่:', evens)\nprint('หารด้วย 3:', div3)",
-        expectedOutput: ""
+        expectedOutput: "เลขคู่: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]\nหารด้วย 3: [3, 6, 9, 12, 15, 18]"
       },
       {
         id: "b8e3", title: "หมุน List", difficulty: "hard",
@@ -895,7 +895,7 @@ print(evens)    # [2, 4, 6, 8, 10]</code></pre>
         starterCode: "def rotate(lst, k):\n    # หมุน list ไปทางขวา k ตำแหน่ง\n    n = len(lst)\n    k = k % n  # กัน k ที่มากกว่า len\n    return lst[???:] + lst[:???]\n\nprint(rotate([1,2,3,4,5], 2))  # [4,5,1,2,3]\nprint(rotate([1,2,3,4,5], 1))  # [5,1,2,3,4]",
         hint: "หมุนขวา k = ตัดจากข้างหลัง k ตัว มาต่อข้างหน้า lst[-k:] + lst[:-k]",
         solution: "def rotate(lst, k):\n    n = len(lst)\n    k = k % n\n    return lst[-k:] + lst[:-k]\nprint(rotate([1,2,3,4,5], 2))\nprint(rotate([1,2,3,4,5], 1))",
-        expectedOutput: ""
+        expectedOutput: "[4, 5, 1, 2, 3]\n[5, 1, 2, 3, 4]"
       }
     ]
   },
@@ -952,7 +952,7 @@ for subject, score in scores.items():
         starterCode: "sentence = 'the cat sat on the mat the cat'\nwords = sentence.split()\nfrequency = {}\n\nfor word in words:\n    # นับความถี่\n    if word in frequency:\n        frequency[word] += 1\n    else:\n        frequency[word] = ???\n\nfor word, count in frequency.items():\n    print(f'{word}: {count} ครั้ง')",
         hint: "ตั้งต้นที่ 1 เมื่อพบคำใหม่: frequency[word] = 1",
         solution: "sentence = 'the cat sat on the mat the cat'\nwords = sentence.split()\nfrequency = {}\nfor word in words:\n    if word in frequency:\n        frequency[word] += 1\n    else:\n        frequency[word] = 1\nfor word, count in frequency.items():\n    print(f'{word}: {count} ครั้ง')",
-        expectedOutput: ""
+        expectedOutput: "the: 3 ครั้ง\ncat: 2 ครั้ง\nsat: 1 ครั้ง\non: 1 ครั้ง\nmat: 1 ครั้ง"
       },
       {
         id: "b9e3", title: "ระบบสต็อกสินค้า", difficulty: "hard",
@@ -960,7 +960,7 @@ for subject, score in scores.items():
         starterCode: "inventory = {'ดินสอ': 50, 'ปากกา': 30, 'ยางลบ': 20}\n\ndef add_stock(inv, item, qty):\n    if item in inv:\n        inv[item] += qty\n    else:\n        inv[item] = qty\n\ndef remove_stock(inv, item, qty):\n    if item in inv and inv[item] >= qty:\n        inv[item] -= qty\n        return True\n    return False\n\nadd_stock(inventory, 'ไม้บรรทัด', 15)\nremove_stock(inventory, 'ดินสอ', 10)\n\nfor item, qty in inventory.items():\n    print(f'{item}: {qty} ชิ้น')",
         hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
         solution: "inventory = {'ดินสอ': 50, 'ปากกา': 30, 'ยางลบ': 20}\ndef add_stock(inv, item, qty):\n    if item in inv:\n        inv[item] += qty\n    else:\n        inv[item] = qty\ndef remove_stock(inv, item, qty):\n    if item in inv and inv[item] >= qty:\n        inv[item] -= qty\n        return True\n    return False\nadd_stock(inventory, 'ไม้บรรทัด', 15)\nremove_stock(inventory, 'ดินสอ', 10)\nfor item, qty in inventory.items():\n    print(f'{item}: {qty} ชิ้น')",
-        expectedOutput: ""
+        expectedOutput: "ดินสอ: 40 ชิ้น\nปากกา: 30 ชิ้น\nยางลบ: 20 ชิ้น\nไม้บรรทัด: 15 ชิ้น"
       }
     ]
   },
@@ -998,7 +998,7 @@ print(joined)     # Python | Java | C++ | JavaScript</code></pre>
         starterCode: "def is_palindrome(text):\n    cleaned = text.lower().replace(' ', '')\n    return cleaned == ???\n\nprint(is_palindrome('racecar'))  # True\nprint(is_palindrome('hello'))    # False\nprint(is_palindrome('A man a plan a canal Panama'))  # True",
         hint: "ใช้ cleaned[::-1] เพื่อกลับสตริง",
         solution: "def is_palindrome(text):\n    cleaned = text.lower().replace(' ', '')\n    return cleaned == cleaned[::-1]\nprint(is_palindrome('racecar'))\nprint(is_palindrome('hello'))\nprint(is_palindrome('A man a plan a canal Panama'))",
-        expectedOutput: ""
+        expectedOutput: "True\nFalse\nTrue"
       },
       {
         id: "b10e2", title: "นับสระและพยัญชนะ", difficulty: "medium",
@@ -1006,7 +1006,7 @@ print(joined)     # Python | Java | C++ | JavaScript</code></pre>
         starterCode: "def count_vowels_consonants(text):\n    text = text.lower()\n    vowels = 'aeiou'\n    v_count = 0\n    c_count = 0\n    for ch in text:\n        if ch.isalpha():\n            if ch in vowels:\n                v_count += 1\n            else:\n                c_count += 1\n    return v_count, c_count\n\nv, c = count_vowels_consonants('Hello World')\nprint(f'สระ: {v}, พยัญชนะ: {c}')",
         hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
         solution: "def count_vowels_consonants(text):\n    text = text.lower()\n    vowels = 'aeiou'\n    v_count = 0\n    c_count = 0\n    for ch in text:\n        if ch.isalpha():\n            if ch in vowels:\n                v_count += 1\n            else:\n                c_count += 1\n    return v_count, c_count\nv, c = count_vowels_consonants('Hello World')\nprint(f'สระ: {v}, พยัญชนะ: {c}')",
-        expectedOutput: ""
+        expectedOutput: "สระ: 3, พยัญชนะ: 7"
       },
       {
         id: "b10e3", title: "เข้ารหัสข้อความ Caesar Cipher", difficulty: "hard",
@@ -1014,7 +1014,7 @@ print(joined)     # Python | Java | C++ | JavaScript</code></pre>
         starterCode: "def caesar_encrypt(text, shift):\n    result = ''\n    for char in text:\n        if char.isalpha():\n            base = ord('A') if char.isupper() else ord('a')\n            encrypted = chr((ord(char) - base + shift) % 26 + base)\n            result += encrypted\n        else:\n            result += char\n    return result\n\nprint(caesar_encrypt('Hello World', 3))  # Khoor Zruog\nprint(caesar_encrypt('Python', 13))      # ROT13",
         hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
         solution: "def caesar_encrypt(text, shift):\n    result = ''\n    for char in text:\n        if char.isalpha():\n            base = ord('A') if char.isupper() else ord('a')\n            encrypted = chr((ord(char) - base + shift) % 26 + base)\n            result += encrypted\n        else:\n            result += char\n    return result\nprint(caesar_encrypt('Hello World', 3))\nprint(caesar_encrypt('Python', 13))",
-        expectedOutput: ""
+        expectedOutput: "Khoor Zruog\nClguba"
       }
     ]
   },

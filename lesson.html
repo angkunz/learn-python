@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com https://cdn.jsdelivr.net; worker-src blob:;">
   <title>บทเรียน — PyLearn</title>
   <meta name="description" content="เรียนรู้ Python แบบ interactive พร้อมโค้ดเอดิเตอร์และ AI feedback">
   <link rel="stylesheet" href="css/style.css">
@@ -464,8 +465,20 @@ function setExerciseMode(exId, mode) {
   }
 }
 
-// ── AI Check ──
+// ── AI Check (with Rate Limiting) ──
+let _lastAICheckTime = 0;
+const AI_CHECK_COOLDOWN = 5000; // 5 seconds
+
 async function runAICheck(lessonId, exId, editorId) {
+  // Rate limiting
+  const now = Date.now();
+  if (now - _lastAICheckTime < AI_CHECK_COOLDOWN) {
+    const remaining = Math.ceil((AI_CHECK_COOLDOWN - (now - _lastAICheckTime)) / 1000);
+    showToast(`กรุณารอ ${remaining} วินาทีก่อนตรวจอีกครั้ง`, 'warning');
+    return;
+  }
+  _lastAICheckTime = now;
+
   const editor = editors[editorId];
   if (!editor) return;
   const code = getEditorCode(editor);
@@ -545,7 +558,7 @@ function showHint(exId) {
   toast.className = 'hint-toast';
   toast.innerHTML = `
     <div class="hint-toast-title">💡 คำใบ้</div>
-    <div class="hint-toast-text">${ex.hint}</div>
+    <div class="hint-toast-text">${escapeHtml(ex.hint)}</div>
     <button onclick="this.parentElement.remove()" style="
       margin-top:10px;padding:4px 12px;border-radius:6px;border:1px solid var(--orange);
       background:transparent;color:var(--orange);cursor:pointer;font-size:0.8rem;

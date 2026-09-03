@@ -460,7 +460,7 @@ function heuristicScore(code, output, expectedOutput = '', solution = '', isRate
     };
   }
 
-  let score = 40;
+  let score = 30;
   const bugs = [], improvements = [], strengths = [], missing = [];
 
   const hasError = output && output.toLowerCase().includes('error');
@@ -474,25 +474,40 @@ function heuristicScore(code, output, expectedOutput = '', solution = '', isRate
       score = 100;
       strengths.push('ผลลัพธ์ถูกต้องตรงตามที่โจทย์ต้องการเป๊ะ!');
     } else if (hasError) {
-      score = 40;
-    } else {
-      score = 60;
+      score = 30;
+    } else if (hasOutput) {
+      // Partial line matching for more accurate scoring
+      const outLines = outTrim.split('\n').map(l => l.trim()).filter(l => l);
+      const expLines = expTrim.split('\n').map(l => l.trim()).filter(l => l);
+      const matchedLines = expLines.filter(el => outLines.some(ol => ol === el)).length;
+      const matchRatio = expLines.length > 0 ? matchedLines / expLines.length : 0;
+      if (matchRatio >= 0.8) {
+        score = 80;
+        strengths.push('ผลลัพธ์ถูกต้องเป็นส่วนใหญ่');
+      } else if (matchRatio >= 0.5) {
+        score = 60;
+      } else {
+        score = 45;
+      }
       bugs.push({
         severity: 'warning',
         line: '-',
         problem: 'ผลลัพธ์ไม่ตรงกับที่โจทย์ต้องการ',
-        bad_code: outTrim,
-        fix: `พยายามทำให้ผลลัพธ์ออกมาเป็น:\n${expTrim}`,
+        bad_code: outTrim.slice(0, 200),
+        fix: `พยายามทำให้ผลลัพธ์ออกมาเป็น:\n${expTrim.slice(0, 200)}`,
         explanation: 'ตรวจสอบตัวสะกดและการเว้นวรรคให้ถูกต้อง'
       });
+    } else {
+      score = 20;
+      missing.push('ยังไม่มีผลลัพธ์ — ลองรันโค้ดดูก่อน');
     }
   } else {
     // Basic heuristic
-    if (!hasError && hasOutput) score += 25;
-    if (code.includes('def ')) { score += 8; strengths.push('มีการแยกโค้ดเป็นฟังก์ชัน'); }
-    if (code.includes('f"') || code.includes("f'")) { score += 5; strengths.push('ใช้ f-string'); }
-    if (code.includes('try:')) { score += 7; strengths.push('มี error handling'); }
-    if (code.length > 200) score += 5;
+    if (!hasError && hasOutput) score += 20;
+    if (code.includes('def ')) { score += 5; strengths.push('มีการแยกโค้ดเป็นฟังก์ชัน'); }
+    if (code.includes('f"') || code.includes("f'")) { score += 3; strengths.push('ใช้ f-string'); }
+    if (code.includes('try:')) { score += 5; strengths.push('มี error handling'); }
+    if (code.length > 200) score += 2;
   }
 
   if (hasError) {
@@ -510,7 +525,7 @@ function heuristicScore(code, output, expectedOutput = '', solution = '', isRate
   score = Math.min(100, Math.max(0, score));
   const grade = score >= 90 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : score >= 40 ? 'D' : 'F';
 
-  let summaryText = hasError ? 'โค้ดยังมี Error ต้องแก้ไขก่อน' : (score === 100 ? 'ยอดเยี่ยมมาก! โค้ดทำงานได้ถูกต้อง' : 'โค้ดทำงานได้ แต่ผลลัพธ์ยังไม่ตรงเป๊ะ ลองปรับอีกนิดนะ');
+  let summaryText = hasError ? 'โค้ดยังมี Error ต้องแก้ไขก่อน' : (score === 100 ? 'ยอดเยี่ยมมาก! โค้ดทำงานได้ถูกต้อง' : (score >= 75 ? 'ดีมาก! ผลลัพธ์ใกล้เคียงกับที่ต้องการแล้ว' : 'โค้ดทำงานได้ แต่ผลลัพธ์ยังไม่ตรงเป๊ะ ลองปรับอีกนิดนะ'));
   if (isRateLimit) {
     summaryText = '⚠️ (โควตา AI เต็มชั่วคราว ระบบใช้การตรวจแบบพื้นฐาน) ' + summaryText;
   }
@@ -564,13 +579,15 @@ function getAutoFeedback(exerciseDesc, userCode, runOutput, solution, hint, star
     if (solution) {
       const solClean = solution.replace(/\\n/g, '\n').replace(/\s+/g, ' ').trim().toLowerCase();
       const codeClean = userCode.replace(/\s+/g, ' ').trim().toLowerCase();
-      // Keyword matching
-      const solKeywords = solClean.match(/\b(for|while|if|def|return|print|input|range|len|append|split|join|int|str|float|list|dict|set)\b/g) || [];
-      const codeKeywords = codeClean.match(/\b(for|while|if|def|return|print|input|range|len|append|split|join|int|str|float|list|dict|set)\b/g) || [];
+      // Keyword matching (use unique keywords for better comparison)
+      const solKeywords = [...new Set(solClean.match(/\b(for|while|if|elif|else|def|return|print|input|range|len|append|split|join|int|str|float|list|dict|set|class|try|except|import)\b/g) || [])];
+      const codeKeywords = [...new Set(codeClean.match(/\b(for|while|if|elif|else|def|return|print|input|range|len|append|split|join|int|str|float|list|dict|set|class|try|except|import)\b/g) || [])];
       const matched = solKeywords.filter(k => codeKeywords.includes(k));
       const similarity = solKeywords.length > 0 ? matched.length / solKeywords.length : 0;
-      if (similarity >= 0.7 && base.score < 80) {
-        base.score = Math.min(85, base.score + 15);
+      if (similarity >= 0.8 && base.score < 75) {
+        base.score = Math.min(75, base.score + 10);
+      } else if (similarity >= 0.5 && base.score < 65) {
+        base.score = Math.min(65, base.score + 5);
       }
     }
   }

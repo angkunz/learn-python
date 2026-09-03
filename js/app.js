@@ -2,6 +2,17 @@
 // App — State, Progress, Navigation
 // ================================================
 
+// ── HTML Escape Helper (XSS Prevention) ──
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 const PROGRESS_KEY = 'python_progress_v2';
 const XP_KEY = 'python_xp';
 
@@ -116,7 +127,7 @@ function showToast(message, type = 'info', duration = 3000) {
     animation:fadeInUp 0.3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);
     font-family:'Inter',sans-serif;
   `;
-  toast.innerHTML = `${icons[type]} ${message}`;
+  toast.textContent = `${icons[type]} ${message}`;
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(()=>toast.remove(),300); }, duration);
 }
@@ -131,7 +142,7 @@ function createInputDialog(promptText) {
         <div style="font-size:0.75rem;font-weight:700;color:var(--purple-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">
           🐍 Python input()
         </div>
-        <div class="input-dialog-prompt">${promptText || 'ป้อนค่า:'}</div>
+        <div class="input-dialog-prompt">${escapeHtml(promptText) || 'ป้อนค่า:'}</div>
         <input class="input-dialog-field" type="text" id="dialog-input" autocomplete="off" placeholder="พิมพ์คำตอบที่นี่...">
         <button class="input-dialog-btn" id="dialog-ok">ยืนยัน ↵</button>
       </div>
