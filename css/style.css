@@ -608,7 +608,7 @@ footer {
 }
 .btn-ai-check:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,58,237,0.4); }
 .btn-ai-check:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.ai-content { padding: 20px; }
+.ai-content { padding: 20px; text-align: left; }
 .ai-placeholder { color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 20px 0; }
 .ai-score-row {
   display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
@@ -813,6 +813,7 @@ footer {
 .ai-fb-wrap {
   animation: fbFadeUp 0.35s cubic-bezier(0.22,1,0.36,1) both;
   display: flex; flex-direction: column; gap: 12px;
+  text-align: left;
 }
 
 /* ── Score Hero ── */
@@ -977,6 +978,10 @@ footer {
 
 /* Code compare blocks */
 .ai-code-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ai-code-compare:has(> :only-child) { grid-template-columns: 1fr; }
+@supports not (selector(:has(*))) {
+  .ai-code-compare { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+}
 .ai-code-block { border-radius: 10px; overflow: hidden; background: #070b16; border: 1px solid rgba(255,255,255,0.07); }
 .ai-code-bad  { border-color: rgba(239,68,68,0.3); }
 .ai-code-good { border-color: rgba(16,185,129,0.3); }
@@ -987,11 +992,13 @@ footer {
   letter-spacing: 0.5px; padding: 6px 12px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   background: rgba(255,255,255,0.03);
+  text-align: left;
 }
 .ai-code-block pre {
   font-family: 'Fira Code', monospace; font-size: 0.8rem;
   color: #c9d5e8; padding: 12px; margin: 0;
   overflow-x: auto; line-height: 1.65; white-space: pre-wrap; word-break: break-word;
+  text-align: left;
 }
 
 /* ── Missing items ── */
@@ -1021,8 +1028,8 @@ footer {
   text-transform: uppercase; letter-spacing: 0.5px;
   color: var(--purple-light);
 }
-.ai-improv-body { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
-.ai-improv-desc { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; }
+.ai-improv-body { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.ai-improv-desc { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; text-align: left; }
 
 /* ── Strength items ── */
 .ai-strength-list { display: flex; flex-direction: column; gap: 7px; }
