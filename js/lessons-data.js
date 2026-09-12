@@ -109,7 +109,7 @@ print("แบ่งได้คนละ:", 12 / 4, "ชิ้น")</code></pre>
         starterCode: "# แบ่งขนม 24 ชิ้น ให้ 4 คน\n\n# แบ่งขนม 24 ชิ้น ให้ 3 คน\n",
         hint: "ใช้เครื่องหมาย / สำหรับการหาร เช่น print(24 / 4)",
         solution: 'print("แบ่งให้ 4 คน คนละ:", 24 / 4, "ชิ้น")\nprint("แบ่งให้ 3 คน คนละ:", 24 / 3, "ชิ้น")',
-        expectedOutput: ""
+        expectedOutput: "แบ่งให้ 4 คน คนละ: 6.0 ชิ้น\nแบ่งให้ 3 คน คนละ: 8.0 ชิ้น"
       },
       {
         id: "e2e3", title: "คะแนนในเกม", difficulty: "medium",
@@ -117,7 +117,7 @@ print("แบ่งได้คนละ:", 12 / 4, "ชิ้น")</code></pre>
         starterCode: "# คะแนนแต่ละรอบ\nround1 = 150\nround2 = 200\nround3 = 175\n\n# คำนวณคะแนนรวม\n\n# คำนวณคะแนนเฉลี่ย\n",
         hint: "คะแนนรวม = round1 + round2 + round3 และเฉลี่ย = รวม / 3",
         solution: 'round1 = 150\nround2 = 200\nround3 = 175\ntotal = round1 + round2 + round3\nprint("คะแนนรวม:", total)\nprint("เฉลี่ยต่อรอบ:", total / 3)',
-        expectedOutput: ""
+        expectedOutput: "คะแนนรวม: 525\nเฉลี่ยต่อรอบ: 175.0"
       }
     ]
   },
@@ -180,7 +180,7 @@ print("โรงเรียน:", school)</code></pre>
         starterCode: "# คะแนนแต่ละวิชา\nmath = 85\nthai = 90\nscience = 78\nsocial = 92\n\n# คะแนนรวม\n\n# คะแนนเฉลี่ย\n",
         hint: "รวม = math + thai + science + social จากนั้น เฉลี่ย = รวม / 4",
         solution: 'math = 85\nthai = 90\nscience = 78\nsocial = 92\ntotal = math + thai + science + social\naverage = total / 4\nprint("คะแนนรวม:", total)\nprint("คะแนนเฉลี่ย:", average)',
-        expectedOutput: ""
+        expectedOutput: "คะแนนรวม: 345\nคะแนนเฉลี่ย: 86.25"
       }
     ]
   },
@@ -722,7 +722,7 @@ while True:
         id: "b6e2", title: "คำนวณดอกเบี้ย", difficulty: "medium",
         description: "ฝากเงิน 10,000 บาท ดอกเบี้ย 5% ต่อปี วนคำนวณจนกว่าจะมีเงินถึง 15,000 บาท แสดงจำนวนปีที่ใช้",
         starterCode: "balance = 10000\nrate = 0.05\nyears = 0\n\nwhile balance < 15000:\n    balance = balance * (1 + rate)\n    years += 1\n\nprint(f'ใช้เวลา {years} ปี')\nprint(f'เงินสุดท้าย {balance:.2f} บาท')",
-        hint: "โค้ดนี้เกือบสมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "สังเกตว่าลูป while ทำงานจนกว่า balance >= 15000 แต่ละรอบดอกเบี้ยทบต้น (balance * 1.05) และนับจำนวนปี โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์",
         solution: "balance = 10000\nrate = 0.05\nyears = 0\nwhile balance < 15000:\n    balance = balance * (1 + rate)\n    years += 1\nprint(f'ใช้เวลา {years} ปี')\nprint(f'เงินสุดท้าย {balance:.2f} บาท')",
         expectedOutput: "ใช้เวลา 9 ปี\nเงินสุดท้าย 15513.28 บาท"
       },
@@ -730,7 +730,7 @@ while True:
         id: "b6e3", title: "เกมทายตัวเลข", difficulty: "hard",
         description: "สร้างเกมทายตัวเลข 1-100 ให้คำใบ้ 'สูงเกิน'/'ต่ำเกิน' นับจำนวนครั้งที่เล่น แสดงเมื่อถูก",
         starterCode: "import random\nsecret = random.randint(1, 100)\nattempts = 0\n\nprint('ทายตัวเลข 1-100!')\n\nwhile True:\n    guess = int(input('ทาย: '))\n    attempts += 1\n    \n    if guess == secret:\n        print(f'ถูก! ใช้ {attempts} ครั้ง')\n        break\n    elif guess < secret:\n        print('ต่ำเกิน!')\n    else:\n        print('สูงเกิน!')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ได้เลย!",
+        hint: "while True ทำให้ลูปวนไม่หยุดจนกว่าจะ break — เมื่อทายถูก (guess == secret) ให้ print และ break ออก ถ้ายังไม่ถูกให้บอกว่า 'สูงเกิน' หรือ 'ต่ำเกิน' เป็นคำใบ้",
         solution: "import random\nsecret = random.randint(1, 100)\nattempts = 0\nprint('ทายตัวเลข 1-100!')\nwhile True:\n    guess = int(input('ทาย: '))\n    attempts += 1\n    if guess == secret:\n        print(f'ถูก! ใช้ {attempts} ครั้ง')\n        break\n    elif guess < secret:\n        print('ต่ำเกิน!')\n    else:\n        print('สูงเกิน!')",
         expectedOutput: ""
       }
@@ -958,7 +958,7 @@ for subject, score in scores.items():
         id: "b9e3", title: "ระบบสต็อกสินค้า", difficulty: "hard",
         description: "สร้างฟังก์ชัน add_stock(inventory, item, qty) และ remove_stock(inventory, item, qty) จัดการสต็อกสินค้า แสดงสต็อกหลังแก้ไข",
         starterCode: "inventory = {'ดินสอ': 50, 'ปากกา': 30, 'ยางลบ': 20}\n\ndef add_stock(inv, item, qty):\n    if item in inv:\n        inv[item] += qty\n    else:\n        inv[item] = qty\n\ndef remove_stock(inv, item, qty):\n    if item in inv and inv[item] >= qty:\n        inv[item] -= qty\n        return True\n    return False\n\nadd_stock(inventory, 'ไม้บรรทัด', 15)\nremove_stock(inventory, 'ดินสอ', 10)\n\nfor item, qty in inventory.items():\n    print(f'{item}: {qty} ชิ้น')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "add_stock() เพิ่มสินค้าใหม่หรือเพิ่มจำนวนถ้ามีอยู่แล้ว remove_stock() ตรวจว่ามีพอก่อนลด ลอง trace ค่า inventory หลังเรียกแต่ละฟังก์ชัน",
         solution: "inventory = {'ดินสอ': 50, 'ปากกา': 30, 'ยางลบ': 20}\ndef add_stock(inv, item, qty):\n    if item in inv:\n        inv[item] += qty\n    else:\n        inv[item] = qty\ndef remove_stock(inv, item, qty):\n    if item in inv and inv[item] >= qty:\n        inv[item] -= qty\n        return True\n    return False\nadd_stock(inventory, 'ไม้บรรทัด', 15)\nremove_stock(inventory, 'ดินสอ', 10)\nfor item, qty in inventory.items():\n    print(f'{item}: {qty} ชิ้น')",
         expectedOutput: "ดินสอ: 40 ชิ้น\nปากกา: 30 ชิ้น\nยางลบ: 20 ชิ้น\nไม้บรรทัด: 15 ชิ้น"
       }
@@ -1004,7 +1004,7 @@ print(joined)     # Python | Java | C++ | JavaScript</code></pre>
         id: "b10e2", title: "นับสระและพยัญชนะ", difficulty: "medium",
         description: "รับ string แล้วนับจำนวนสระ (a,e,i,o,u) และพยัญชนะ แสดงผลทั้งคู่",
         starterCode: "def count_vowels_consonants(text):\n    text = text.lower()\n    vowels = 'aeiou'\n    v_count = 0\n    c_count = 0\n    for ch in text:\n        if ch.isalpha():\n            if ch in vowels:\n                v_count += 1\n            else:\n                c_count += 1\n    return v_count, c_count\n\nv, c = count_vowels_consonants('Hello World')\nprint(f'สระ: {v}, พยัญชนะ: {c}')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "ใช้ ch.isalpha() ตรวจว่าเป็นตัวอักษร แล้วเช็คว่าอยู่ใน vowels ('aeiou') หรือไม่ ถ้าใช่=สระ ถ้าไม่=พยัญชนะ",
         solution: "def count_vowels_consonants(text):\n    text = text.lower()\n    vowels = 'aeiou'\n    v_count = 0\n    c_count = 0\n    for ch in text:\n        if ch.isalpha():\n            if ch in vowels:\n                v_count += 1\n            else:\n                c_count += 1\n    return v_count, c_count\nv, c = count_vowels_consonants('Hello World')\nprint(f'สระ: {v}, พยัญชนะ: {c}')",
         expectedOutput: "สระ: 3, พยัญชนะ: 7"
       },
@@ -1012,7 +1012,7 @@ print(joined)     # Python | Java | C++ | JavaScript</code></pre>
         id: "b10e3", title: "เข้ารหัสข้อความ Caesar Cipher", difficulty: "hard",
         description: "เขียนฟังก์ชัน caesar_encrypt(text, shift) เข้ารหัสข้อความโดยเลื่อนตัวอักษรไป shift ตำแหน่ง เช่น 'abc', shift=3 → 'def'",
         starterCode: "def caesar_encrypt(text, shift):\n    result = ''\n    for char in text:\n        if char.isalpha():\n            base = ord('A') if char.isupper() else ord('a')\n            encrypted = chr((ord(char) - base + shift) % 26 + base)\n            result += encrypted\n        else:\n            result += char\n    return result\n\nprint(caesar_encrypt('Hello World', 3))  # Khoor Zruog\nprint(caesar_encrypt('Python', 13))      # ROT13",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "ord() แปลงตัวอักษรเป็นเลข chr() แปลงกลับ สูตร (ord(char) - base + shift) % 26 + base เลื่อนอักษรไป shift ตำแหน่งแบบวนรอบ (% 26)",
         solution: "def caesar_encrypt(text, shift):\n    result = ''\n    for char in text:\n        if char.isalpha():\n            base = ord('A') if char.isupper() else ord('a')\n            encrypted = chr((ord(char) - base + shift) % 26 + base)\n            result += encrypted\n        else:\n            result += char\n    return result\nprint(caesar_encrypt('Hello World', 3))\nprint(caesar_encrypt('Python', 13))",
         expectedOutput: "Khoor Zruog\nClguba"
       }
@@ -1062,7 +1062,7 @@ except ValueError as e:
         id: "i1e1", title: "เครื่องคิดเลขปลอดภัย", difficulty: "medium",
         description: "สร้างเครื่องคิดเลขที่รับ input ได้อย่างปลอดภัย จัดการ ValueError และ ZeroDivisionError",
         starterCode: "def safe_calculate():\n    try:\n        a = float(input('ตัวเลขแรก: '))\n        op = input('ตัวดำเนินการ (+,-,*,/): ')\n        b = float(input('ตัวเลขที่สอง: '))\n        \n        if op == '+':\n            return a + b\n        elif op == '-':\n            return a - b\n        elif op == '*':\n            return a * b\n        elif op == '/':\n            return a / b  # จะเกิด ZeroDivisionError ถ้า b=0\n    except ValueError:\n        return 'กรุณาใส่ตัวเลขที่ถูกต้อง'\n    except ZeroDivisionError:\n        return 'หารด้วยศูนย์ไม่ได้!'\n\nresult = safe_calculate()\nprint(f'ผลลัพธ์: {result}')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "try จะจับ error ที่เกิดขึ้น — ValueError เมื่อ input ไม่ใช่ตัวเลข, ZeroDivisionError เมื่อหารด้วย 0 ลองทดสอบทั้ง input ปกติ, ตัวอักษร, และหาร 0",
         solution: "def safe_calculate():\n    try:\n        a = float(input('ตัวเลขแรก: '))\n        op = input('ตัวดำเนินการ (+,-,*,/): ')\n        b = float(input('ตัวเลขที่สอง: '))\n        if op == '+':\n            return a + b\n        elif op == '-':\n            return a - b\n        elif op == '*':\n            return a * b\n        elif op == '/':\n            return a / b\n    except ValueError:\n        return 'กรุณาใส่ตัวเลขที่ถูกต้อง'\n    except ZeroDivisionError:\n        return 'หารด้วยศูนย์ไม่ได้!'\nresult = safe_calculate()\nprint(f'ผลลัพธ์: {result}')",
         expectedOutput: ""
       },
@@ -1070,17 +1070,17 @@ except ValueError as e:
         id: "i1e2", title: "Custom Exception", difficulty: "hard",
         description: "สร้าง Custom Exception ชื่อ InsufficientFundsError แล้วใช้กับฟังก์ชัน withdraw(balance, amount)",
         starterCode: "class InsufficientFundsError(Exception):\n    def __init__(self, balance, amount):\n        super().__init__(f'ยอดเงินไม่พอ: มี {balance} บาท แต่ถอน {amount} บาท')\n\ndef withdraw(balance, amount):\n    if amount > balance:\n        raise InsufficientFundsError(balance, amount)\n    return balance - amount\n\ntry:\n    new_balance = withdraw(500, 1000)\nexcept InsufficientFundsError as e:\n    print(f'Error: {e}')\n\nnew_balance = withdraw(1000, 300)\nprint(f'ยอดคงเหลือ: {new_balance} บาท')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "InsufficientFundsError สืบทอดจาก Exception และกำหนด __init__ เพื่อสร้างข้อความ error เฉพาะ withdraw() จะ raise error เมื่อ amount > balance",
         solution: "class InsufficientFundsError(Exception):\n    def __init__(self, balance, amount):\n        super().__init__(f'ยอดเงินไม่พอ: มี {balance} บาท แต่ถอน {amount} บาท')\ndef withdraw(balance, amount):\n    if amount > balance:\n        raise InsufficientFundsError(balance, amount)\n    return balance - amount\ntry:\n    new_balance = withdraw(500, 1000)\nexcept InsufficientFundsError as e:\n    print(f'Error: {e}')\nnew_balance = withdraw(1000, 300)\nprint(f'ยอดคงเหลือ: {new_balance} บาท')",
-        expectedOutput: ""
+        expectedOutput: "Error: ยอดเงินไม่พอ: มี 500 บาท แต่ถอน 1000 บาท\nยอดคงเหลือ: 700 บาท"
       },
       {
         id: "i1e3", title: "อ่านไฟล์ปลอดภัย", difficulty: "hard",
         description: "จำลองการอ่านข้อมูลจาก dict (แทนไฟล์) ด้วย try/except/finally บันทึก log ทุกครั้งที่อ่าน",
         starterCode: "database = {'user1': 'สมชาย', 'user2': 'มาลี'}\n\ndef get_user(user_id):\n    try:\n        data = database[user_id]\n        print(f'Log: อ่านข้อมูล {user_id} สำเร็จ')\n        return data\n    except KeyError:\n        print(f'Log: ไม่พบ {user_id}')\n        return None\n    finally:\n        print('Log: จบการค้นหา')\n\nprint(get_user('user1'))\nprint('---')\nprint(get_user('user99'))",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "finally จะทำงาน 'เสมอ' ไม่ว่า try จะสำเร็จหรือเข้า except ก็ตาม สังเกตว่า return ใน try/except ทำงานก่อน finally แต่ finally ก็ยังรันอยู่ดี",
         solution: "database = {'user1': 'สมชาย', 'user2': 'มาลี'}\ndef get_user(user_id):\n    try:\n        data = database[user_id]\n        print(f'Log: อ่านข้อมูล {user_id} สำเร็จ')\n        return data\n    except KeyError:\n        print(f'Log: ไม่พบ {user_id}')\n        return None\n    finally:\n        print('Log: จบการค้นหา')\nprint(get_user('user1'))\nprint('---')\nprint(get_user('user99'))",
-        expectedOutput: ""
+        expectedOutput: "Log: อ่านข้อมูล user1 สำเร็จ\nLog: จบการค้นหา\nสมชาย\n---\nLog: ไม่พบ user99\nLog: จบการค้นหา\nNone"
       }
     ]
   },
@@ -1125,7 +1125,7 @@ print(f"เฉลี่ย: {s1.get_average()}")</code></pre>
         id: "i2e1", title: "Class BankAccount", difficulty: "medium",
         description: "สร้าง class BankAccount ที่มี deposit(), withdraw(), get_balance() และแสดง history การทำรายการ",
         starterCode: "class BankAccount:\n    def __init__(self, owner, initial_balance=0):\n        self.owner = owner\n        self.balance = initial_balance\n        self.history = []\n    \n    def deposit(self, amount):\n        self.balance += amount\n        self.history.append(f'ฝาก +{amount}')\n    \n    def withdraw(self, amount):\n        if amount <= self.balance:\n            self.balance -= amount\n            self.history.append(f'ถอน -{amount}')\n        else:\n            print('ยอดเงินไม่พอ!')\n    \n    def get_balance(self):\n        return self.balance\n    \n    def show_history(self):\n        print(f'=== ประวัติ {self.owner} ===')\n        for h in self.history:\n            print(h)\n        print(f'ยอดคงเหลือ: {self.balance}')\n\nacc = BankAccount('สมชาย', 1000)\nacc.deposit(500)\nacc.withdraw(200)\nacc.withdraw(2000)\nacc.show_history()",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "deposit() เพิ่ม balance และบันทึกใน history, withdraw() ตรวจยอดก่อนถอน ลอง trace ค่า balance: 1000 → +500=1500 → -200=1300 ส่วน withdraw(2000) จะพิมพ์ 'ยอดเงินไม่พอ!'",
         solution: "class BankAccount:\n    def __init__(self, owner, initial_balance=0):\n        self.owner = owner\n        self.balance = initial_balance\n        self.history = []\n    def deposit(self, amount):\n        self.balance += amount\n        self.history.append(f'ฝาก +{amount}')\n    def withdraw(self, amount):\n        if amount <= self.balance:\n            self.balance -= amount\n            self.history.append(f'ถอน -{amount}')\n        else:\n            print('ยอดเงินไม่พอ!')\n    def get_balance(self):\n        return self.balance\n    def show_history(self):\n        print(f'=== ประวัติ {self.owner} ===')\n        for h in self.history:\n            print(h)\n        print(f'ยอดคงเหลือ: {self.balance}')\nacc = BankAccount('สมชาย', 1000)\nacc.deposit(500)\nacc.withdraw(200)\nacc.withdraw(2000)\nacc.show_history()",
         expectedOutput: ""
       },
@@ -1133,7 +1133,7 @@ print(f"เฉลี่ย: {s1.get_average()}")</code></pre>
         id: "i2e2", title: "Class Rectangle", difficulty: "medium",
         description: "สร้าง class Rectangle ที่คำนวณพื้นที่ เส้นรอบรูป และเปรียบเทียบสองรูปสี่เหลี่ยม",
         starterCode: "class Rectangle:\n    def __init__(self, width, height):\n        self.width = width\n        self.height = height\n    \n    def area(self):\n        return self.width * self.height\n    \n    def perimeter(self):\n        return 2 * (self.width + self.height)\n    \n    def is_square(self):\n        return self.width == self.height\n    \n    def __str__(self):\n        return f'Rectangle({self.width}x{self.height})'\n\nr1 = Rectangle(5, 3)\nr2 = Rectangle(4, 4)\n\nprint(r1)\nprint(f'พื้นที่: {r1.area()}')\nprint(f'เส้นรอบรูป: {r1.perimeter()}')\nprint(f'เป็นสี่เหลี่ยมจัตุรัส: {r2.is_square()}')\nprint(f'พื้นที่ใหญ่กว่า: {r1 if r1.area() > r2.area() else r2}')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "area()=width×height, perimeter()=2×(width+height), is_square() ตรวจว่า width==height __str__() กำหนดว่า print(obj) จะแสดงอะไร",
         solution: "class Rectangle:\n    def __init__(self, width, height):\n        self.width = width\n        self.height = height\n    def area(self):\n        return self.width * self.height\n    def perimeter(self):\n        return 2 * (self.width + self.height)\n    def is_square(self):\n        return self.width == self.height\n    def __str__(self):\n        return f'Rectangle({self.width}x{self.height})'\nr1 = Rectangle(5, 3)\nr2 = Rectangle(4, 4)\nprint(r1)\nprint(f'พื้นที่: {r1.area()}')\nprint(f'เส้นรอบรูป: {r1.perimeter()}')\nprint(f'เป็นสี่เหลี่ยมจัตุรัส: {r2.is_square()}')\nprint(f'พื้นที่ใหญ่กว่า: {r1 if r1.area() > r2.area() else r2}')",
         expectedOutput: ""
       },
@@ -1141,7 +1141,7 @@ print(f"เฉลี่ย: {s1.get_average()}")</code></pre>
         id: "i2e3", title: "ระบบจัดการห้องสมุด", difficulty: "hard",
         description: "สร้าง class Book และ Library ที่มีเมธอด add_book(), borrow(), return_book(), search()",
         starterCode: "class Book:\n    def __init__(self, title, author, isbn):\n        self.title = title\n        self.author = author\n        self.isbn = isbn\n        self.available = True\n    \n    def __str__(self):\n        status = '✓ พร้อมยืม' if self.available else '✗ ถูกยืมแล้ว'\n        return f'{self.title} โดย {self.author} [{status}]'\n\nclass Library:\n    def __init__(self, name):\n        self.name = name\n        self.books = []\n    \n    def add_book(self, book):\n        self.books.append(book)\n    \n    def borrow(self, isbn):\n        for book in self.books:\n            if book.isbn == isbn and book.available:\n                book.available = False\n                return f'ยืม \"{book.title}\" สำเร็จ'\n        return 'ไม่พบหนังสือหรือถูกยืมแล้ว'\n    \n    def return_book(self, isbn):\n        for book in self.books:\n            if book.isbn == isbn:\n                book.available = True\n                return f'คืน \"{book.title}\" สำเร็จ'\n        return 'ไม่พบหนังสือ'\n    \n    def show_all(self):\n        print(f'=== {self.name} ===')\n        for book in self.books:\n            print(' -', book)\n\nlib = Library('ห้องสมุด Python')\nlib.add_book(Book('Python Crash Course', 'Eric', 'P001'))\nlib.add_book(Book('Clean Code', 'Robert', 'C001'))\nlib.show_all()\nprint(lib.borrow('P001'))\nlib.show_all()",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "Book มี available เป็น flag ที่เปลี่ยนเมื่อยืม/คืน Library เก็บ list ของ Book และค้นหาด้วย isbn สังเกตว่า __str__ กำหนดการแสดงผลของ object",
         solution: "class Book:\n    def __init__(self, title, author, isbn):\n        self.title = title\n        self.author = author\n        self.isbn = isbn\n        self.available = True\n    def __str__(self):\n        status = '✓ พร้อมยืม' if self.available else '✗ ถูกยืมแล้ว'\n        return f'{self.title} โดย {self.author} [{status}]'\nclass Library:\n    def __init__(self, name):\n        self.name = name\n        self.books = []\n    def add_book(self, book):\n        self.books.append(book)\n    def borrow(self, isbn):\n        for book in self.books:\n            if book.isbn == isbn and book.available:\n                book.available = False\n                return f'ยืม \"{book.title}\" สำเร็จ'\n        return 'ไม่พบหนังสือหรือถูกยืมแล้ว'\n    def return_book(self, isbn):\n        for book in self.books:\n            if book.isbn == isbn:\n                book.available = True\n                return f'คืน \"{book.title}\" สำเร็จ'\n        return 'ไม่พบหนังสือ'\n    def show_all(self):\n        print(f'=== {self.name} ===')\n        for book in self.books:\n            print(' -', book)\nlib = Library('ห้องสมุด Python')\nlib.add_book(Book('Python Crash Course', 'Eric', 'P001'))\nlib.add_book(Book('Clean Code', 'Robert', 'C001'))\nlib.show_all()\nprint(lib.borrow('P001'))\nlib.show_all()",
         expectedOutput: ""
       }
@@ -1193,7 +1193,7 @@ print(cat.purr())</code></pre>
         id: "i3e1", title: "ระบบพนักงาน", difficulty: "hard",
         description: "สร้าง class Employee (base) และ Manager, Developer (subclass) ที่มีการคำนวณเงินเดือนต่างกัน",
         starterCode: "class Employee:\n    def __init__(self, name, base_salary):\n        self.name = name\n        self.base_salary = base_salary\n    \n    def get_salary(self):\n        return self.base_salary\n    \n    def __str__(self):\n        return f'{self.__class__.__name__}: {self.name} เงินเดือน {self.get_salary():,} บาท'\n\nclass Manager(Employee):\n    def __init__(self, name, base_salary, bonus_pct):\n        super().__init__(name, base_salary)\n        self.bonus_pct = bonus_pct\n    \n    def get_salary(self):\n        return self.base_salary * (1 + self.bonus_pct)\n\nclass Developer(Employee):\n    def __init__(self, name, base_salary, level):\n        super().__init__(name, base_salary)\n        self.level = level  # 1=Junior, 2=Mid, 3=Senior\n    \n    def get_salary(self):\n        multiplier = {1: 1.0, 2: 1.3, 3: 1.7}\n        return self.base_salary * multiplier.get(self.level, 1)\n\nstaff = [\n    Manager('สมชาย', 50000, 0.3),\n    Developer('มาลี', 40000, 3),\n    Developer('ชัยวัฒน์', 35000, 1)\n]\n\nfor e in staff:\n    print(e)",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "super().__init__() เรียกใช้ __init__ ของ class แม่ แต่ละ subclass override get_salary() ให้คำนวณต่างกัน (Manager คูณโบนัส, Developer คูณตาม level)",
         solution: "class Employee:\n    def __init__(self, name, base_salary):\n        self.name = name\n        self.base_salary = base_salary\n    def get_salary(self):\n        return self.base_salary\n    def __str__(self):\n        return f'{self.__class__.__name__}: {self.name} เงินเดือน {self.get_salary():,} บาท'\nclass Manager(Employee):\n    def __init__(self, name, base_salary, bonus_pct):\n        super().__init__(name, base_salary)\n        self.bonus_pct = bonus_pct\n    def get_salary(self):\n        return self.base_salary * (1 + self.bonus_pct)\nclass Developer(Employee):\n    def __init__(self, name, base_salary, level):\n        super().__init__(name, base_salary)\n        self.level = level\n    def get_salary(self):\n        multiplier = {1: 1.0, 2: 1.3, 3: 1.7}\n        return self.base_salary * multiplier.get(self.level, 1)\nstaff = [Manager('สมชาย', 50000, 0.3),Developer('มาลี', 40000, 3),Developer('ชัยวัฒน์', 35000, 1)]\nfor e in staff:\n    print(e)",
         expectedOutput: ""
       },
@@ -1201,7 +1201,7 @@ print(cat.purr())</code></pre>
         id: "i3e2", title: "Shape Calculator", difficulty: "medium",
         description: "สร้าง class Shape (base) และ Circle, Triangle, Rectangle (subclass) แต่ละชนิดคำนวณพื้นที่ต่างกัน",
         starterCode: "import math\n\nclass Shape:\n    def area(self):\n        raise NotImplementedError\n    \n    def describe(self):\n        return f'{self.__class__.__name__}: พื้นที่ = {self.area():.2f}'\n\nclass Circle(Shape):\n    def __init__(self, radius):\n        self.radius = radius\n    def area(self):\n        return math.pi * self.radius ** 2\n\nclass Triangle(Shape):\n    def __init__(self, base, height):\n        self.base = base\n        self.height = height\n    def area(self):\n        return 0.5 * self.base * self.height\n\nclass Rectangle(Shape):\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n    def area(self):\n        return self.w * self.h\n\nshapes = [Circle(5), Triangle(6, 4), Rectangle(3, 7)]\nfor s in shapes:\n    print(s.describe())",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "Shape เป็น base class ที่กำหนด area() เป็น NotImplementedError แต่ละ subclass (Circle, Triangle, Rectangle) override area() ด้วยสูตรต่างกัน นี่คือ Polymorphism",
         solution: "import math\nclass Shape:\n    def area(self):\n        raise NotImplementedError\n    def describe(self):\n        return f'{self.__class__.__name__}: พื้นที่ = {self.area():.2f}'\nclass Circle(Shape):\n    def __init__(self, radius):\n        self.radius = radius\n    def area(self):\n        return math.pi * self.radius ** 2\nclass Triangle(Shape):\n    def __init__(self, base, height):\n        self.base = base\n        self.height = height\n    def area(self):\n        return 0.5 * self.base * self.height\nclass Rectangle(Shape):\n    def __init__(self, w, h):\n        self.w = w\n        self.h = h\n    def area(self):\n        return self.w * self.h\nshapes = [Circle(5), Triangle(6, 4), Rectangle(3, 7)]\nfor s in shapes:\n    print(s.describe())",
         expectedOutput: ""
       },
@@ -1209,7 +1209,7 @@ print(cat.purr())</code></pre>
         id: "i3e3", title: "เกม RPG ง่ายๆ", difficulty: "hard",
         description: "สร้าง class Character (base) และ Warrior, Mage (subclass) ที่มีการโจมตีต่างกัน",
         starterCode: "import random\n\nclass Character:\n    def __init__(self, name, hp, attack):\n        self.name = name\n        self.hp = hp\n        self.max_hp = hp\n        self.attack_power = attack\n    \n    def attack(self, target):\n        dmg = random.randint(self.attack_power-5, self.attack_power+5)\n        target.hp -= dmg\n        return f'{self.name} โจมตี {target.name} ด้วยพลัง {dmg}!'\n    \n    def is_alive(self):\n        return self.hp > 0\n    \n    def status(self):\n        return f'{self.name}: {max(0,self.hp)}/{self.max_hp} HP'\n\nclass Warrior(Character):\n    def __init__(self, name):\n        super().__init__(name, hp=150, attack=20)\n    \n    def shield(self):\n        self.hp += 20\n        return f'{self.name} ใช้โล่! ฟื้น 20 HP'\n\nclass Mage(Character):\n    def __init__(self, name):\n        super().__init__(name, hp=80, attack=35)\n        self.mana = 100\n    \n    def fireball(self, target):\n        if self.mana >= 20:\n            self.mana -= 20\n            dmg = 60\n            target.hp -= dmg\n            return f'{self.name} ใช้ไฟบอล! ทำความเสียหาย {dmg}!'\n        return f'{self.name} ไม่มี mana พอ!'\n\nhero = Warrior('อัศวิน')\nboss = Mage('จอมเวทย์ชั่ว')\n\nprint(hero.attack(boss))\nprint(boss.fireball(hero))\nprint(hero.shield())\nprint(hero.status())\nprint(boss.status())",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "Character เป็น base class มี hp และ attack พื้นฐาน Warrior มี hp เยอะและ shield ฟื้น HP, Mage มี attack แรงกว่าแต่ hp น้อย และมี fireball ที่ใช้ mana",
         solution: "import random\nclass Character:\n    def __init__(self, name, hp, attack):\n        self.name = name\n        self.hp = hp\n        self.max_hp = hp\n        self.attack_power = attack\n    def attack(self, target):\n        dmg = random.randint(self.attack_power-5, self.attack_power+5)\n        target.hp -= dmg\n        return f'{self.name} โจมตี {target.name} ด้วยพลัง {dmg}!'\n    def is_alive(self):\n        return self.hp > 0\n    def status(self):\n        return f'{self.name}: {max(0,self.hp)}/{self.max_hp} HP'\nclass Warrior(Character):\n    def __init__(self, name):\n        super().__init__(name, hp=150, attack=20)\n    def shield(self):\n        self.hp += 20\n        return f'{self.name} ใช้โล่! ฟื้น 20 HP'\nclass Mage(Character):\n    def __init__(self, name):\n        super().__init__(name, hp=80, attack=35)\n        self.mana = 100\n    def fireball(self, target):\n        if self.mana >= 20:\n            self.mana -= 20\n            dmg = 60\n            target.hp -= dmg\n            return f'{self.name} ใช้ไฟบอล! ทำความเสียหาย {dmg}!'\n        return f'{self.name} ไม่มี mana พอ!'\nhero = Warrior('อัศวิน')\nboss = Mage('จอมเวทย์ชั่ว')\nprint(hero.attack(boss))\nprint(boss.fireball(hero))\nprint(hero.shield())\nprint(hero.status())\nprint(boss.status())",
         expectedOutput: ""
       }
@@ -1267,7 +1267,7 @@ evens = list(filter(lambda x: x%2==0, range(10)))</code></pre>
         id: "i4e1", title: "Data Processing", difficulty: "medium",
         description: "ใช้ List Comprehension และ Lambda จัดการข้อมูลนักเรียน: กรองเกรด A, เรียงตามคะแนน, แปลงเป็น dict",
         starterCode: "students = [\n    {'name': 'สมชาย', 'score': 92},\n    {'name': 'มาลี', 'score': 78},\n    {'name': 'วิชัย', 'score': 88},\n    {'name': 'สุดา', 'score': 65},\n    {'name': 'ชัยวัฒน์', 'score': 95},\n]\n\n# นักเรียนที่ได้ A (score >= 80)\ngrade_a = [s['name'] for s in students if s['score'] >= 80]\nprint('เกรด A:', grade_a)\n\n# เรียงตามคะแนนมากไปน้อย\nsorted_students = sorted(students, key=lambda s: s['score'], reverse=True)\nfor s in sorted_students:\n    print(f\"{s['name']}: {s['score']}\")",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "List Comprehension ใช้ [expr for x in list if condition] กรองข้อมูล sorted() ใช้ key=lambda เพื่อกำหนดเกณฑ์เรียง เช่น score >= 80 สำหรับเกรด A",
         solution: "students = [{'name': 'สมชาย', 'score': 92},{'name': 'มาลี', 'score': 78},{'name': 'วิชัย', 'score': 88},{'name': 'สุดา', 'score': 65},{'name': 'ชัยวัฒน์', 'score': 95}]\ngrade_a = [s['name'] for s in students if s['score'] >= 80]\nprint('เกรด A:', grade_a)\nsorted_students = sorted(students, key=lambda s: s['score'], reverse=True)\nfor s in sorted_students:\n    print(f\"{s['name']}: {s['score']}\")",
         expectedOutput: ""
       },
@@ -1275,7 +1275,7 @@ evens = list(filter(lambda x: x%2==0, range(10)))</code></pre>
         id: "i4e2", title: "Pipeline ด้วย map/filter", difficulty: "hard",
         description: "ใช้ map() และ filter() สร้าง pipeline: จาก 1-50 → กรองเฉพาะเลขคี่ → ยกกำลัง 2 → เก็บเฉพาะที่ < 500",
         starterCode: "numbers = range(1, 51)\n\n# Pipeline\nodd = filter(lambda x: x % 2 != 0, numbers)\nsquared = map(lambda x: x**2, odd)\nresult = list(filter(lambda x: x < 500, squared))\n\nprint(result)",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "filter() กรองข้อมูล, map() แปลงทุกตัว สามารถต่อเป็น pipeline ได้: ข้อมูลดิบ → filter คี่ → map ยกกำลัง 2 → filter < 500",
         solution: "numbers = range(1, 51)\nodd = filter(lambda x: x % 2 != 0, numbers)\nsquared = map(lambda x: x**2, odd)\nresult = list(filter(lambda x: x < 500, squared))\nprint(result)",
         expectedOutput: ""
       },
@@ -1283,7 +1283,7 @@ evens = list(filter(lambda x: x%2==0, range(10)))</code></pre>
         id: "i4e3", title: "Matrix Operations", difficulty: "hard",
         description: "ใช้ List Comprehension สร้าง matrix identity 4x4 และคำนวณ transpose",
         starterCode: "n = 4\n\n# Identity matrix\nidentity = [[1 if i == j else 0 for j in range(n)] for i in range(n)]\nprint('Identity Matrix:')\nfor row in identity:\n    print(row)\n\n# Transpose\nmatrix = [[1,2,3],[4,5,6],[7,8,9]]\ntransposed = [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))]\nprint('\\nOriginal:', matrix)\nprint('Transposed:', transposed)",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "Identity matrix คือเมทริกซ์ที่มี 1 บนแนวทแยงมุม (i==j) ที่เหลือเป็น 0 Transpose คือการสลับแถวกับหลัก (matrix[j][i])",
         solution: "n = 4\nidentity = [[1 if i == j else 0 for j in range(n)] for i in range(n)]\nprint('Identity Matrix:')\nfor row in identity:\n    print(row)\nmatrix = [[1,2,3],[4,5,6],[7,8,9]]\ntransposed = [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))]\nprint('\\nOriginal:', matrix)\nprint('Transposed:', transposed)",
         expectedOutput: ""
       }
@@ -1331,7 +1331,7 @@ print(sqrt(25))  # 5.0</code></pre>
         id: "i5e1", title: "เครื่องมือสถิติ", difficulty: "medium",
         description: "ใช้ math และ statistics module คำนวณ mean, median, std deviation จากข้อมูลคะแนน",
         starterCode: "import statistics\nimport math\n\nscores = [72, 85, 90, 68, 95, 78, 82, 88, 76, 91]\n\nprint(f'Mean: {statistics.mean(scores):.2f}')\nprint(f'Median: {statistics.median(scores)}')\nprint(f'Std Dev: {statistics.stdev(scores):.2f}')\nprint(f'Variance: {statistics.variance(scores):.2f}')\nprint(f'Max: {max(scores)}, Min: {min(scores)}')\nprint(f'Range: {max(scores) - min(scores)}')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "statistics module มีฟังก์ชันพร้อมใช้: mean() ค่าเฉลี่ย, median() ค่ากลาง, stdev() ส่วนเบี่ยงเบนมาตรฐาน ใช้ :.2f จัดทศนิยม 2 ตำแหน่ง",
         solution: "import statistics\nimport math\nscores = [72, 85, 90, 68, 95, 78, 82, 88, 76, 91]\nprint(f'Mean: {statistics.mean(scores):.2f}')\nprint(f'Median: {statistics.median(scores)}')\nprint(f'Std Dev: {statistics.stdev(scores):.2f}')\nprint(f'Variance: {statistics.variance(scores):.2f}')\nprint(f'Max: {max(scores)}, Min: {min(scores)}')\nprint(f'Range: {max(scores) - min(scores)}')",
         expectedOutput: ""
       },
@@ -1339,7 +1339,7 @@ print(sqrt(25))  # 5.0</code></pre>
         id: "i5e2", title: "เกมลูกเต๋า", difficulty: "medium",
         description: "ใช้ random สร้างเกมทอยลูกเต๋า 2 ลูก เล่น 10 รอบ บันทึกสถิติ",
         starterCode: "import random\n\nwins = draws = losses = 0\n\nfor round_num in range(1, 11):\n    player = random.randint(1, 6) + random.randint(1, 6)\n    computer = random.randint(1, 6) + random.randint(1, 6)\n    \n    if player > computer:\n        result = 'ชนะ! 🎉'\n        wins += 1\n    elif player == computer:\n        result = 'เสมอ 🤝'\n        draws += 1\n    else:\n        result = 'แพ้ 😢'\n        losses += 1\n    \n    print(f'รอบ {round_num}: คุณ={player} คอม={computer} → {result}')\n\nprint(f'\\nสรุป: ชนะ {wins} | เสมอ {draws} | แพ้ {losses}')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "random.randint(1,6) สุ่มลูกเต๋า 1-6 สองลูกรวมกัน เทียบผลรวมและนับสถิติ wins/draws/losses ด้วย if/elif/else",
         solution: "import random\nwins = draws = losses = 0\nfor round_num in range(1, 11):\n    player = random.randint(1, 6) + random.randint(1, 6)\n    computer = random.randint(1, 6) + random.randint(1, 6)\n    if player > computer:\n        result = 'ชนะ! 🎉'\n        wins += 1\n    elif player == computer:\n        result = 'เสมอ 🤝'\n        draws += 1\n    else:\n        result = 'แพ้ 😢'\n        losses += 1\n    print(f'รอบ {round_num}: คุณ={player} คอม={computer} → {result}')\nprint(f'\\nสรุป: ชนะ {wins} | เสมอ {draws} | แพ้ {losses}')",
         expectedOutput: ""
       },
@@ -1347,7 +1347,7 @@ print(sqrt(25))  # 5.0</code></pre>
         id: "i5e3", title: "นาฬิกาและวันที่", difficulty: "medium",
         description: "ใช้ datetime สร้างฟังก์ชันที่คำนวณอายุ, วันเกิดครั้งถัดไป, และจำนวนวันที่เหลือ",
         starterCode: "from datetime import datetime, date\n\ndef calculate_age(birth_year, birth_month, birth_day):\n    today = date.today()\n    born = date(birth_year, birth_month, birth_day)\n    age = today.year - born.year\n    if (today.month, today.day) < (born.month, born.day):\n        age -= 1\n    return age\n\ndef days_until_birthday(birth_month, birth_day):\n    today = date.today()\n    next_bd = date(today.year, birth_month, birth_day)\n    if next_bd < today:\n        next_bd = date(today.year + 1, birth_month, birth_day)\n    return (next_bd - today).days\n\nage = calculate_age(2008, 5, 15)\ndays = days_until_birthday(5, 15)\nprint(f'อายุ: {age} ปี')\nprint(f'วันเกิดอีก: {days} วัน')\nprint(f'วันนี้: {date.today().strftime(\"%d/%m/%Y\")}')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "date.today() ได้วันที่ปัจจุบัน คำนวณอายุโดยเทียบปี แต่ต้องตรวจว่าเดือน/วันเกิดผ่านแล้วหรือยัง (next_bd - today).days คำนวณจำนวนวันที่เหลือ",
         solution: "from datetime import datetime, date\ndef calculate_age(birth_year, birth_month, birth_day):\n    today = date.today()\n    born = date(birth_year, birth_month, birth_day)\n    age = today.year - born.year\n    if (today.month, today.day) < (born.month, born.day):\n        age -= 1\n    return age\ndef days_until_birthday(birth_month, birth_day):\n    today = date.today()\n    next_bd = date(today.year, birth_month, birth_day)\n    if next_bd < today:\n        next_bd = date(today.year + 1, birth_month, birth_day)\n    return (next_bd - today).days\nage = calculate_age(2008, 5, 15)\ndays = days_until_birthday(5, 15)\nprint(f'อายุ: {age} ปี')\nprint(f'วันเกิดอีก: {days} วัน')\nprint(f'วันนี้: {date.today().strftime(\"%d/%m/%Y\")}')",
         expectedOutput: ""
       }
@@ -1416,7 +1416,7 @@ print(risky_operation())</code></pre>
         id: "a1e1", title: "Logger Decorator", difficulty: "medium",
         description: "สร้าง decorator @log_call ที่บันทึกชื่อฟังก์ชัน arguments และผลลัพธ์ทุกครั้งที่เรียก",
         starterCode: "def log_call(func):\n    def wrapper(*args, **kwargs):\n        print(f'เรียก {func.__name__}({args}, {kwargs})')\n        result = func(*args, **kwargs)\n        print(f'ผลลัพธ์: {result}')\n        return result\n    return wrapper\n\n@log_call\ndef add(a, b):\n    return a + b\n\n@log_call\ndef greet(name, greeting='สวัสดี'):\n    return f'{greeting} {name}!'\n\nadd(3, 4)\ngreet('สมชาย')\ngreet('มาลี', greeting='หวัดดี')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "Decorator รับฟังก์ชันเป็น argument แล้วคืน wrapper ที่เพิ่มความสามารถ *args, **kwargs รองรับ argument ทุกรูปแบบ @log_call จะ print ข้อมูลการเรียกทุกครั้ง",
         solution: "def log_call(func):\n    def wrapper(*args, **kwargs):\n        print(f'เรียก {func.__name__}({args}, {kwargs})')\n        result = func(*args, **kwargs)\n        print(f'ผลลัพธ์: {result}')\n        return result\n    return wrapper\n@log_call\ndef add(a, b):\n    return a + b\n@log_call\ndef greet(name, greeting='สวัสดี'):\n    return f'{greeting} {name}!'\nadd(3, 4)\ngreet('สมชาย')\ngreet('มาลี', greeting='หวัดดี')",
         expectedOutput: ""
       },
@@ -1424,7 +1424,7 @@ print(risky_operation())</code></pre>
         id: "a1e2", title: "Cache Decorator", difficulty: "hard",
         description: "สร้าง decorator @memoize ที่ cache ผลลัพธ์ของฟังก์ชัน Fibonacci เปรียบเทียบเวลา",
         starterCode: "import time\n\ndef memoize(func):\n    cache = {}\n    def wrapper(*args):\n        if args not in cache:\n            cache[args] = func(*args)\n        return cache[args]\n    return wrapper\n\n# ไม่มี cache\ndef fib_slow(n):\n    if n <= 1:\n        return n\n    return fib_slow(n-1) + fib_slow(n-2)\n\n# มี cache\n@memoize\ndef fib_fast(n):\n    if n <= 1:\n        return n\n    return fib_fast(n-1) + fib_fast(n-2)\n\n# เปรียบเทียบเวลา\nstart = time.time()\nprint(f'fib(35) = {fib_fast(35)}')\nprint(f'ใช้เวลา: {time.time()-start:.6f}s (fast)')\n\nstart = time.time()\nprint(f'fib(30) = {fib_slow(30)}')\nprint(f'ใช้เวลา: {time.time()-start:.4f}s (slow)')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run เพื่อเห็นความต่างของเวลา!",
+        hint: "@memoize เก็บผลลัพธ์ใน cache dict ถ้า args เคยคำนวณแล้วจะ return ทันทีไม่ต้องคำนวณซ้ำ ทำให้ Fibonacci จาก O(2^n) เหลือ O(n) ลอง Run เทียบเวลา",
         solution: "import time\ndef memoize(func):\n    cache = {}\n    def wrapper(*args):\n        if args not in cache:\n            cache[args] = func(*args)\n        return cache[args]\n    return wrapper\ndef fib_slow(n):\n    if n <= 1:\n        return n\n    return fib_slow(n-1) + fib_slow(n-2)\n@memoize\ndef fib_fast(n):\n    if n <= 1:\n        return n\n    return fib_fast(n-1) + fib_fast(n-2)\nstart = time.time()\nprint(f'fib(35) = {fib_fast(35)}')\nprint(f'ใช้เวลา: {time.time()-start:.6f}s (fast)')\nstart = time.time()\nprint(f'fib(30) = {fib_slow(30)}')\nprint(f'ใช้เวลา: {time.time()-start:.4f}s (slow)')",
         expectedOutput: ""
       },
@@ -1432,7 +1432,7 @@ print(risky_operation())</code></pre>
         id: "a1e3", title: "Access Control", difficulty: "hard",
         description: "สร้าง decorator @require_role(role) ที่ตรวจสอบสิทธิ์ก่อนเรียกฟังก์ชัน",
         starterCode: "def require_role(role):\n    def decorator(func):\n        def wrapper(user, *args, **kwargs):\n            if user.get('role') == role:\n                return func(user, *args, **kwargs)\n            else:\n                raise PermissionError(f'ต้องการสิทธิ์ {role} แต่ {user[\"name\"]} มีสิทธิ์ {user[\"role\"]}')\n        return wrapper\n    return decorator\n\n@require_role('admin')\ndef delete_user(user, target_id):\n    return f'{user[\"name\"]} ลบ user {target_id} สำเร็จ'\n\n@require_role('teacher')\ndef add_grade(user, student, score):\n    return f'{user[\"name\"]} บันทึกคะแนน {student}: {score}'\n\nadmin = {'name': 'อาจารย์ใหญ่', 'role': 'admin'}\nteacher = {'name': 'ครูสมชาย', 'role': 'teacher'}\nstudent = {'name': 'นักเรียน', 'role': 'student'}\n\nprint(delete_user(admin, 'user123'))\nprint(add_grade(teacher, 'มาลี', 95))\n\ntry:\n    delete_user(student, 'user999')\nexcept PermissionError as e:\n    print(f'Error: {e}')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "require_role(role) เป็น decorator factory ที่รับ role เป็น argument แล้วคืน decorator ตรวจ user.get('role') ก่อนเรียกฟังก์ชัน ถ้าไม่ตรงจะ raise PermissionError",
         solution: "def require_role(role):\n    def decorator(func):\n        def wrapper(user, *args, **kwargs):\n            if user.get('role') == role:\n                return func(user, *args, **kwargs)\n            else:\n                raise PermissionError(f'ต้องการสิทธิ์ {role} แต่ {user[\"name\"]} มีสิทธิ์ {user[\"role\"]}')\n        return wrapper\n    return decorator\n@require_role('admin')\ndef delete_user(user, target_id):\n    return f'{user[\"name\"]} ลบ user {target_id} สำเร็จ'\n@require_role('teacher')\ndef add_grade(user, student, score):\n    return f'{user[\"name\"]} บันทึกคะแนน {student}: {score}'\nadmin = {'name': 'อาจารย์ใหญ่', 'role': 'admin'}\nteacher = {'name': 'ครูสมชาย', 'role': 'teacher'}\nstudent = {'name': 'นักเรียน', 'role': 'student'}\nprint(delete_user(admin, 'user123'))\nprint(add_grade(teacher, 'มาลี', 95))\ntry:\n    delete_user(student, 'user999')\nexcept PermissionError as e:\n    print(f'Error: {e}')",
         expectedOutput: ""
       }
@@ -1468,7 +1468,7 @@ print(next(squares))   # 1</code></pre>
         id: "a2e1", title: "Prime Number Generator", difficulty: "hard",
         description: "สร้าง generator ที่ผลิตเลขเฉพาะไม่สิ้นสุด แล้วใช้ islice เอา 20 ตัวแรก",
         starterCode: "def prime_gen():\n    \"\"\"Generator เลขเฉพาะ\"\"\"\n    def is_prime(n):\n        if n < 2:\n            return False\n        for i in range(2, int(n**0.5)+1):\n            if n % i == 0:\n                return False\n        return True\n    \n    n = 2\n    while True:\n        if is_prime(n):\n            yield n\n        n += 1\n\n# เอา 20 เลขเฉพาะแรก\nfrom itertools import islice\nprimes = list(islice(prime_gen(), 20))\nprint(primes)",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "yield ทำให้ฟังก์ชันเป็น generator — หยุดทำงานชั่วคราวแล้วส่งค่าออก เมื่อเรียก next() จะทำงานต่อ islice(gen, 20) เอาแค่ 20 ตัวแรกจาก generator ไม่สิ้นสุด",
         solution: "def prime_gen():\n    def is_prime(n):\n        if n < 2:\n            return False\n        for i in range(2, int(n**0.5)+1):\n            if n % i == 0:\n                return False\n        return True\n    n = 2\n    while True:\n        if is_prime(n):\n            yield n\n        n += 1\nfrom itertools import islice\nprimes = list(islice(prime_gen(), 20))\nprint(primes)",
         expectedOutput: ""
       },
@@ -1476,7 +1476,7 @@ print(next(squares))   # 1</code></pre>
         id: "a2e2", title: "Data Pipeline", difficulty: "hard",
         description: "ใช้ generator chain สร้าง data pipeline: อ่านข้อมูล → กรอง → แปลง → รวม",
         starterCode: "def read_data():\n    \"\"\"จำลองการอ่านข้อมูล\"\"\"\n    data = [10, -5, 20, -3, 15, 8, -1, 25, 12, -8]\n    for item in data:\n        yield item\n\ndef filter_positive(data):\n    \"\"\"กรองเฉพาะบวก\"\"\"\n    for item in data:\n        if item > 0:\n            yield item\n\ndef square(data):\n    \"\"\"ยกกำลัง 2\"\"\"\n    for item in data:\n        yield item ** 2\n\n# สร้าง pipeline\npipeline = square(filter_positive(read_data()))\nresult = list(pipeline)\nprint('Pipeline result:', result)\nprint('Sum:', sum(result))",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "Generator chain ทำงานแบบขี้เกียจ (lazy) — square(filter_positive(read_data())) จะไม่ประมวลผลจนกว่าจะ list() แต่ละ generator ส่งค่าทีละตัวต่อกัน",
         solution: "def read_data():\n    data = [10, -5, 20, -3, 15, 8, -1, 25, 12, -8]\n    for item in data:\n        yield item\ndef filter_positive(data):\n    for item in data:\n        if item > 0:\n            yield item\ndef square(data):\n    for item in data:\n        yield item ** 2\npipeline = square(filter_positive(read_data()))\nresult = list(pipeline)\nprint('Pipeline result:', result)\nprint('Sum:', sum(result))",
         expectedOutput: ""
       },
@@ -1484,7 +1484,7 @@ print(next(squares))   # 1</code></pre>
         id: "a2e3", title: "Custom Iterator Class", difficulty: "hard",
         description: "สร้าง class Countdown iterator ที่นับถอยหลังจาก n ไปถึง 0",
         starterCode: "class Countdown:\n    def __init__(self, start):\n        self.current = start\n    \n    def __iter__(self):\n        return self\n    \n    def __next__(self):\n        if self.current < 0:\n            raise StopIteration\n        value = self.current\n        self.current -= 1\n        return value\n\n# ใช้งาน\ncountdown = Countdown(5)\nfor n in countdown:\n    print(n, end=' ')\nprint('🚀 ปล่อยจรวด!')\n\n# ใช้ list()\nprint(list(Countdown(3)))",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "Iterator ต้องมี __iter__() (return self) และ __next__() ที่ส่งค่าหรือ raise StopIteration เมื่อหมด for loop จะเรียก __next__() อัตโนมัติ",
         solution: "class Countdown:\n    def __init__(self, start):\n        self.current = start\n    def __iter__(self):\n        return self\n    def __next__(self):\n        if self.current < 0:\n            raise StopIteration\n        value = self.current\n        self.current -= 1\n        return value\ncountdown = Countdown(5)\nfor n in countdown:\n    print(n, end=' ')\nprint('🚀 ปล่อยจรวด!')\nprint(list(Countdown(3)))",
         expectedOutput: ""
       }
@@ -1538,7 +1538,7 @@ print(check_brackets("((a + b)"))            # False</code></pre>
         id: "a3e1", title: "Queue Implementation", difficulty: "hard",
         description: "สร้าง Queue class (FIFO) ด้วย linked list และใช้จำลองคิวธนาคาร",
         starterCode: "class Node:\n    def __init__(self, data):\n        self.data = data\n        self.next = None\n\nclass Queue:\n    def __init__(self):\n        self.head = None\n        self.tail = None\n        self.size = 0\n    \n    def enqueue(self, item):\n        node = Node(item)\n        if self.tail:\n            self.tail.next = node\n        self.tail = node\n        if not self.head:\n            self.head = node\n        self.size += 1\n    \n    def dequeue(self):\n        if not self.head:\n            raise IndexError('Queue ว่าง')\n        data = self.head.data\n        self.head = self.head.next\n        if not self.head:\n            self.tail = None\n        self.size -= 1\n        return data\n    \n    def peek(self):\n        return self.head.data if self.head else None\n\n# จำลองคิวธนาคาร\nbank_queue = Queue()\ncustomers = ['สมชาย', 'มาลี', 'วิชัย', 'สุดา']\n\nfor c in customers:\n    bank_queue.enqueue(c)\n    print(f'{c} เข้าคิว')\n\nprint('\\nให้บริการ:')\nwhile bank_queue.size > 0:\n    customer = bank_queue.dequeue()\n    print(f'บริการ {customer} ✓')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "Queue ใช้ linked list — enqueue เพิ่มที่ tail, dequeue ลบที่ head (FIFO: First In, First Out) เหมาะกับการจำลองคิวจริงๆ เช่น คิวธนาคาร",
         solution: "class Node:\n    def __init__(self, data):\n        self.data = data\n        self.next = None\nclass Queue:\n    def __init__(self):\n        self.head = None\n        self.tail = None\n        self.size = 0\n    def enqueue(self, item):\n        node = Node(item)\n        if self.tail:\n            self.tail.next = node\n        self.tail = node\n        if not self.head:\n            self.head = node\n        self.size += 1\n    def dequeue(self):\n        if not self.head:\n            raise IndexError('Queue ว่าง')\n        data = self.head.data\n        self.head = self.head.next\n        if not self.head:\n            self.tail = None\n        self.size -= 1\n        return data\n    def peek(self):\n        return self.head.data if self.head else None\nbank_queue = Queue()\ncustomers = ['สมชาย', 'มาลี', 'วิชัย', 'สุดา']\nfor c in customers:\n    bank_queue.enqueue(c)\n    print(f'{c} เข้าคิว')\nprint('\\nให้บริการ:')\nwhile bank_queue.size > 0:\n    customer = bank_queue.dequeue()\n    print(f'บริการ {customer} ✓')",
         expectedOutput: ""
       },
@@ -1546,7 +1546,7 @@ print(check_brackets("((a + b)"))            # False</code></pre>
         id: "a3e2", title: "Binary Search Tree", difficulty: "hard",
         description: "สร้าง BST ที่ insert, search, และ in-order traversal ได้",
         starterCode: "class TreeNode:\n    def __init__(self, val):\n        self.val = val\n        self.left = None\n        self.right = None\n\nclass BST:\n    def __init__(self):\n        self.root = None\n    \n    def insert(self, val):\n        self.root = self._insert(self.root, val)\n    \n    def _insert(self, node, val):\n        if not node:\n            return TreeNode(val)\n        if val < node.val:\n            node.left = self._insert(node.left, val)\n        elif val > node.val:\n            node.right = self._insert(node.right, val)\n        return node\n    \n    def search(self, val):\n        return self._search(self.root, val)\n    \n    def _search(self, node, val):\n        if not node:\n            return False\n        if val == node.val:\n            return True\n        if val < node.val:\n            return self._search(node.left, val)\n        return self._search(node.right, val)\n    \n    def inorder(self):\n        result = []\n        def traverse(node):\n            if node:\n                traverse(node.left)\n                result.append(node.val)\n                traverse(node.right)\n        traverse(self.root)\n        return result\n\nbst = BST()\nfor val in [5, 3, 7, 1, 4, 6, 8]:\n    bst.insert(val)\n\nprint('In-order (เรียงลำดับ):', bst.inorder())\nprint('ค้นหา 4:', bst.search(4))\nprint('ค้นหา 9:', bst.search(9))",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run ดูผลลัพธ์!",
+        hint: "BST: ค่าน้อยกว่าไปซ้าย มากกว่าไปขวา insert ใช้ recursion หาตำแหน่ง in-order traversal (ซ้าย→ตัวเอง→ขวา) จะได้ข้อมูลเรียงจากน้อยไปมากอัตโนมัติ",
         solution: "class TreeNode:\n    def __init__(self, val):\n        self.val = val\n        self.left = None\n        self.right = None\nclass BST:\n    def __init__(self):\n        self.root = None\n    def insert(self, val):\n        self.root = self._insert(self.root, val)\n    def _insert(self, node, val):\n        if not node:\n            return TreeNode(val)\n        if val < node.val:\n            node.left = self._insert(node.left, val)\n        elif val > node.val:\n            node.right = self._insert(node.right, val)\n        return node\n    def search(self, val):\n        return self._search(self.root, val)\n    def _search(self, node, val):\n        if not node:\n            return False\n        if val == node.val:\n            return True\n        if val < node.val:\n            return self._search(node.left, val)\n        return self._search(node.right, val)\n    def inorder(self):\n        result = []\n        def traverse(node):\n            if node:\n                traverse(node.left)\n                result.append(node.val)\n                traverse(node.right)\n        traverse(self.root)\n        return result\nbst = BST()\nfor val in [5, 3, 7, 1, 4, 6, 8]:\n    bst.insert(val)\nprint('In-order (เรียงลำดับ):', bst.inorder())\nprint('ค้นหา 4:', bst.search(4))\nprint('ค้นหา 9:', bst.search(9))",
         expectedOutput: ""
       },
@@ -1554,7 +1554,7 @@ print(check_brackets("((a + b)"))            # False</code></pre>
         id: "a3e3", title: "Sorting Algorithms", difficulty: "hard",
         description: "เปรียบเทียบ Bubble Sort, Merge Sort, Quick Sort ทั้งความถูกต้องและเวลา",
         starterCode: "import time\nimport random\n\ndef bubble_sort(arr):\n    arr = arr.copy()\n    n = len(arr)\n    for i in range(n):\n        for j in range(0, n-i-1):\n            if arr[j] > arr[j+1]:\n                arr[j], arr[j+1] = arr[j+1], arr[j]\n    return arr\n\ndef merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    return merge(left, right)\n\ndef merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    return result + left[i:] + right[j:]\n\ndef quick_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr)//2]\n    left = [x for x in arr if x < pivot]\n    mid = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quick_sort(left) + mid + quick_sort(right)\n\ndata = random.sample(range(1000), 500)\n\nfor name, func in [('Bubble Sort', bubble_sort), ('Merge Sort', merge_sort), ('Quick Sort', quick_sort)]:\n    start = time.time()\n    result = func(data)\n    elapsed = time.time() - start\n    print(f'{name}: {elapsed:.4f}s (ถูกต้อง: {result == sorted(data)})')",
-        hint: "โค้ดนี้สมบูรณ์แล้ว ลอง Run เพื่อเห็นความต่างของประสิทธิภาพ!",
+        hint: "Bubble Sort O(n²) เปรียบเทียบคู่ๆ, Merge Sort O(n log n) แบ่งครึ่งแล้ว merge, Quick Sort O(n log n) เฉลี่ย เลือก pivot แล้วแยก ลองเทียบเวลาจริง",
         solution: "import time\nimport random\ndef bubble_sort(arr):\n    arr = arr.copy()\n    n = len(arr)\n    for i in range(n):\n        for j in range(0, n-i-1):\n            if arr[j] > arr[j+1]:\n                arr[j], arr[j+1] = arr[j+1], arr[j]\n    return arr\ndef merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    return merge(left, right)\ndef merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    return result + left[i:] + right[j:]\ndef quick_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr)//2]\n    left = [x for x in arr if x < pivot]\n    mid = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quick_sort(left) + mid + quick_sort(right)\ndata = random.sample(range(1000), 500)\nfor name, func in [('Bubble Sort', bubble_sort), ('Merge Sort', merge_sort), ('Quick Sort', quick_sort)]:\n    start = time.time()\n    result = func(data)\n    elapsed = time.time() - start\n    print(f'{name}: {elapsed:.4f}s (ถูกต้อง: {result == sorted(data)})')",
         expectedOutput: ""
       }

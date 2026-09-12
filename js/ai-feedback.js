@@ -550,6 +550,7 @@ function getAutoFeedback(exerciseDesc, userCode, runOutput, solution, hint, star
   // Extra code quality checks
   const extraStrengths = [];
   const extraBugs = [];
+  let keywordSimilarity = 0;
 
   if (userCode && userCode.trim().length > 5) {
     // Check indentation consistency
@@ -583,11 +584,75 @@ function getAutoFeedback(exerciseDesc, userCode, runOutput, solution, hint, star
       const solKeywords = [...new Set(solClean.match(/\b(for|while|if|elif|else|def|return|print|input|range|len|append|split|join|int|str|float|list|dict|set|class|try|except|import)\b/g) || [])];
       const codeKeywords = [...new Set(codeClean.match(/\b(for|while|if|elif|else|def|return|print|input|range|len|append|split|join|int|str|float|list|dict|set|class|try|except|import)\b/g) || [])];
       const matched = solKeywords.filter(k => codeKeywords.includes(k));
-      const similarity = solKeywords.length > 0 ? matched.length / solKeywords.length : 0;
-      if (similarity >= 0.8 && base.score < 75) {
-        base.score = Math.min(75, base.score + 10);
-      } else if (similarity >= 0.5 && base.score < 65) {
-        base.score = Math.min(65, base.score + 5);
+      keywordSimilarity = solKeywords.length > 0 ? matched.length / solKeywords.length : 0;
+
+      // ── Enhanced scoring when NO expectedOutput ──
+      // Compare code structure against solution for a more accurate score
+      if (!expectedOutput) {
+        const hasError = (runOutput || '').toLowerCase().includes('error');
+        const hasOutput = runOutput && runOutput.trim().length > 0;
+
+        // Normalize solution and code for structure comparison
+        const solNorm = solution.replace(/\\n/g, '\n');
+        const solStmts = solNorm.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+        const codeStmts = userCode.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+
+        // Count key executable statements in solution
+        const keyPatterns = /^(print|def |class |return |if |elif |else:|for |while |raise |yield |import |from |try:|except|finally:)/;
+        const solKeyStmts = solStmts.filter(l => keyPatterns.test(l));
+        const codeKeyStmts = codeStmts.filter(l => keyPatterns.test(l));
+
+        // Match: how many solution key statements appear (loosely) in code?
+        const matchedStmts = solKeyStmts.filter(stmt => {
+          const stmtNorm = stmt.replace(/\s+/g, ' ').replace(/['"]/g, '');
+          return codeKeyStmts.some(cl => {
+            const clNorm = cl.replace(/\s+/g, ' ').replace(/['"]/g, '');
+            // Exact or substring match
+            return clNorm === stmtNorm || clNorm.includes(stmtNorm) || stmtNorm.includes(clNorm);
+          });
+        });
+        const structSimilarity = solKeyStmts.length > 0 ? matchedStmts.length / solKeyStmts.length : 0;
+
+        // Also check if starter code was unchanged (student didn't edit)
+        const starterNorm = (starterCode || '').replace(/\\n/g, '\n').replace(/\s+/g, ' ').trim();
+        const codeNormForCompare = userCode.replace(/\s+/g, ' ').trim();
+        const starterUnchanged = starterNorm && codeNormForCompare === starterNorm;
+
+        if (!hasError && hasOutput && !starterUnchanged) {
+          // High confidence: code structure closely matches solution
+          if (structSimilarity >= 0.7 && keywordSimilarity >= 0.7) {
+            base.score = Math.max(base.score, 95);
+            base.summary = 'ยอดเยี่ยมมาก! โค้ดทำงานได้ถูกต้องสมบูรณ์';
+            extraStrengths.push('โค้ดมีโครงสร้างถูกต้องตรงตามโจทย์');
+          } else if (structSimilarity >= 0.5 && keywordSimilarity >= 0.5) {
+            base.score = Math.max(base.score, 85);
+            base.summary = 'ดีมาก! โค้ดทำงานได้ถูกต้องเป็นส่วนใหญ่';
+          } else if (structSimilarity >= 0.3 || keywordSimilarity >= 0.4) {
+            base.score = Math.max(base.score, 75);
+            base.summary = 'ดี! โค้ดทำงานได้ แต่ยังมีจุดที่ปรับปรุงได้';
+          } else {
+            base.score = Math.max(base.score, 65);
+          }
+        } else if (!hasError && hasOutput && starterUnchanged) {
+          // Student just ran starter code without changes
+          if (structSimilarity >= 0.8) {
+            // Starter IS the solution (many intermediate/advanced exercises)
+            base.score = Math.max(base.score, 90);
+            base.summary = 'โค้ดทำงานได้ถูกต้อง! ลองอ่านทำความเข้าใจแต่ละบรรทัดด้วยนะ';
+          } else {
+            base.score = Math.max(base.score, 50);
+            base.summary = 'โค้ดรันได้ แต่ยังไม่ได้แก้ไขตามโจทย์';
+          }
+        } else if (hasError) {
+          base.score = Math.min(base.score, 40);
+        }
+      } else {
+        // Original logic for when expectedOutput exists
+        if (keywordSimilarity >= 0.8 && base.score < 75) {
+          base.score = Math.min(75, base.score + 10);
+        } else if (keywordSimilarity >= 0.5 && base.score < 65) {
+          base.score = Math.min(65, base.score + 5);
+        }
       }
     }
   }
@@ -599,10 +664,18 @@ function getAutoFeedback(exerciseDesc, userCode, runOutput, solution, hint, star
   const score = Math.min(100, Math.max(0, base.score));
   const grade = score >= 90 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : score >= 40 ? 'D' : 'F';
 
+  // Better summary based on final score
+  let finalSummary = base.summary;
+  if (!expectedOutput && score >= 90) {
+    finalSummary = base.summary || 'ยอดเยี่ยมมาก! โค้ดทำงานได้ถูกต้อง';
+  } else if (!expectedOutput && score >= 75) {
+    finalSummary = base.summary || 'ดีมาก! โค้ดใช้งานได้ ผลลัพธ์ถูกต้องเป็นส่วนใหญ่';
+  }
+
   return {
     score,
     grade,
-    summary: base.summary,
+    summary: finalSummary,
     bugs: mergedBugs,
     missing: base.missing || [],
     improvements: base.improvements || [],
