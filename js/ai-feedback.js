@@ -211,7 +211,11 @@ async function showApiKeyModal(onSave) {
       saveBtn.disabled = false;
       saveBtn.innerHTML = '💾 บันทึก';
       input.style.borderColor = 'var(--red)';
-      errorMsg.textContent = '❌ คีย์ไม่ถูกต้อง หรือใช้งานไม่ได้ กรุณาตรวจสอบอีกครั้ง';
+      if (key.startsWith('AQ.')) {
+        errorMsg.innerHTML = '❌ คีย์แบบ <b>AQ.</b> เป็นคีย์ของ Google Cloud/Vertex AI ซึ่งไม่รองรับครับ<br>กรุณารับคีย์ใหม่ที่ <b>aistudio.google.com</b> (คีย์ที่ถูกต้องจะขึ้นต้นด้วย <b>AIza</b>)';
+      } else {
+        errorMsg.textContent = '❌ คีย์ไม่ถูกต้อง หรือใช้งานไม่ได้ กรุณาตรวจสอบอีกครั้ง';
+      }
       errorMsg.style.display = 'block';
     }
   };
