@@ -150,6 +150,8 @@ async function initPyodide(onProgress) {
 async function runPython(code, onOutput, onInput, inputBuffer = []) {
   if (!pyodide) throw new Error('Pyodide ยังไม่พร้อม');
 
+  const isRerun = inputBuffer.length > 0;
+
   // Set up output capture & mocked input in Python
   pyodide.globals.set('_input_queue_js', inputBuffer);
 
@@ -158,9 +160,6 @@ async function runPython(code, onOutput, onInput, inputBuffer = []) {
 import builtins
 import sys
 import time
-import random
-
-random.seed(42)
 
 _output_lines = []
 _input_idx = [0]
@@ -168,7 +167,14 @@ _input_q = list(_input_queue_js)
 _start_time = time.time()
 _timeout = 2.5
 
-_orig_print = builtins.print
+# Save original print and input only once (avoid saving fakes on re-runs)
+if not hasattr(builtins, '_orig_print_saved'):
+    builtins._orig_print_saved = builtins.print
+if not hasattr(builtins, '_orig_input_saved'):
+    builtins._orig_input_saved = builtins.input
+
+import random
+random.seed(42)
 
 def _fake_print(*args, sep=' ', end='\\n', **kwargs):
     text = sep.join(str(a) for a in args) + end
@@ -255,10 +261,23 @@ except ValueError as e:
       const partialLines = pyodide.globals.get('_output_lines').toJs();
       if (onOutput) onOutput(partialLines.join(''));
       
+      // Restore print before re-running so the next setup can save correctly
+      try {
+        pyodide.runPython(`
+builtins.print = builtins._orig_print_saved
+builtins.input = builtins._orig_input_saved
+try:
+    del _fake_print, _fake_input, _output_lines, _input_idx, _input_q, _start_time, _timeout
+    del _user_code, _tree, _LoopProtector, _compiled, _input_needed, _input_prompt
+except:
+    pass
+`);
+      } catch (_) {}
+      
       if (onInput) {
         const userInput = await onInput(prompt);
         inputBuffer.push(String(userInput));
-        // Re-run the script with the new buffer (no await in return to let finally run correctly)
+        // Re-run the script with the new input buffer
         return runPython(code, onOutput, onInput, inputBuffer);
       } else {
         return { success: false, output: "Error: Input required but no input handler provided." };
@@ -311,7 +330,8 @@ except ValueError as e:
   } finally {
     try {
       pyodide.runPython(`
-builtins.print = _orig_print
+builtins.print = builtins._orig_print_saved
+builtins.input = builtins._orig_input_saved
 try:
     del _fake_print, _fake_input, _output_lines, _input_idx, _input_q, _start_time, _timeout
     del _user_code, _tree, _LoopProtector, _compiled, _input_needed, _input_prompt
