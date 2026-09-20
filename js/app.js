@@ -122,10 +122,9 @@ function showToast(message, type = 'info', duration = 3000) {
     position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:999;
     padding:12px 24px;border-radius:100px;
     background:rgba(8,11,20,0.95);backdrop-filter:blur(20px);
-    border:1px solid ${colors[type]};color:var(--text-primary);
+    border:1px solid ${colors[type]};color:#ffffff;
     font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:8px;
     animation:fadeInUp 0.3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);
-    font-family:'Inter',sans-serif;
   `;
   toast.textContent = `${icons[type]} ${message}`;
   document.body.appendChild(toast);

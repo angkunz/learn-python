@@ -3,7 +3,7 @@
    Design: Soft Neo-Brutalism (Bright + Bold Outlines)
    ================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap');
 
 /* ── CSS Variables ── */
 :root {
@@ -77,7 +77,7 @@ html {
 }
 
 body {
-  font-family: 'Nunito', -apple-system, sans-serif;
+  font-family: 'Prompt', -apple-system, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
@@ -531,7 +531,7 @@ body {
   background: #fff;
   box-shadow: var(--shadow-sm);
   color: var(--ink);
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Prompt', sans-serif;
   font-size: .95rem;
   font-weight: 800;
   transition: var(--transition);
@@ -2871,7 +2871,7 @@ footer {
   color: var(--text-secondary);
   transition: all .18s ease;
   white-space: nowrap;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Prompt', sans-serif;
 }
 
 .mode-btn:hover {
