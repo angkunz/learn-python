@@ -187,13 +187,6 @@ async function showApiKeyModal(onSave) {
       return;
     }
 
-    if (!key.startsWith('AIza')) {
-      input.style.borderColor = 'var(--red)';
-      errorMsg.textContent = '❌ คีย์ไม่ถูกต้อง (API Key ของ Google Gemini ต้องขึ้นต้นด้วย "AIza")';
-      errorMsg.style.display = 'block';
-      return;
-    }
-
     // UI Loading state
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<div class="spinner" style="width:14px;height:14px;margin:0;display:inline-block;vertical-align:middle;"></div> กำลังตรวจสอบ...';
