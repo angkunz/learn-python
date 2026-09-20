@@ -1257,7 +1257,7 @@ footer {
   background: var(--code-bg);
   border: var(--bw) solid var(--ink);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 4px 4px 0 var(--blue);
   overflow: hidden;
   margin: 20px 0;
 }
@@ -2902,7 +2902,7 @@ footer {
   width: 100%;
   max-width: 380px;
   box-sizing: border-box;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 8px 8px 0 var(--blue);
   color: var(--code-text);
   font-family: 'Fira Code', monospace;
   margin: 0 auto;
