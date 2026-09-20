@@ -192,7 +192,7 @@
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
 <script src="js/app.js?v=4"></script>
-<script src="js/editor.js?v=5"></script>
+<script src="js/editor.js?v=7"></script>
 <script>
   let editor;
   const STORAGE_KEY = 'playground_code';
@@ -247,8 +247,8 @@ greet("Python Developer")
     } catch(e) {
       clearInterval(interval);
       bar.style.background = 'var(--red)';
-      document.getElementById('output-console').textContent = '⚠️ โหลด Python Environment ไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ';
-      if (typeof showToast === 'function') showToast('โหลด Python ล้มเหลว ลองรีเฟรชหน้า', 'error');
+      document.getElementById('output-console').textContent = '⚠️ โหลด Python Environment ไม่สำเร็จ: ' + e.message;
+      if (typeof showToast === 'function') showToast('โหลด Python ล้มเหลว: ' + e.message, 'error');
     }
   });
 

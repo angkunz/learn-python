@@ -137,8 +137,6 @@ async function initPyodide(onProgress) {
       pyodide = await loadPyodide({
         indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
       });
-      if (onProgress) onProgress('กำลังโหลดแพ็กเกจพื้นฐาน...');
-      await pyodide.loadPackage('micropip');
       if (onProgress) onProgress('พร้อมแล้ว!');
       return pyodide;
     } catch (e) {
