@@ -110,17 +110,26 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Pyodide UI ──
 async function initPyodideWithUI() {
   const bar = document.getElementById('py-progress-bar');
-  bar.style.width = '30%';
+  let progress = 10;
+  bar.style.width = progress + '%';
+  
+  // Fake progress animation while waiting for download
+  const interval = setInterval(() => {
+    if (progress < 90) {
+      progress += (90 - progress) * 0.1; // Slow down as it gets closer to 90
+      bar.style.width = progress + '%';
+    }
+  }, 500);
 
   try {
-    await initPyodide((msg) => {
-      bar.style.width = '80%';
-    });
+    await initPyodide();
+    clearInterval(interval);
     bar.style.width = '100%';
     pyodideReady = true;
     setTimeout(() => { bar.style.opacity = '0'; }, 500);
     showToast('Python Runtime พร้อมแล้ว! 🐍', 'success');
   } catch(e) {
+    clearInterval(interval);
     bar.style.background = 'var(--red)';
     showToast('โหลด Python ล้มเหลว ลองรีเฟรชหน้า', 'error');
   }

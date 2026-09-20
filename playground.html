@@ -216,16 +216,26 @@ greet("Python Developer")
 
     // Initialize Pyodide with UI feedback
     const bar = document.getElementById('py-progress-bar');
-    bar.style.width = '30%';
+    let progress = 10;
+    bar.style.width = progress + '%';
+    
+    // Fake progress animation while waiting for download
+    const interval = setInterval(() => {
+      if (progress < 90) {
+        progress += (90 - progress) * 0.1;
+        bar.style.width = progress + '%';
+      }
+    }, 500);
+
     try {
-      await initPyodide((msg) => {
-        bar.style.width = '80%';
-      });
+      await initPyodide();
+      clearInterval(interval);
       bar.style.width = '100%';
       window.pyodideReady = true;
       setTimeout(() => { bar.style.opacity = '0'; }, 500);
       if (typeof showToast === 'function') showToast('Python Runtime พร้อมแล้ว! 🐍', 'success');
     } catch(e) {
+      clearInterval(interval);
       bar.style.background = 'var(--red)';
       document.getElementById('output-console').textContent = '⚠️ โหลด Python Environment ไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ';
       if (typeof showToast === 'function') showToast('โหลด Python ล้มเหลว ลองรีเฟรชหน้า', 'error');

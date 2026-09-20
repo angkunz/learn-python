@@ -125,25 +125,28 @@ function setEditorCode(view, code) {
 
 // ── Initialize Pyodide ──
 let pyodide = null;
-let isLoading = false;
+let pyodidePromise = null;
 
 async function initPyodide(onProgress) {
   if (pyodide) return pyodide;
-  if (isLoading) return null;
-  isLoading = true;
-  try {
-    onProgress && onProgress('กำลังโหลด Python runtime...');
-    pyodide = await loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
-    });
-    onProgress && onProgress('พร้อมแล้ว!');
-    isLoading = false;
-    return pyodide;
-  } catch (e) {
-    isLoading = false;
-    console.error('Pyodide load error:', e);
-    throw e;
-  }
+  if (pyodidePromise) return pyodidePromise;
+
+  pyodidePromise = (async () => {
+    try {
+      if (onProgress) onProgress('กำลังโหลด Python runtime...');
+      pyodide = await loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
+      });
+      if (onProgress) onProgress('พร้อมแล้ว!');
+      return pyodide;
+    } catch (e) {
+      pyodidePromise = null;
+      console.error('Pyodide load error:', e);
+      throw e;
+    }
+  })();
+
+  return pyodidePromise;
 }
 
 // ── Run Python Code ──
