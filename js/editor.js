@@ -135,7 +135,7 @@ async function initPyodide(onProgress) {
     try {
       if (onProgress) onProgress('กำลังโหลด Python runtime...');
       pyodide = await loadPyodide({
-        indexURL: 'https://unpkg.com/pyodide@0.26.2/'
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
       });
       if (onProgress) onProgress('กำลังโหลดแพ็กเกจพื้นฐาน...');
       await pyodide.loadPackage('micropip');
