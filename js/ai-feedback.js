@@ -339,7 +339,8 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 2048
+          maxOutputTokens: 2048,
+          responseMimeType: "application/json"
         }
       })
     });
@@ -362,24 +363,20 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
     let result;
     try {
       let cleanText = text.trim();
-      // Remove markdown block if model added it despite responseMimeType
       cleanText = cleanText.replace(/^```[a-z]*\s*/i, '').replace(/\s*```$/i, '').trim();
       
-      // Fix: The model sometimes generates literal newlines inside strings which breaks JSON.parse.
-      // Replacing actual '\n' (ASCII 10) with spaces will fix invalid strings
-      // while keeping structural JSON and explicit '\n' escape sequences intact.
-      cleanText = cleanText.replace(/[\n\r\t]+/g, ' ');
-      
+      // Attempt parse first
       result = JSON.parse(cleanText);
     } catch (parseError) {
-      console.warn('JSON Parse Error:', parseError);
-      console.warn('Raw Text was:', text);
-      // Try to extract JSON from messy response
+      console.warn('JSON Parse Error. Trying to extract JSON block...');
+      // Extract everything between the first { and the last }
       const match = text.match(/\{[\s\S]*\}/);
       if (match) {
+        let extracted = match[0];
         try { 
-          result = JSON.parse(match[0]); 
-        } catch { 
+          result = JSON.parse(extracted); 
+        } catch (e2) {
+          console.warn('Extracted JSON still invalid:', e2);
           result = buildFallback(userCode, runOutput, match[0]); 
         }
       } else {
