@@ -10,9 +10,10 @@ function setCheckMode(mode) { localStorage.setItem(CHECK_MODE_KEY, mode); }
 const AI_STORAGE_KEY = 'python_ai_api_key';
 const AI_SESSION_KEY = 'python_ai_api_key_session';
 const AI_MODELS = [
-  'gemini-1.5-flash',
-  'gemini-2.0-flash-exp',
-  'gemini-1.5-pro'
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-2.5-flash',
+  'gemini-1.5-flash'
 ];
 
 // ================================================
@@ -195,7 +196,7 @@ async function showApiKeyModal(onSave) {
 
     try {
       // Validate key by fetching model info
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash?key=${key}`);
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash?key=${key}`);
       if (!res.ok && res.status !== 429) throw new Error('Invalid key');
 
       // Valid — save encrypted
