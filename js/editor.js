@@ -137,6 +137,8 @@ async function initPyodide(onProgress) {
       pyodide = await loadPyodide({
         indexURL: 'https://unpkg.com/pyodide@0.26.2/'
       });
+      if (onProgress) onProgress('กำลังโหลดแพ็กเกจพื้นฐาน...');
+      await pyodide.loadPackage('micropip');
       if (onProgress) onProgress('พร้อมแล้ว!');
       return pyodide;
     } catch (e) {
