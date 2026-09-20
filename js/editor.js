@@ -135,7 +135,7 @@ async function initPyodide(onProgress) {
     try {
       if (onProgress) onProgress('กำลังโหลด Python runtime...');
       pyodide = await loadPyodide({
-        indexURL: 'https://cdnjs.cloudflare.com/ajax/libs/pyodide/0.26.2/'
+        indexURL: 'https://unpkg.com/pyodide@0.26.2/'
       });
       if (onProgress) onProgress('พร้อมแล้ว!');
       return pyodide;
