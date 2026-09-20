@@ -246,7 +246,7 @@ function renderLesson(lesson) {
     </div>
 
     <!-- Exercises -->
-    <div class="exercise-panel section-container" id="exercise-panel" style="background: rgba(13,17,23,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-top: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.15);">
+    <div class="exercise-panel section-container" id="exercise-panel" style="margin-top: 32px;">
       <!-- Rendered separately -->
     </div>
 
@@ -275,7 +275,7 @@ function renderExercises(lesson) {
   if (!panel) return;
 
   panel.innerHTML = `
-    <div class="exercise-section-header" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <div class="exercise-section-header" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--ink);">
       <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--cyan); margin: 0; display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 1.8rem;">🎯</span> ส่วนแบบฝึกหัด (${lesson.exercises.length} ข้อ)
       </h2>
@@ -303,9 +303,9 @@ function renderExerciseCard(lesson, idx, containerId) {
   const savedCode = localStorage.getItem(`code-${lesson.id}-${ex.id}`) || ex.starterCode;
 
   container.innerHTML = `
-    <div class="exercise-card" id="ex-card-${ex.id}" style="border:1px solid rgba(124,58,237,0.2); border-radius:16px; padding:24px; background:rgba(13,17,23,0.7); box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+    <div class="exercise-card" id="ex-card-${ex.id}">
       <div class="exercise-desc">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid var(--ink);padding-bottom:12px;">
           <h3 style="margin:0; font-size:1.25rem; color:var(--text-primary);">ข้อ ${idx + 1}. ${ex.title}</h3>
           <span class="difficulty-badge difficulty-${ex.difficulty}">${
             ex.difficulty === 'easy' ? '🟢 ง่าย' : ex.difficulty === 'medium' ? '🟡 ปานกลาง' : '🔴 ยาก'
