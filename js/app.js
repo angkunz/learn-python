@@ -161,3 +161,25 @@ function createInputDialog(promptText) {
     input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
   });
 }
+
+// ── Theme Toggle System ──
+document.addEventListener('DOMContentLoaded', () => {
+  const themeBtns = document.querySelectorAll('.theme-toggle');
+  themeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.body.classList.add('theme-transition');
+      
+      if (document.documentElement.getAttribute('data-theme') === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      }
+      
+      setTimeout(() => {
+        document.body.classList.remove('theme-transition');
+      }, 300);
+    });
+  });
+});

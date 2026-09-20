@@ -14,6 +14,9 @@
     .cm-editor { font-size: 14px !important; }
     .ͼ1 .cm-scroller { overflow: auto !important; }
   </style>
+  <script>
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  </script>
 </head>
 <body>
 
@@ -31,9 +34,12 @@
   <div class="nav-links" id="lesson-breadcrumb" style="flex:1;padding:0 16px;">
     <!-- Breadcrumb inserted by JS -->
   </div>
-  <div style="display:flex;align-items:center;gap:12px;">
+  <div class="nav-actions">
     <a href="playground.html" style="color:var(--text-secondary);text-decoration:none;font-size:0.85rem;font-weight:600;"> Playground </a>
     <span id="nav-xp" style="font-size:0.85rem;font-weight:700;color:var(--purple-light);">⭐ 0 XP</span>
+    <button class="theme-toggle" id="theme-btn" aria-label="Toggle dark mode" title="สลับโหมดมืด/สว่าง">
+      <span class="icon-moon">🌙</span><span class="icon-sun">☀️</span>
+    </button>
     <button class="nav-btn" onclick="showApiKeyModal(null)" title="ตั้งค่า AI Key">⚙️ API Key</button>
   </div>
 </nav>

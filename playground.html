@@ -122,6 +122,9 @@
       .playground-left, .playground-right { height: 400px; flex: none; }
     }
   </style>
+  <script>
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  </script>
 </head>
 <body>
 
@@ -141,8 +144,11 @@
     <a href="index.html#curriculum">หลักสูตร</a>
     <a href="playground.html" class="active">ลองเขียนโค้ด (Playground)</a>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;">
+  <div class="nav-actions">
     <span id="nav-xp" style="font-size:0.85rem;font-weight:700;color:var(--purple-light);">⭐ 0 XP</span>
+    <button class="theme-toggle" id="theme-btn" aria-label="Toggle dark mode" title="สลับโหมดมืด/สว่าง">
+      <span class="icon-moon">🌙</span><span class="icon-sun">☀️</span>
+    </button>
   </div>
 </nav>
 
