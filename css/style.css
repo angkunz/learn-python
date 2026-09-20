@@ -179,7 +179,7 @@ body {
   align-items: center;
   gap: 12px;
   font-size: 1.2rem;
-  font-weight: 900;
+  font-weight: 600;
   color: var(--ink);
   text-decoration: none;
   letter-spacing: -0.3px;
@@ -230,7 +230,7 @@ body {
   border: var(--bw) solid var(--ink);
   cursor: pointer;
   font-size: .9rem;
-  font-weight: 800;
+  font-weight: 500;
   font-family: inherit;
   background: var(--orange);
   color: #fff;
@@ -287,7 +287,7 @@ body {
   border: 2px solid var(--ink);
   box-shadow: var(--shadow-sm);
   font-size: .85rem;
-  font-weight: 800;
+  font-weight: 500;
   color: var(--ink);
   margin-bottom: 26px;
   animation: fadeInDown .6s ease;
@@ -319,7 +319,7 @@ body {
 
 .hero-title {
   font-size: clamp(2.5rem, 6vw, 4.4rem);
-  font-weight: 900;
+  font-weight: 600;
   line-height: 1.12;
   letter-spacing: -1.5px;
   margin-bottom: 20px;
@@ -365,7 +365,7 @@ body {
   border: var(--bw) solid var(--ink);
   cursor: pointer;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 500;
   font-family: inherit;
   background: var(--yellow);
   color: var(--ink);
@@ -392,7 +392,7 @@ body {
   border: var(--bw) solid var(--ink);
   cursor: pointer;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 500;
   font-family: inherit;
   background: #fff;
   color: var(--ink);
@@ -437,7 +437,7 @@ body {
 
 .stat-number {
   font-size: 2rem;
-  font-weight: 900;
+  font-weight: 600;
   color: var(--orange);
   background: none;
   -webkit-text-fill-color: currentColor;
@@ -474,7 +474,7 @@ body {
   border: 2px solid var(--ink);
   box-shadow: 2px 2px 0 var(--ink);
   font-size: .76rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .8px;
   margin-bottom: 14px;
@@ -482,7 +482,7 @@ body {
 
 .section-title {
   font-size: clamp(1.8rem, 4vw, 2.7rem);
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: -.8px;
   margin-bottom: 12px;
 }
@@ -506,7 +506,7 @@ body {
 
 .grade-selector-label {
   font-size: .82rem;
-  font-weight: 900;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -533,7 +533,7 @@ body {
   color: var(--ink);
   font-family: 'Mitr', sans-serif;
   font-size: .95rem;
-  font-weight: 800;
+  font-weight: 500;
   transition: var(--transition);
   min-width: 152px;
 }
@@ -631,13 +631,13 @@ body {
   background: var(--yellow-soft);
   color: var(--ink);
   font-size: .74rem;
-  font-weight: 900;
+  font-weight: 600;
   margin-bottom: 12px;
 }
 
 .level-card-title {
   font-size: 1.4rem;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: -.4px;
   margin-bottom: 8px;
 }
@@ -667,7 +667,7 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: .8rem;
-  font-weight: 800;
+  font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 7px;
 }
@@ -736,7 +736,7 @@ body {
 
 .feature-title {
   font-size: 1.02rem;
-  font-weight: 900;
+  font-weight: 600;
   margin-bottom: 8px;
 }
 
@@ -772,7 +772,7 @@ body {
 
 .meta-strip strong {
   display: block;
-  font-weight: 900;
+  font-weight: 600;
   font-size: .95rem;
 }
 
@@ -907,7 +907,7 @@ footer {
 
 .sidebar-title {
   font-size: .74rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-muted);
@@ -973,7 +973,7 @@ footer {
   border-radius: var(--pill);
   cursor: pointer;
   font-size: .78rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .5px;
   color: var(--text-muted);
@@ -1038,7 +1038,7 @@ footer {
   align-items: center;
   justify-content: center;
   font-size: .62rem;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .sidebar-lesson-check.done {
@@ -1082,7 +1082,7 @@ footer {
   color: var(--ink);
   box-shadow: 2px 2px 0 var(--ink);
   font-size: .74rem;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .lesson-icon-big {
@@ -1100,7 +1100,7 @@ footer {
 
 .lesson-title-big {
   font-size: clamp(1.5rem, 3vw, 2.2rem);
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: -.6px;
   margin-bottom: 8px;
 }
@@ -1133,7 +1133,7 @@ footer {
 
 .theory-content h2 {
   font-size: 1.5rem;
-  font-weight: 900;
+  font-weight: 600;
   margin-bottom: 18px;
   letter-spacing: -.5px;
   color: var(--ink);
@@ -1146,7 +1146,7 @@ footer {
 
 .theory-content h3 {
   font-size: 1.1rem;
-  font-weight: 900;
+  font-weight: 600;
   margin: 26px 0 12px;
   color: var(--ink);
 }
@@ -1173,7 +1173,7 @@ footer {
 
 .theory-content li::marker {
   color: var(--orange);
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .theory-content code {
@@ -1390,7 +1390,7 @@ footer {
 
 .exercise-title {
   font-size: 1.3rem;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: -.4px;
 }
 
@@ -1409,7 +1409,7 @@ footer {
   box-shadow: 2px 2px 0 var(--ink);
   cursor: pointer;
   font-size: .85rem;
-  font-weight: 800;
+  font-weight: 500;
   font-family: inherit;
   transition: var(--transition);
   display: flex;
@@ -1429,7 +1429,7 @@ footer {
 
 .ex-tab.done::after {
   content: '✓';
-  font-weight: 900;
+  font-weight: 600;
   color: var(--green);
 }
 
@@ -1439,7 +1439,7 @@ footer {
   border: 2px solid var(--ink);
   color: var(--ink);
   font-size: .7rem;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .difficulty-easy {
@@ -1469,7 +1469,7 @@ footer {
 
 .exercise-desc h3 {
   font-size: 1.1rem;
-  font-weight: 900;
+  font-weight: 600;
   margin-bottom: 10px;
 }
 
@@ -1498,7 +1498,7 @@ footer {
 
 .editor-lang {
   font-size: .76rem;
-  font-weight: 800;
+  font-weight: 500;
   color: var(--yellow);
   display: flex;
   align-items: center;
@@ -1517,7 +1517,7 @@ footer {
   border: 2px solid var(--ink);
   cursor: pointer;
   font-size: .875rem;
-  font-weight: 900;
+  font-weight: 600;
   font-family: inherit;
   background: var(--green);
   color: #fff;
@@ -1551,7 +1551,7 @@ footer {
   border: 2px solid var(--ink);
   cursor: pointer;
   font-size: .875rem;
-  font-weight: 800;
+  font-weight: 500;
   font-family: inherit;
   background: var(--yellow);
   color: var(--ink);
@@ -1575,7 +1575,7 @@ footer {
   border: 2px solid var(--ink);
   cursor: pointer;
   font-size: .875rem;
-  font-weight: 800;
+  font-weight: 500;
   font-family: inherit;
   background: #fff;
   color: var(--ink);
@@ -1617,7 +1617,7 @@ footer {
 
 .output-label {
   font-size: .74rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: #8E97AE;
@@ -1628,7 +1628,7 @@ footer {
 
 .output-status {
   font-size: .74rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .output-status.success {
@@ -1717,7 +1717,7 @@ footer {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 900;
+  font-weight: 600;
   font-size: .98rem;
   color: var(--ink);
 }
@@ -1742,7 +1742,7 @@ footer {
   border: 2px solid var(--ink);
   cursor: pointer;
   font-size: .85rem;
-  font-weight: 900;
+  font-weight: 600;
   font-family: inherit;
   background: var(--orange);
   color: #fff;
@@ -1797,7 +1797,7 @@ footer {
 
 .ai-score-big {
   font-size: 3rem;
-  font-weight: 900;
+  font-weight: 600;
   color: var(--orange);
   background: none;
   -webkit-text-fill-color: currentColor;
@@ -1813,7 +1813,7 @@ footer {
 
 .ai-score-grade {
   font-size: 1.1rem;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .ai-feedback-text {
@@ -1829,7 +1829,7 @@ footer {
 
 .ai-feedback-section strong {
   color: var(--ink);
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .ai-loading {
@@ -1892,7 +1892,7 @@ footer {
   border: var(--bw) solid var(--ink);
   cursor: pointer;
   font-size: .9rem;
-  font-weight: 800;
+  font-weight: 500;
   font-family: inherit;
   background: #fff;
   color: var(--ink);
@@ -1927,7 +1927,7 @@ footer {
   border: var(--bw) solid var(--ink);
   cursor: pointer;
   font-size: .9rem;
-  font-weight: 900;
+  font-weight: 600;
   font-family: inherit;
   background: var(--green);
   color: #fff;
@@ -1965,7 +1965,7 @@ footer {
 
 .hint-toast-title {
   font-size: .85rem;
-  font-weight: 900;
+  font-weight: 600;
   color: var(--ink);
   margin-bottom: 6px;
 }
@@ -2029,7 +2029,7 @@ footer {
 
 .modal-title {
   font-size: 1.3rem;
-  font-weight: 900;
+  font-weight: 600;
   text-align: center;
   margin-bottom: 8px;
 }
@@ -2072,7 +2072,7 @@ footer {
   border: var(--bw) solid var(--ink);
   cursor: pointer;
   font-size: .9rem;
-  font-weight: 800;
+  font-weight: 500;
   font-family: inherit;
   background: #fff;
   color: var(--ink);
@@ -2093,7 +2093,7 @@ footer {
   border: var(--bw) solid var(--ink);
   cursor: pointer;
   font-size: .9rem;
-  font-weight: 900;
+  font-weight: 600;
   font-family: inherit;
   background: var(--yellow);
   color: var(--ink);
@@ -2241,7 +2241,7 @@ footer {
 
 .input-dialog-prompt {
   font-size: .95rem;
-  font-weight: 800;
+  font-weight: 500;
   margin-bottom: 16px;
   color: var(--ink);
 }
@@ -2270,7 +2270,7 @@ footer {
   border: var(--bw) solid var(--ink);
   cursor: pointer;
   font-size: .9rem;
-  font-weight: 900;
+  font-weight: 600;
   font-family: inherit;
   background: var(--yellow);
   color: var(--ink);
@@ -2366,7 +2366,7 @@ footer {
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
-  font-weight: 900;
+  font-weight: 600;
   line-height: 1;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
@@ -2395,7 +2395,7 @@ footer {
 
 .ai-grade-pill {
   font-size: .8rem;
-  font-weight: 900;
+  font-weight: 600;
   padding: 4px 16px;
   border-radius: var(--pill);
   border: 2px solid var(--ink);
@@ -2406,7 +2406,7 @@ footer {
 
 .ai-mode-chip {
   font-size: .68rem;
-  font-weight: 900;
+  font-weight: 600;
   padding: 3px 11px;
   border-radius: var(--pill);
   border: 2px solid var(--ink);
@@ -2422,7 +2422,7 @@ footer {
 
 .ai-score-bar-label {
   font-size: .72rem;
-  font-weight: 800;
+  font-weight: 500;
   color: var(--text-muted);
   display: flex;
   justify-content: space-between;
@@ -2514,7 +2514,7 @@ footer {
   background: var(--yellow-soft);
   color: var(--ink);
   font-size: .78rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .6px;
 }
@@ -2573,7 +2573,7 @@ footer {
   align-items: center;
   gap: 5px;
   font-size: .72rem;
-  font-weight: 900;
+  font-weight: 600;
   padding: 4px 12px;
   border-radius: var(--pill);
   border: 2px solid var(--ink);
@@ -2601,7 +2601,7 @@ footer {
 
 .ai-bug-problem-text {
   font-size: .9rem;
-  font-weight: 800;
+  font-weight: 500;
   color: var(--ink);
   line-height: 1.5;
 }
@@ -2660,7 +2660,7 @@ footer {
 
 .ai-code-label-tag {
   font-size: .68rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .5px;
   padding: 7px 12px;
@@ -2723,7 +2723,7 @@ footer {
   background: var(--blue-soft);
   border-bottom: 2px solid var(--ink);
   font-size: .72rem;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .5px;
   color: var(--ink);
@@ -2801,7 +2801,7 @@ footer {
   align-items: center;
   justify-content: center;
   font-size: .7rem;
-  font-weight: 900;
+  font-weight: 600;
   background: var(--blue);
   color: #fff;
   border: 2px solid var(--ink);
@@ -2865,7 +2865,7 @@ footer {
   border: 2px solid transparent;
   border-radius: var(--pill);
   font-size: .78rem;
-  font-weight: 800;
+  font-weight: 500;
   cursor: pointer;
   background: transparent;
   color: var(--text-secondary);
