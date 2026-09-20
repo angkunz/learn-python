@@ -604,9 +604,10 @@ function getAutoFeedback(exerciseDesc, userCode, runOutput, solution, hint, star
 
         // Match: how many solution key statements appear (loosely) in code?
         const matchedStmts = solKeyStmts.filter(stmt => {
-          const stmtNorm = stmt.replace(/\s+/g, ' ').replace(/['"]/g, '');
+          // Normalize by emptying parentheses so different arguments match structurally
+          const stmtNorm = stmt.replace(/\(.*?\)/g, '()').replace(/\s+/g, ' ').replace(/['"]/g, '');
           return codeKeyStmts.some(cl => {
-            const clNorm = cl.replace(/\s+/g, ' ').replace(/['"]/g, '');
+            const clNorm = cl.replace(/\(.*?\)/g, '()').replace(/\s+/g, ' ').replace(/['"]/g, '');
             // Exact or substring match
             return clNorm === stmtNorm || clNorm.includes(stmtNorm) || stmtNorm.includes(clNorm);
           });
