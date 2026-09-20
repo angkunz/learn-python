@@ -34,9 +34,13 @@
   </div>
   <div class="nav-actions">
     <span id="nav-xp" style="font-size:0.85rem;font-weight:700;color:var(--purple-light);">⭐ 0 XP</span>
-    <button class="theme-toggle" id="theme-btn" aria-label="Toggle dark mode" title="สลับโหมดมืด/สว่าง">
-      <span class="icon-moon">🌙</span><span class="icon-sun">☀️</span>
-    </button>
+    <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
+      <input type="checkbox" class="theme-switch-cb">
+      <span class="theme-switch-slider">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+      </span>
+    </label>
     <button class="nav-btn" onclick="startLearning()">เริ่มเรียน →</button>
   </div>
 </nav>
@@ -168,7 +172,7 @@
 </footer>
 
 <script src="js/lessons-data.js?v=3"></script>
-<script src="js/app.js?v=3"></script>
+<script src="js/app.js?v=4"></script>
 <script>
 // ── Initialize Page ──
 document.addEventListener('DOMContentLoaded', () => {

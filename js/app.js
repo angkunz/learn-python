@@ -164,17 +164,25 @@ function createInputDialog(promptText) {
 
 // ── Theme Toggle System ──
 document.addEventListener('DOMContentLoaded', () => {
-  const themeBtns = document.querySelectorAll('.theme-toggle');
-  themeBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
+  const themeCheckboxes = document.querySelectorAll('.theme-switch-cb');
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  
+  themeCheckboxes.forEach(cb => {
+    cb.checked = currentTheme === 'dark';
+    cb.addEventListener('change', (e) => {
       document.body.classList.add('theme-transition');
+      const isDark = e.target.checked;
       
-      if (document.documentElement.getAttribute('data-theme') === 'dark') {
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('theme', 'light');
-      } else {
+      themeCheckboxes.forEach(otherCb => {
+        if(otherCb !== cb) otherCb.checked = isDark;
+      });
+      
+      if (isDark) {
         document.documentElement.setAttribute('data-theme', 'dark');
         localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
       }
       
       setTimeout(() => {

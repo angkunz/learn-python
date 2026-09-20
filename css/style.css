@@ -3027,3 +3027,167 @@ footer {
   outline-offset: 3px;
   border-radius: 6px;
 }
+
+/* ================================================
+   THEME SYSTEM — Bright (default) ↔ Dark
+   ================================================ */
+
+html { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+
+/* ── Dark Tokens ── */
+[data-theme="dark"] {
+  --bg-primary:   #0E1015;
+  --bg-secondary: #191D27;
+  --bg-card:      #232936;
+  --bg-card-hover:#2B3241;
+  --surface:      #232936;   /* ใช้แทน #fff ที่ hard-code ไว้ */
+  --surface-2:    #1B202B;
+  --glass:        #232936;
+
+  /* ขอบ + เงา ยังเป็นดำสนิท เพราะการ์ดสว่างกว่าพื้นหลัง → outline ยังชัด */
+  --ink: #04060B;
+
+  --orange:      #FF7F5C;
+  --orange-soft: rgba(255,127,92,.16);
+  --yellow:      #FFC93C;
+  --yellow-soft: rgba(255,201,60,.15);
+  --blue:        #5FC0F0;
+  --blue-soft:   rgba(95,192,240,.15);
+  --green:       #34D778;
+  --green-soft:  rgba(52,215,120,.16);
+  --red:         #FF6B6B;
+  --red-soft:    rgba(255,107,107,.15);
+
+  --text-primary:   #EDF0F6;
+  --text-secondary: #A9B1C2;
+  --text-muted:     #717C90;
+
+  --code-bg:  #0A0C12;
+  --code-bar: #141926;
+  --code-out: #080A10;
+}
+
+/* ── A. พื้นผิวที่เดิม hard-code เป็น #fff ── */
+[data-theme="dark"] :is(
+  .navbar, .hero-stats, .grade-btn, .level-card, .feature-card, .meta-strip,
+  footer, .sidebar, .theory-content, .exercise-card, .modal, .input-dialog,
+  .ai-score-hero, .ai-score-row, .ai-card, .ai-bug-item, .ai-improv-item,
+  .type-card, .operator-grid, .comparison-box div, .ex-tab, .btn-secondary,
+  .btn-reset, .btn-lesson-nav, .modal-btn-cancel, .sidebar-search input,
+  .modal-input, .input-dialog-field, .ai-icon, .ai-mode-chip, .ai-bug-loc,
+  .ai-bug-sev-chip, .sidebar-lesson-check, .check-mode-toggle,
+  .progress-bar-bg, .ai-score-bar-track, .pyodide-progress, .tray > .tray-inner
+) {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+[data-theme="dark"] :is(.navbar, .sidebar, footer) { background: var(--surface-2); }
+
+/* ── B. พื้น soft-tint → ต้องใช้ตัวหนังสือสว่าง ── */
+[data-theme="dark"] :is(
+  .hero-badge, .section-tag, .level-card-tag, .lesson-level-badge,
+  .difficulty-badge, .info-box, .warning-box, .ai-card-header, .ai-summary-body,
+  .ai-strength-item, .ai-missing-item, .ai-improv-top, .ai-bug-top,
+  .ai-bug-explain, .hint-toast, .hint-toast-title, .type-card span
+) { color: var(--text-primary); }
+
+[data-theme="dark"] :is(
+  .sidebar-lesson:hover, .btn-secondary:hover, .btn-lesson-nav:hover,
+  .grade-btn:hover, .ex-tab:hover, .mode-btn:hover, .sidebar-level-header:hover
+) { color: var(--text-primary); }
+
+/* ── C. องค์ประกอบพื้นสีสด → ตัวหนังสือต้องดำเสมอ ── */
+[data-theme="dark"] :is(
+  .ex-tab.active, .grade-btn.active, .sidebar-lesson.active,
+  .ai-grade-pill, .mode-btn-auto.active, .lesson-icon-big, .level-card-icon
+) { color: var(--ink); }
+
+/* ── D. จุดปลีกย่อย ── */
+[data-theme="dark"] .theory-content code { color: var(--yellow); background: var(--yellow-soft); }
+[data-theme="dark"] .theory-content h2 { color: var(--text-primary); -webkit-text-fill-color: var(--text-primary); }
+[data-theme="dark"] .ai-score-ring-bg { stroke: rgba(255,255,255,.12); }
+[data-theme="dark"] .ai-score-ring-num { color: var(--text-primary); }
+[data-theme="dark"] .modal-backdrop,
+[data-theme="dark"] .input-dialog-overlay { background: rgba(0,0,0,.7); }
+[data-theme="dark"] .section-divider { border-top-color: rgba(255,255,255,.2); }
+[data-theme="dark"] .lesson-nav-btns { border-top-color: rgba(255,255,255,.15); }
+[data-theme="dark"] .ai-action-step { border-bottom-color: rgba(255,255,255,.08); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { border-color: var(--bg-primary); }
+[data-theme="dark"] .bg-orb { opacity: .5; filter: blur(30px); }
+
+/* ── ปุ่มสลับธีมแบบ Toggle Switch (Pill) ── */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 64px;
+  height: 34px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.theme-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--blue-soft);
+  border: var(--bw) solid var(--ink);
+  border-radius: 34px;
+  transition: .3s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7px;
+  box-shadow: var(--shadow-sm);
+}
+.theme-switch-slider .icon-sun, 
+.theme-switch-slider .icon-moon {
+  font-size: 13px;
+  z-index: 1;
+  user-select: none;
+}
+.theme-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 2px;
+  bottom: 2.5px;
+  background-color: #fff;
+  border: var(--bw) solid var(--ink);
+  border-radius: 50%;
+  transition: .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 2;
+}
+
+[data-theme="dark"] .theme-switch-slider {
+  background-color: var(--surface-2);
+}
+
+[data-theme="dark"] .theme-switch-slider:before {
+  transform: translateX(30px);
+  background-color: var(--blue);
+}
+
+.theme-switch:hover .theme-switch-slider {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow);
+}
+.theme-switch:active .theme-switch-slider {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+
+/* ── ทรานซิชันตอนสลับ (เปิดเฉพาะตอนกด) ── */
+.theme-transition, .theme-transition *,
+.theme-transition *::before, .theme-transition *::after {
+  transition: background-color .3s ease, border-color .3s ease,
+              color .3s ease, box-shadow .3s ease, fill .3s ease, stroke .3s ease !important;
+}

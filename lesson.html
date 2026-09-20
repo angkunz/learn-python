@@ -37,9 +37,13 @@
   <div class="nav-actions">
     <a href="playground.html" style="color:var(--text-secondary);text-decoration:none;font-size:0.85rem;font-weight:600;"> Playground </a>
     <span id="nav-xp" style="font-size:0.85rem;font-weight:700;color:var(--purple-light);">⭐ 0 XP</span>
-    <button class="theme-toggle" id="theme-btn" aria-label="Toggle dark mode" title="สลับโหมดมืด/สว่าง">
-      <span class="icon-moon">🌙</span><span class="icon-sun">☀️</span>
-    </button>
+    <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
+      <input type="checkbox" class="theme-switch-cb">
+      <span class="theme-switch-slider">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+      </span>
+    </label>
     <button class="nav-btn" onclick="showApiKeyModal(null)" title="ตั้งค่า AI Key">⚙️ API Key</button>
   </div>
 </nav>
@@ -80,7 +84,7 @@
 
 
 <script src="js/lessons-data.js?v=3"></script>
-<script src="js/app.js?v=3"></script>
+<script src="js/app.js?v=4"></script>
 <script src="js/editor.js?v=3"></script>
 <script src="js/ai-feedback.js?v=3"></script>
 <script>
