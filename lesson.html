@@ -333,11 +333,11 @@ function renderExerciseCard(lesson, idx, containerId) {
         <div style="display:flex;align-items:center;gap:8px;">
           <!-- Mode Toggle -->
           <div class="check-mode-toggle" id="mode-toggle-${ex.id}" title="เลือกโหมดตรวจโค้ด">
-            <button class="mode-btn mode-btn-ai active" id="mode-ai-${ex.id}"
+            <button class="mode-btn mode-btn-ai" id="mode-ai-${ex.id}"
               onclick="setExerciseMode('${ex.id}', 'ai')">
               🤖 AI
             </button>
-            <button class="mode-btn mode-btn-auto" id="mode-auto-${ex.id}"
+            <button class="mode-btn mode-btn-auto active" id="mode-auto-${ex.id}"
               onclick="setExerciseMode('${ex.id}', 'auto')">
               ⚡ Auto
             </button>
@@ -365,7 +365,7 @@ function renderExerciseCard(lesson, idx, containerId) {
 
   // Sync toggle state with stored preference
   const savedMode = getCheckMode();
-  if (savedMode === 'auto') setExerciseMode(ex.id, 'auto');
+  setExerciseMode(ex.id, savedMode);
 }
 
 // ── Run Code ──

@@ -4,7 +4,7 @@
 
 // ── Check Mode Storage ──
 const CHECK_MODE_KEY = 'python_check_mode'; // 'ai' | 'auto'
-function getCheckMode() { return localStorage.getItem(CHECK_MODE_KEY) || 'ai'; }
+function getCheckMode() { return localStorage.getItem(CHECK_MODE_KEY) || 'auto'; }
 function setCheckMode(mode) { localStorage.setItem(CHECK_MODE_KEY, mode); }
 
 const AI_STORAGE_KEY = 'python_ai_api_key';
@@ -620,7 +620,11 @@ function getAutoFeedback(exerciseDesc, userCode, runOutput, solution, hint, star
 
         if (!hasError && hasOutput && !starterUnchanged) {
           // High confidence: code structure closely matches solution
-          if (structSimilarity >= 0.7 && keywordSimilarity >= 0.7) {
+          if (structSimilarity >= 0.8 && keywordSimilarity >= 0.8) {
+            base.score = Math.max(base.score, 100);
+            base.summary = 'ยอดเยี่ยมมาก! โค้ดทำงานได้ถูกต้องสมบูรณ์ ครบทุกองค์ประกอบ';
+            extraStrengths.push('โค้ดมีโครงสร้างถูกต้องครบถ้วนตรงตามโจทย์');
+          } else if (structSimilarity >= 0.7 && keywordSimilarity >= 0.7) {
             base.score = Math.max(base.score, 95);
             base.summary = 'ยอดเยี่ยมมาก! โค้ดทำงานได้ถูกต้องสมบูรณ์';
             extraStrengths.push('โค้ดมีโครงสร้างถูกต้องตรงตามโจทย์');
@@ -637,8 +641,8 @@ function getAutoFeedback(exerciseDesc, userCode, runOutput, solution, hint, star
           // Student just ran starter code without changes
           if (structSimilarity >= 0.8) {
             // Starter IS the solution (many intermediate/advanced exercises)
-            base.score = Math.max(base.score, 90);
-            base.summary = 'โค้ดทำงานได้ถูกต้อง! ลองอ่านทำความเข้าใจแต่ละบรรทัดด้วยนะ';
+            base.score = Math.max(base.score, 100);
+            base.summary = 'โค้ดทำงานได้ถูกต้องสมบูรณ์! ลองอ่านทำความเข้าใจแต่ละบรรทัดด้วยนะ';
           } else {
             base.score = Math.max(base.score, 50);
             base.summary = 'โค้ดรันได้ แต่ยังไม่ได้แก้ไขตามโจทย์';
