@@ -187,6 +187,13 @@ async function showApiKeyModal(onSave) {
       return;
     }
 
+    if (!key.startsWith('AIza')) {
+      input.style.borderColor = 'var(--red)';
+      errorMsg.textContent = '❌ คีย์ไม่ถูกต้อง (API Key ของ Google Gemini ต้องขึ้นต้นด้วย "AIza")';
+      errorMsg.style.display = 'block';
+      return;
+    }
+
     // UI Loading state
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<div class="spinner" style="width:14px;height:14px;margin:0;display:inline-block;vertical-align:middle;"></div> กำลังตรวจสอบ...';
@@ -211,6 +218,7 @@ async function showApiKeyModal(onSave) {
       saveBtn.disabled = false;
       saveBtn.innerHTML = '💾 บันทึก';
       input.style.borderColor = 'var(--red)';
+      errorMsg.textContent = '❌ คีย์ไม่ถูกต้อง หรือใช้งานไม่ได้ กรุณาตรวจสอบอีกครั้ง';
       errorMsg.style.display = 'block';
     }
   };
@@ -345,7 +353,7 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
 
     if (!response.ok) {
       const body = await response.text().catch(() => '');
-      if (response.status === 400 || response.status === 403) {
+      if (response.status === 400 || response.status === 403 || response.status === 404) {
         clearApiKey();
         throw new Error('API Key ไม่ถูกต้อง กรุณาตั้งค่าใหม่');
       }
@@ -392,8 +400,8 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
 
   } catch (e) {
     if (e.message.includes('API Key')) throw e;
-    // Fallback to next model on rate limit (429) or unavailability (404/503)
-    if (e.message === 'API_RATE_LIMIT' || e.message.includes('404') || e.message.includes('503')) {
+    
+    if (e.message === 'API_RATE_LIMIT' || e.message.includes('503')) {
       if (modelIndex + 1 < AI_MODELS.length) {
         const nextModel = AI_MODELS[modelIndex + 1];
         console.log(`[AI Debug] Model ${AI_MODELS[modelIndex]} failed, switching to ${nextModel}...`);
