@@ -330,11 +330,14 @@ body {
   background: var(--yellow);
   color: var(--ink);
   -webkit-text-fill-color: var(--ink);
-  padding: 0 12px;
+  padding: 2px 18px;
   border-radius: 14px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   box-shadow: 4px 4px 0 var(--ink);
+  display: inline-block;
+  line-height: 1.1;
+  margin: 4px 0;
 }
 
 .hero-subtitle {
