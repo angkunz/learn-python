@@ -2214,38 +2214,83 @@ footer {
   bottom: 24px;
   right: 24px;
   z-index: 1000;
-  max-width: 360px;
+  max-width: 380px;
+  width: calc(100% - 48px);
   padding: 16px 20px;
   border-radius: var(--radius-lg);
   background: var(--yellow-soft);
   border: var(--bw) solid var(--ink);
   box-shadow: var(--shadow);
   animation: slideInRight .3s ease;
+  font-family: 'Mitr', sans-serif;
+}
+
+[data-theme="dark"] .hint-toast {
+  background: #232014;
+  border-color: #eab308;
+  color: #fef08a;
+}
+
+.hint-toast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .hint-toast-title {
-  font-size: .85rem;
-  font-weight: 600;
+  font-size: .88rem;
+  font-weight: 700;
   color: var(--ink);
-  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme="dark"] .hint-toast-title {
+  color: #fef08a;
+}
+
+.hint-toast-close {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--ink);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.hint-toast-close:hover {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .hint-toast-text {
   font-size: .9rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink);
   line-height: 1.55;
+}
+
+[data-theme="dark"] .hint-toast-text {
+  color: #fef9c3;
 }
 
 @keyframes slideInRight {
   from {
     transform: translateX(100px);
-    opacity: 0
+    opacity: 0;
   }
 
   to {
     transform: translateX(0);
-    opacity: 1
+    opacity: 1;
   }
 }
 
@@ -3759,4 +3804,419 @@ html {
 [data-theme="dark"] .nav-xp-badge {
   background: var(--yellow);
   color: var(--ink);
+}
+
+/* ============================================================
+   PyLearn Modern Toast & Notification System (Neo-Brutalist)
+   ============================================================ */
+
+.pylearn-toast-container {
+  position: fixed;
+  top: 84px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+  max-width: 420px;
+  width: calc(100% - 48px);
+}
+
+.pylearn-toast {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px 16px 14px;
+  background: var(--surface, #ffffff);
+  border: 2.5px solid var(--ink, #16161a);
+  border-radius: 18px;
+  box-shadow: 4px 4px 0 var(--ink, #16161a);
+  overflow: hidden;
+  font-family: 'Mitr', -apple-system, BlinkMacSystemFont, sans-serif;
+  animation: pylearnToastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pylearn-toast:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink, #16161a);
+}
+
+.pylearn-toast.pylearn-toast-hiding {
+  animation: pylearnToastOut 0.28s ease forwards;
+}
+
+/* Left accent stripe */
+.pylearn-toast-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 6px;
+}
+.pylearn-toast-accent-success { background: var(--green, #22c55e); }
+.pylearn-toast-accent-error   { background: var(--red, #ef4444); }
+.pylearn-toast-accent-warning { background: var(--orange, #f97316); }
+.pylearn-toast-accent-info    { background: var(--blue, #3b82f6); }
+
+/* Icon badge */
+.pylearn-toast-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 2px solid var(--ink, #16161a);
+  box-shadow: 2px 2px 0 var(--ink, #16161a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.pylearn-toast-icon-success { background: #dcfce7; }
+.pylearn-toast-icon-error   { background: #fee2e2; }
+.pylearn-toast-icon-warning { background: #fef3c7; }
+.pylearn-toast-icon-info    { background: #e0e7ff; }
+
+/* Toast content */
+.pylearn-toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pylearn-toast-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.pylearn-toast-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 7px;
+  border-radius: var(--pill, 100px);
+  border: 1.5px solid var(--ink, #16161a);
+}
+.pylearn-toast-tag-success { background: #bbf7d0; color: #166534; }
+.pylearn-toast-tag-error   { background: #fecaca; color: #991b1b; }
+.pylearn-toast-tag-warning { background: #fde68a; color: #92400e; }
+.pylearn-toast-tag-info    { background: #c7d2fe; color: #3730a3; }
+
+.pylearn-toast-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.pylearn-toast-message {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+/* Close button */
+.pylearn-toast-close {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  padding: 0;
+  margin: -2px -2px 0 0;
+}
+.pylearn-toast-close:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* Progress bar */
+.pylearn-toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: rgba(0, 0, 0, 0.06);
+}
+.pylearn-toast-progress-bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+}
+.pylearn-toast-bar-success { background: var(--green, #22c55e); }
+.pylearn-toast-bar-error   { background: var(--red, #ef4444); }
+.pylearn-toast-bar-warning { background: var(--orange, #f97316); }
+.pylearn-toast-bar-info    { background: var(--blue, #3b82f6); }
+
+/* Dark mode toast adjustments */
+[data-theme="dark"] .pylearn-toast {
+  background: #181b26;
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+}
+[data-theme="dark"] .pylearn-toast:hover {
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.8);
+}
+[data-theme="dark"] .pylearn-toast-icon-wrap {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+[data-theme="dark"] .pylearn-toast-icon-success { background: #064e3b; }
+[data-theme="dark"] .pylearn-toast-icon-error   { background: #7f1d1d; }
+[data-theme="dark"] .pylearn-toast-icon-warning { background: #78350f; }
+[data-theme="dark"] .pylearn-toast-icon-info    { background: #1e1b4b; }
+[data-theme="dark"] .pylearn-toast-tag-success { background: #064e3b; color: #a7f3d0; border-color: rgba(255,255,255,0.2); }
+[data-theme="dark"] .pylearn-toast-tag-error   { background: #7f1d1d; color: #fecaca; border-color: rgba(255,255,255,0.2); }
+[data-theme="dark"] .pylearn-toast-tag-warning { background: #78350f; color: #fde68a; border-color: rgba(255,255,255,0.2); }
+[data-theme="dark"] .pylearn-toast-tag-info    { background: #1e1b4b; color: #c7d2fe; border-color: rgba(255,255,255,0.2); }
+[data-theme="dark"] .pylearn-toast-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Animations */
+@keyframes pylearnToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pylearnToastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 120px;
+    margin-bottom: 0;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.9);
+    max-height: 0;
+    margin-bottom: -12px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* Mobile Toast positioning */
+@media (max-width: 768px) {
+  .pylearn-toast-container {
+    top: 68px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    align-items: stretch;
+  }
+  .pylearn-toast {
+    padding: 12px 14px 14px 12px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+}
+
+/* ============================================================
+   PyLearn Dialog Modal System (pylearnAlert & pylearnConfirm)
+   ============================================================ */
+
+.pylearn-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: pylearnFadeIn 0.2s ease-out;
+}
+
+.pylearn-dialog-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface, #ffffff);
+  border: 3px solid var(--ink, #16161a);
+  border-radius: 24px;
+  box-shadow: 6px 6px 0 var(--ink, #16161a);
+  padding: 28px 24px;
+  text-align: center;
+  animation: pylearnPopIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-family: 'Mitr', -apple-system, sans-serif;
+}
+
+[data-theme="dark"] .pylearn-dialog-card {
+  background: #181b26;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.7);
+}
+
+.pylearn-dialog-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ink, #16161a);
+  box-shadow: 3px 3px 0 var(--ink, #16161a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 16px;
+  animation: pylearnBounce 0.5s ease;
+}
+
+.pylearn-dialog-icon-info    { background: var(--blue-soft, #e0e7ff); }
+.pylearn-dialog-icon-success { background: #dcfce7; }
+.pylearn-dialog-icon-warning { background: var(--yellow-soft, #fef3c7); }
+.pylearn-dialog-icon-danger  { background: #fee2e2; }
+
+.pylearn-dialog-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.pylearn-dialog-message {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  white-space: pre-line;
+}
+
+.pylearn-dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.pylearn-dialog-btn {
+  flex: 1;
+  padding: 11px 20px;
+  border-radius: var(--pill, 100px);
+  border: 2px solid var(--ink, #16161a);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 2.5px 2.5px 0 var(--ink, #16161a);
+  transition: all 0.15s ease;
+}
+
+.pylearn-dialog-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--ink, #16161a);
+}
+
+.pylearn-dialog-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink, #16161a);
+}
+
+.pylearn-dialog-btn-cancel {
+  background: var(--surface, #ffffff);
+  color: var(--text-primary);
+}
+
+.pylearn-dialog-btn-primary {
+  background: var(--orange, #f97316);
+  color: #ffffff;
+}
+
+.pylearn-dialog-btn-danger {
+  background: var(--red, #ef4444);
+  color: #ffffff;
+}
+
+.pylearn-dialog-btn-success {
+  background: var(--green, #22c55e);
+  color: #ffffff;
+}
+
+/* ============================================================
+   In-Page Alert Boxes (.error-box, .alert-box, .success-box)
+   ============================================================ */
+
+.error-box,
+.alert-box {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 2px solid #ef4444;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 3px 3px 0 #ef4444;
+  margin-top: 16px;
+  animation: pylearnShake 0.35s ease;
+  text-align: left;
+}
+
+[data-theme="dark"] .error-box,
+[data-theme="dark"] .alert-box {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border-color: #ef4444;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+}
+
+.error-box::before,
+.alert-box.alert-error::before {
+  content: '⚠️';
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+@keyframes pylearnShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pylearnFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pylearnPopIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pylearnBounce {
+  0% { transform: scale(0.5); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
 }

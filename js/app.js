@@ -109,27 +109,217 @@ function celebrate() {
 }
 
 // ── Toast Notification ──
-function showToast(message, type = 'info', duration = 3000) {
-  const existing = document.querySelector('.toast-notif');
-  if (existing) existing.remove();
+function showToast(message, type = 'info', duration = 3500, title = null) {
+  let container = document.getElementById('pylearn-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'pylearn-toast-container';
+    container.className = 'pylearn-toast-container';
+    document.body.appendChild(container);
+  }
 
-  const colors = { success: 'var(--green)', error: 'var(--red)', info: 'var(--purple-light)', warning: 'var(--orange)' };
-  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  // Keep at most 3 simultaneous toasts to avoid clutter
+  while (container.children.length >= 3) {
+    container.firstElementChild.remove();
+  }
+
+  const typeConfig = {
+    success: { icon: '✨', tag: 'สำเร็จ', defaultTitle: 'เยี่ยมมาก!' },
+    error:   { icon: '🚨', tag: 'ข้อผิดพลาด', defaultTitle: 'เกิดข้อผิดพลาด' },
+    warning: { icon: '⚠️', tag: 'คำเตือน', defaultTitle: 'ข้อควรระวัง' },
+    info:    { icon: '💡', tag: 'แจ้งเตือน', defaultTitle: 'ข้อมูล' }
+  };
+  const cfg = typeConfig[type] || typeConfig.info;
 
   const toast = document.createElement('div');
-  toast.className = 'toast-notif';
-  toast.style.cssText = `
-    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:999;
-    padding:12px 24px;border-radius:100px;
-    background:rgba(8,11,20,0.95);backdrop-filter:blur(20px);
-    border:1px solid ${colors[type]};color:#ffffff;
-    font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:8px;
-    animation:fadeInUp 0.3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  toast.className = `pylearn-toast toast-notif pylearn-toast-${type}`;
+
+  const headerTitle = title || cfg.defaultTitle;
+
+  toast.innerHTML = `
+    <div class="pylearn-toast-accent pylearn-toast-accent-${type}"></div>
+    <div class="pylearn-toast-icon-wrap pylearn-toast-icon-${type}">
+      ${cfg.icon}
+    </div>
+    <div class="pylearn-toast-content">
+      <div class="pylearn-toast-header">
+        <span class="pylearn-toast-tag pylearn-toast-tag-${type}">${cfg.tag}</span>
+        <span class="pylearn-toast-title">${escapeHtml(headerTitle)}</span>
+      </div>
+      <div class="pylearn-toast-message">${escapeHtml(message)}</div>
+    </div>
+    <button class="pylearn-toast-close" title="ปิดการแจ้งเตือน" aria-label="Close">✕</button>
+    <div class="pylearn-toast-progress">
+      <div class="pylearn-toast-progress-bar pylearn-toast-bar-${type}"></div>
+    </div>
   `;
-  toast.textContent = `${icons[type]} ${message}`;
-  document.body.appendChild(toast);
-  setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.3s'; setTimeout(()=>toast.remove(),300); }, duration);
+
+  const closeBtn = toast.querySelector('.pylearn-toast-close');
+  const progressBar = toast.querySelector('.pylearn-toast-progress-bar');
+
+  let isDismissed = false;
+  let timer = null;
+
+  const dismiss = () => {
+    if (isDismissed) return;
+    isDismissed = true;
+    if (timer) clearTimeout(timer);
+    toast.classList.add('pylearn-toast-hiding');
+    setTimeout(() => toast.remove(), 280);
+  };
+
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dismiss();
+  });
+
+  // Progress bar countdown
+  if (progressBar) {
+    progressBar.style.transition = `width ${duration}ms linear`;
+    requestAnimationFrame(() => {
+      progressBar.style.width = '0%';
+    });
+  }
+
+  timer = setTimeout(dismiss, duration);
+
+  // Pause on hover
+  toast.addEventListener('mouseenter', () => {
+    if (timer) clearTimeout(timer);
+    if (progressBar) {
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '100%';
+    }
+  });
+
+  toast.addEventListener('mouseleave', () => {
+    timer = setTimeout(dismiss, 1500);
+    if (progressBar) {
+      progressBar.style.transition = 'width 1500ms linear';
+      requestAnimationFrame(() => {
+        progressBar.style.width = '0%';
+      });
+    }
+  });
+
+  container.appendChild(toast);
+  return toast;
 }
+
+// ── PyLearn Modern Dialog System (Alert & Confirm Modals) ──
+window.pylearnAlert = function(message, title = 'แจ้งเตือน', type = 'info') {
+  return new Promise((resolve) => {
+    const existing = document.getElementById('pylearn-dialog-overlay');
+    if (existing) existing.remove();
+
+    const icons = {
+      info: '💡',
+      success: '🎉',
+      warning: '⚠️',
+      danger: '🚨'
+    };
+    const icon = icons[type] || '💡';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'pylearn-dialog-overlay';
+    overlay.className = 'pylearn-dialog-overlay';
+    overlay.innerHTML = `
+      <div class="pylearn-dialog-card">
+        <div class="pylearn-dialog-icon pylearn-dialog-icon-${type}">
+          ${icon}
+        </div>
+        <div class="pylearn-dialog-title">${escapeHtml(title)}</div>
+        <div class="pylearn-dialog-message">${escapeHtml(message)}</div>
+        <div class="pylearn-dialog-actions">
+          <button class="pylearn-dialog-btn pylearn-dialog-btn-primary" id="pylearn-dialog-ok">
+            เข้าใจแล้ว ✓
+          </button>
+        </div>
+      </div>
+    `;
+
+    const close = () => {
+      overlay.remove();
+      document.removeEventListener('keydown', onKey);
+      resolve();
+    };
+
+    const onKey = (e) => {
+      if (e.key === 'Escape' || e.key === 'Enter') close();
+    };
+
+    overlay.querySelector('#pylearn-dialog-ok').onclick = close;
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) close();
+    });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+    overlay.querySelector('#pylearn-dialog-ok').focus();
+  });
+};
+
+window.pylearnConfirm = function(message, title = 'ยืนยันการทำรายการ', options = {}) {
+  return new Promise((resolve) => {
+    const existing = document.getElementById('pylearn-dialog-overlay');
+    if (existing) existing.remove();
+
+    const {
+      type = 'warning',
+      confirmText = 'ยืนยัน',
+      cancelText = 'ยกเลิก',
+      confirmBtnClass = 'pylearn-dialog-btn-primary'
+    } = options;
+
+    const icons = {
+      warning: '⚠️',
+      danger: '🗑️',
+      info: '❓',
+      success: '✨'
+    };
+    const icon = icons[type] || '⚠️';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'pylearn-dialog-overlay';
+    overlay.className = 'pylearn-dialog-overlay';
+    overlay.innerHTML = `
+      <div class="pylearn-dialog-card">
+        <div class="pylearn-dialog-icon pylearn-dialog-icon-${type}">
+          ${icon}
+        </div>
+        <div class="pylearn-dialog-title">${escapeHtml(title)}</div>
+        <div class="pylearn-dialog-message">${escapeHtml(message)}</div>
+        <div class="pylearn-dialog-actions">
+          <button class="pylearn-dialog-btn pylearn-dialog-btn-cancel" id="pylearn-dialog-cancel">
+            ${escapeHtml(cancelText)}
+          </button>
+          <button class="pylearn-dialog-btn ${confirmBtnClass || 'pylearn-dialog-btn-primary'}" id="pylearn-dialog-confirm">
+            ${escapeHtml(confirmText)}
+          </button>
+        </div>
+      </div>
+    `;
+
+    const finish = (result) => {
+      overlay.remove();
+      document.removeEventListener('keydown', onKey);
+      resolve(result);
+    };
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') finish(false);
+      else if (e.key === 'Enter') finish(true);
+    };
+
+    overlay.querySelector('#pylearn-dialog-confirm').onclick = () => finish(true);
+    overlay.querySelector('#pylearn-dialog-cancel').onclick = () => finish(false);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) finish(false);
+    });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+    overlay.querySelector('#pylearn-dialog-confirm').focus();
+  });
+};
 
 // ── Input Dialog for Python input() ──
 function createInputDialog(promptText) {

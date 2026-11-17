@@ -271,7 +271,8 @@ greet("Python Developer")
 
   async function installLibrary() {
     if (!window.pyodideReady) {
-      alert("ระบบกำลังโหลด Python กรุณารอซักครู่...");
+      if (typeof showToast === 'function') showToast("ระบบกำลังโหลด Python กรุณารอซักครู่...", "warning");
+      else alert("ระบบกำลังโหลด Python กรุณารอซักครู่...");
       return;
     }
     const pkg = await createInputDialog(`ใส่ชื่อ Library ที่ต้องการติดตั้ง:\n\n📦 Library ที่รองรับ: ${ALLOWED_PACKAGES.slice(0, 8).join(', ')} เป็นต้น`);
@@ -312,7 +313,8 @@ greet("Python Developer")
 
   async function runPlayground() {
     if (!window.pyodideReady) {
-      alert("ระบบกำลังโหลด Python กรุณารอซักครู่...");
+      if (typeof showToast === 'function') showToast("ระบบกำลังโหลด Python กรุณารอซักครู่...", "warning");
+      else alert("ระบบกำลังโหลด Python กรุณารอซักครู่...");
       return;
     }
     const code = editor._textarea.value;
@@ -359,14 +361,18 @@ greet("Python Developer")
     runBtn.innerHTML = '▶ Run';
   }
 
-  function resetPlaygroundCode() {
-    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างโค้ดทั้งหมด?')) {
+  async function resetPlaygroundCode() {
+    const ok = window.pylearnConfirm
+      ? await window.pylearnConfirm('คุณแน่ใจหรือไม่ว่าต้องการล้างโค้ดทั้งหมด?', 'ล้างโค้ด Playground', { type: 'danger', confirmText: 'ล้างโค้ด', confirmBtnClass: 'pylearn-dialog-btn-danger' })
+      : confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างโค้ดทั้งหมด?');
+    if (ok) {
       editor._textarea.value = DEFAULT_CODE;
       localStorage.setItem(STORAGE_KEY, DEFAULT_CODE);
       if (editor._updateLineNumbers) editor._updateLineNumbers();
       document.getElementById('output-console').textContent = 'รันโค้ดเพื่อดูผลลัพธ์...';
       document.getElementById('output-status').textContent = '';
       document.getElementById('output-console').className = 'output-content';
+      if (typeof showToast === 'function') showToast('ล้างโค้ดกลับสู่ค่าเริ่มต้นแล้ว', 'info');
     }
   }
 </script>

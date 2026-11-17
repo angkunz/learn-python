@@ -24,8 +24,11 @@ function requireAuth() {
   return true;
 }
 
-function logoutTeacher() {
-  if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+async function logoutTeacher() {
+  const ok = window.pylearnConfirm
+    ? await window.pylearnConfirm('คุณต้องการออกจากระบบครูผู้สอนหรือไม่?', 'ออกจากระบบครูผู้สอน', { type: 'warning', confirmText: 'ออกจากระบบ', cancelText: 'ยกเลิก' })
+    : confirm('คุณต้องการออกจากระบบหรือไม่?');
+  if (ok) {
     localStorage.removeItem(TEACHER_TOKEN_KEY);
     localStorage.removeItem('pylearn_teacher_profile');
     window.location.href = 'teacher-login.html';
@@ -43,7 +46,8 @@ async function teacherFetch(url, options = {}) {
 
   const res = await fetch(url, { ...options, headers });
   if (res.status === 401) {
-    alert('Session หมดอายุ กรุณาเข้าสู่ระบบใหม่');
+    if (window.pylearnAlert) await window.pylearnAlert('Session หมดอายุ กรุณาเข้าสู่ระบบใหม่', 'เซสชันหมดอายุ', 'warning');
+    else alert('Session หมดอายุ กรุณาเข้าสู่ระบบใหม่');
     localStorage.removeItem(TEACHER_TOKEN_KEY);
     window.location.href = 'teacher-login.html';
     throw new Error('Unauthorized');
@@ -506,7 +510,8 @@ async function promptResetStudentPassword(studentId, studentName) {
   const newPass = prompt(`กรุณากรอกรหัสผ่านใหม่สำหรับนักเรียน "${studentName}" (อย่างน้อย 4 ตัวอักษร):`, '1234');
   if (!newPass) return;
   if (newPass.length < 4) {
-    alert('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร');
+    if (window.showToast) window.showToast('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร', 'warning');
+    else alert('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร');
     return;
   }
 
@@ -520,7 +525,8 @@ async function promptResetStudentPassword(studentId, studentName) {
     if (window.showToast) window.showToast(`รีเซ็ตรหัสผ่านของ ${studentName} เรียบร้อยแล้ว! รหัสใหม่คือ: ${newPass}`, 'success');
     else alert(`รีเซ็ตรหัสผ่านของ ${studentName} เรียบร้อยแล้ว! รหัสใหม่คือ: ${newPass}`);
   } catch (err) {
-    alert('เกิดข้อผิดพลาด: ' + err.message);
+    if (window.showToast) window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    else alert('เกิดข้อผิดพลาด: ' + err.message);
   }
 }
 
@@ -663,14 +669,19 @@ async function deleteSelectedClassroom() {
   const cls = classrooms.find(c => c.id === selectedClassroomId);
   if (!cls) return;
 
-  if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบห้องเรียน "${cls.name}"?\n(ข้อมูลนักเรียนและผลงานในห้องเรียนนี้ทั้งหมดจะถูกลบ)`)) {
+  const ok = window.pylearnConfirm
+    ? await window.pylearnConfirm(`คุณแน่ใจหรือไม่ว่าต้องการลบห้องเรียน "${cls.name}"?\n(ข้อมูลนักเรียนและผลงานในห้องเรียนนี้ทั้งหมดจะถูกลบ)`, 'ยืนยันการลบห้องเรียน', { type: 'danger', confirmText: 'ลบห้องเรียน', confirmBtnClass: 'pylearn-dialog-btn-danger' })
+    : confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบห้องเรียน "${cls.name}"?`);
+
+  if (ok) {
     try {
       const res = await teacherFetch(`/api/teacher/classrooms/${cls.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('ลบไม่สำเร็จ');
-      if (window.showToast) window.showToast('ลบห้องเรียนเรียบร้อยแล้ว', 'info');
+      if (window.showToast) window.showToast(`ลบห้องเรียน "${cls.name}" เรียบร้อยแล้ว`, 'info');
       await loadTeacherProfile();
     } catch (err) {
-      alert('เกิดข้อผิดพลาด: ' + err.message);
+      if (window.showToast) window.showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+      else alert('เกิดข้อผิดพลาด: ' + err.message);
     }
   }
 }

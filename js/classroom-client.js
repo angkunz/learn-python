@@ -312,10 +312,20 @@ const ClassroomClient = {
     this.integrateNavbar();
   },
 
-  confirmLeave() {
-    if (confirm('คุณต้องการออกจากห้องเรียนนี้หรือไม่? (ความคืบหน้าที่คุณทำไว้จะยังคงถูกบันทึกบนระบบของคุณครู)')) {
+  async confirmLeave() {
+    const ok = window.pylearnConfirm
+      ? await window.pylearnConfirm(
+          'คุณต้องการออกจากห้องเรียนนี้หรือไม่?\n(ความคืบหน้าและการส่งงานของคุณจะยังคงถูกบันทึกบนระบบของคุณครูอย่างปลอดภัย)',
+          'ออกจากห้องเรียน',
+          { type: 'warning', confirmText: 'ออกจากห้องเรียน', cancelText: 'อยู่ต่อ' }
+        )
+      : confirm('คุณต้องการออกจากห้องเรียนนี้หรือไม่? (ความคืบหน้าที่คุณทำไว้จะยังคงถูกบันทึกบนระบบของคุณครู)');
+    if (ok) {
       this.clearSession();
-      window.location.href = 'index.html';
+      if (window.showToast) window.showToast('ออกจากห้องเรียนเรียบร้อยแล้ว 👋', 'info');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 500);
     }
   }
 };
