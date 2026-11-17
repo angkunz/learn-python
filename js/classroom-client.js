@@ -1,6 +1,6 @@
 // ============================================================
 // PyLearn Classroom Client SDK
-// จัดการ Session นักเรียน, ซิงค์ความคืบหน้า และเรียกใช้ AI ผ่านครูผู้สอน
+// จัดการบัญชีนักเรียน, ซิงค์ความคืบหน้า และผสาน UI เข้ากับ Navbar หลัก
 // ============================================================
 
 const CLASSROOM_SESSION_KEY = 'pylearn_student_session';
@@ -29,12 +29,42 @@ const ClassroomClient = {
     return !!(session && session.token && session.classroom);
   },
 
-  // ── API: Join Classroom ──
-  async join(code, name, studentNumber = '') {
+  // ── API: Student Login (Existing Account) ──
+  async login(code, studentNumber, password) {
+    const res = await fetch('/api/student/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, studentNumber, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
+    }
+    this.setSession(data);
+    return data;
+  },
+
+  // ── API: Student Register (New Account) ──
+  async register(code, studentNumber, name, password) {
+    const res = await fetch('/api/student/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, studentNumber, name, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'ลงทะเบียนไม่สำเร็จ');
+    }
+    this.setSession(data);
+    return data;
+  },
+
+  // ── API: Join (Unified fallback) ──
+  async join(code, name, studentNumber = '', password = '') {
     const res = await fetch('/api/student/join', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, name, studentNumber })
+      body: JSON.stringify({ code, name, studentNumber, password })
     });
     const data = await res.json();
     if (!res.ok) {
@@ -58,7 +88,6 @@ const ClassroomClient = {
         return null;
       }
       const data = await res.json();
-      // Update session info
       session.student = data.student;
       session.classroom = data.classroom;
       this.setSession(session);
@@ -120,49 +149,109 @@ const ClassroomClient = {
     return data.feedback;
   },
 
-  // ── UI Helper: Render Classroom Header Banner ──
-  renderHeaderBanner(containerId = 'classroom-banner-container') {
+  // ── UI Integration: Seamlessly embed into Main Navbar (No Overlapping Bars) ──
+  integrateNavbar() {
+    // 1. Remove any legacy banner if exists
+    const legacy = document.getElementById('classroom-banner-container');
+    if (legacy) legacy.remove();
+
     const session = this.getSession();
-    let container = document.getElementById(containerId);
-    if (!container) {
-      container = document.createElement('div');
-      container.id = containerId;
-      document.body.prepend(container);
-    }
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+
+    // Find API Key button anywhere in navbar
+    const apiKeyBtn = navbar.querySelector('button[onclick*="showApiKeyModal"], button[title*="API Key"]');
 
     if (!session || !session.classroom) {
-      container.innerHTML = '';
+      // Standalone mode: ensure API Key button is visible
+      if (apiKeyBtn) apiKeyBtn.style.display = '';
       return;
+    }
+
+    // In Classroom Mode: HIDE the API Key button completely!
+    if (apiKeyBtn) {
+      apiKeyBtn.style.display = 'none';
     }
 
     const { student, classroom } = session;
     const studentLabel = student.studentNumber ? `เลขที่ ${student.studentNumber} : ${student.name}` : student.name;
 
-    container.innerHTML = `
-      <div style="background: linear-gradient(90deg, #1e1b4b 0%, #312e81 100%); border-bottom: 1px solid rgba(129, 140, 248, 0.3); color: #e0e7ff; padding: 6px 16px; font-size: 0.82rem; display: flex; align-items: center; justify-content: space-between; z-index: 9999; position: relative;">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <span style="background: #4f46e5; color: white; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.75rem;">🏫 ห้องเรียน ${classroom.code}</span>
-          <span style="font-weight: 600; color: #ffffff;">${classroom.name}</span>
-          <span style="color: #a5b4fc;">(ครูผู้สอน: ${classroom.teacherName})</span>
-          <span style="color: #818cf8;">|</span>
-          <span>👤 นักเรียน: <b>${studentLabel}</b></span>
-          ${classroom.hasTeacherApiKey ? '<span title="ใช้ API Key ของครูผู้สอน" style="background:rgba(34,197,94,0.2);color:#4ade80;padding:2px 8px;border-radius:6px;font-size:0.75rem;">⚡ AI พร้อมใช้งาน</span>' : '<span title="ครูยังไม่ได้ตั้งค่า API Key" style="background:rgba(239,68,68,0.2);color:#f87171;padding:2px 8px;border-radius:6px;font-size:0.75rem;">⚠️ รอครูใส่ AI Key</span>'}
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button onclick="ClassroomClient.confirmLeave()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 2px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-            ออกจากห้องเรียน
-          </button>
-        </div>
-      </div>
+    // Check if classroom pill already injected
+    let classPill = navbar.querySelector('.classroom-nav-pill');
+    if (!classPill) {
+      classPill = document.createElement('div');
+      classPill.className = 'classroom-nav-pill';
+
+      // Insert after nav-logo or in breadcrumb
+      const breadcrumb = document.getElementById('lesson-breadcrumb');
+      if (breadcrumb) {
+        breadcrumb.prepend(classPill);
+      } else {
+        const navLinks = navbar.querySelector('.nav-links');
+        if (navLinks) {
+          navLinks.prepend(classPill);
+        } else {
+          navbar.querySelector('.nav-logo')?.insertAdjacentElement('afterend', classPill);
+        }
+      }
+    }
+
+    classPill.innerHTML = `
+      <span>🏫 <b>${escapeHtml(classroom.name)}</b></span>
+      <span class="badge-code">${escapeHtml(classroom.code)}</span>
+      <span class="teacher-lbl">(ครู: ${escapeHtml(classroom.teacherName)})</span>
     `;
+
+    // Inject Student info & Leave button into nav-actions
+    const navActions = navbar.querySelector('.nav-actions');
+    if (navActions) {
+      let studentPill = navActions.querySelector('#nav-student-pill');
+      if (!studentPill) {
+        studentPill = document.createElement('div');
+        studentPill.id = 'nav-student-pill';
+        studentPill.style.display = 'flex';
+        studentPill.style.alignItems = 'center';
+        studentPill.style.gap = '8px';
+        // Prepend before theme switch
+        navActions.prepend(studentPill);
+      }
+
+      studentPill.innerHTML = `
+        <span class="student-identity-badge" title="บัญชีนักเรียน">👤 ${escapeHtml(studentLabel)}</span>
+        <span class="badge-ai-ready" title="AI ใช้โควตาของครูประจำห้องเรียน">⚡ AI โดยครู</span>
+        <button class="btn-leave-class" onclick="ClassroomClient.confirmLeave()" title="ออกจากห้องเรียน">ออกจากห้อง</button>
+      `;
+    }
+  },
+
+  // Backward compatible alias
+  renderHeaderBanner() {
+    this.integrateNavbar();
   },
 
   confirmLeave() {
-    if (confirm('คุณต้องการออกจากห้องเรียนนี้หรือไม่? (ความคืบหน้าที่บันทึกบนระบบของครูจะไม่สูญหาย)')) {
+    if (confirm('คุณต้องการออกจากห้องเรียนนี้หรือไม่? (ความคืบหน้าที่คุณทำไว้จะยังคงถูกบันทึกบนระบบของคุณครู)')) {
       this.clearSession();
-      location.href = 'index.html';
+      window.location.href = 'index.html';
     }
   }
 };
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 window.ClassroomClient = ClassroomClient;
+
+// Auto-run integration on load if DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => ClassroomClient.integrateNavbar());
+} else {
+  ClassroomClient.integrateNavbar();
+}

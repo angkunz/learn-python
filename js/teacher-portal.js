@@ -374,9 +374,14 @@ async function openStudentDiagnosticsModal(studentId) {
             สะสม <b>${student.total_xp} XP</b> | ผ่านแล้ว <b>${student.completed_lessons_count} บทเรียน</b> | ใช้งานล่าสุด: ${student.last_active || '-'}
           </div>
         </div>
-        <div style="background:rgba(99,102,241,0.15);padding:6px 14px;border-radius:10px;border:1px solid rgba(99,102,241,0.3);">
-          <span style="font-size:0.75rem;color:#818cf8;display:block;">ระดับความสามารถ</span>
-          <b style="color:var(--primary-light);font-size:0.95rem;">${diagnosis.skillLevel}</b>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="background:rgba(99,102,241,0.15);padding:6px 14px;border-radius:10px;border:1px solid rgba(99,102,241,0.3);">
+            <span style="font-size:0.75rem;color:#818cf8;display:block;">ระดับความสามารถ</span>
+            <b style="color:var(--primary-light);font-size:0.95rem;">${diagnosis.skillLevel}</b>
+          </div>
+          <button onclick="promptResetStudentPassword('${student.id}', '${escapeHtml(student.name)}')" class="btn-inspect" style="background:rgba(234,179,8,0.15);border-color:#eab308;color:#eab308;padding:8px 12px;" title="รีเซ็ตรหัสผ่านเมื่อนักเรียนลืม">
+            🔑 รีเซ็ตรหัสผ่าน
+          </button>
         </div>
       </div>
 
@@ -469,6 +474,28 @@ async function openStudentDiagnosticsModal(studentId) {
 
 function closeStudentModal() {
   document.getElementById('student-modal').style.display = 'none';
+}
+
+async function promptResetStudentPassword(studentId, studentName) {
+  const newPass = prompt(`กรุณากรอกรหัสผ่านใหม่สำหรับนักเรียน "${studentName}" (อย่างน้อย 4 ตัวอักษร):`, '1234');
+  if (!newPass) return;
+  if (newPass.length < 4) {
+    alert('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร');
+    return;
+  }
+
+  try {
+    const res = await teacherFetch(`/api/teacher/classrooms/${selectedClassroomId}/students/${studentId}/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify({ newPassword: newPass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'รีเซ็ตรหัสผ่านไม่สำเร็จ');
+    if (window.showToast) window.showToast(`รีเซ็ตรหัสผ่านของ ${studentName} เรียบร้อยแล้ว! รหัสใหม่คือ: ${newPass}`, 'success');
+    else alert(`รีเซ็ตรหัสผ่านของ ${studentName} เรียบร้อยแล้ว! รหัสใหม่คือ: ${newPass}`);
+  } catch (err) {
+    alert('เกิดข้อผิดพลาด: ' + err.message);
+  }
 }
 
 // ── Export CSV ──

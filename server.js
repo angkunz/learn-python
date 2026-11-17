@@ -649,9 +649,168 @@ app.get('/api/teacher/classrooms/:id/export-csv', authenticateTeacher, (req, res
 // 4. STUDENT CLASSROOM & LEARNING SESSION APIS
 // ============================================================
 
-// Join classroom via code
+// Teacher reset student password
+app.post('/api/teacher/classrooms/:id/students/:studentId/reset-password', authenticateTeacher, (req, res) => {
+  const { id, studentId } = req.params;
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 4) {
+    return res.status(400).json({ error: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร' });
+  }
+
+  try {
+    const cls = db.prepare('SELECT id FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    if (!cls) return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
+
+    const student = db.prepare('SELECT id FROM students WHERE id = ? AND classroom_id = ?').get(studentId, id);
+    if (!student) return res.status(404).json({ error: 'ไม่พบนักเรียนนี้' });
+
+    const { hash, salt } = hashPassword(newPassword);
+    db.prepare('UPDATE students SET password_hash = ?, salt = ? WHERE id = ?').run(hash, salt, studentId);
+
+    res.json({ success: true, message: 'รีเซ็ตรหัสผ่านให้นักเรียนเรียบร้อยแล้ว' });
+  } catch (err) {
+    console.error('Reset student password error:', err);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน' });
+  }
+});
+
+// ============================================================
+// 4. STUDENT CLASSROOM & ACCOUNT APIS
+// ============================================================
+
+// Register new student in classroom
+app.post('/api/student/register', (req, res) => {
+  const { code, studentNumber, name, password } = req.body;
+  if (!code || !studentNumber || !name || !password) {
+    return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบทุกช่อง (รหัสห้องเรียน, เลขประจำตัว, ชื่อ-นามสกุล, รหัสผ่าน)' });
+  }
+  if (password.length < 4) {
+    return res.status(400).json({ error: 'รหัสผ่าน/PIN ต้องมีความยาวอย่างน้อย 4 ตัวอักษร' });
+  }
+
+  const cleanCode = code.trim().toUpperCase();
+  const cleanNumber = studentNumber.trim();
+  const trimmedName = name.trim();
+
+  try {
+    const classroom = db.prepare(`
+      SELECT c.*, t.name as teacher_name 
+      FROM classrooms c 
+      JOIN teachers t ON c.teacher_id = t.id 
+      WHERE c.code = ?
+    `).get(cleanCode);
+
+    if (!classroom) {
+      return res.status(404).json({ error: 'ไม่พบรหัสห้องเรียนนี้ กรุณาตรวจสอบรหัสอีกครั้ง' });
+    }
+
+    // Check if student with this studentNumber already exists in classroom
+    const existing = db.prepare('SELECT id FROM students WHERE classroom_id = ? AND student_number = ?').get(classroom.id, cleanNumber);
+    if (existing) {
+      return res.status(400).json({ error: `เลขประจำตัว "${cleanNumber}" ได้ลงทะเบียนในห้องเรียนนี้แล้ว กรุณาเลือกแท็บ 'เข้าสู่ระบบ' เพื่อลงชื่อเข้าใช้` });
+    }
+
+    const studentId = 'std_' + crypto.randomBytes(8).toString('hex');
+    const token = generateToken();
+    const { hash, salt } = hashPassword(password);
+
+    db.prepare(`
+      INSERT INTO students (id, classroom_id, student_number, name, password_hash, salt, session_token)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(studentId, classroom.id, cleanNumber, trimmedName, hash, salt, token);
+
+    res.json({
+      success: true,
+      token,
+      student: {
+        id: studentId,
+        name: trimmedName,
+        studentNumber: cleanNumber
+      },
+      classroom: {
+        id: classroom.id,
+        code: classroom.code,
+        name: classroom.name,
+        description: classroom.description,
+        teacherName: classroom.teacher_name,
+        hasTeacherApiKey: !!classroom.gemini_api_key
+      }
+    });
+  } catch (err) {
+    console.error('Student register error:', err);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการลงทะเบียนนักเรียน' });
+  }
+});
+
+// Login existing student
+app.post('/api/student/login', (req, res) => {
+  const { code, studentNumber, password } = req.body;
+  if (!code || !studentNumber || !password) {
+    return res.status(400).json({ error: 'กรุณากรอกรหัสห้องเรียน เลขประจำตัว และรหัสผ่าน' });
+  }
+
+  const cleanCode = code.trim().toUpperCase();
+  const cleanNumber = studentNumber.trim();
+
+  try {
+    const classroom = db.prepare(`
+      SELECT c.*, t.name as teacher_name 
+      FROM classrooms c 
+      JOIN teachers t ON c.teacher_id = t.id 
+      WHERE c.code = ?
+    `).get(cleanCode);
+
+    if (!classroom) {
+      return res.status(404).json({ error: 'ไม่พบรหัสห้องเรียนนี้ กรุณาตรวจสอบรหัสอีกครั้ง' });
+    }
+
+    const student = db.prepare('SELECT * FROM students WHERE classroom_id = ? AND student_number = ?').get(classroom.id, cleanNumber);
+    if (!student) {
+      return res.status(404).json({ error: `ไม่พบเลขประจำตัว "${cleanNumber}" ในห้องเรียนนี้ กรุณาตรวจสอบเลขประจำตัว หรือสมัครสมาชิกใหม่` });
+    }
+
+    // Verify password if set
+    if (student.password_hash && student.salt) {
+      if (!verifyPassword(password, student.password_hash, student.salt)) {
+        return res.status(401).json({ error: 'รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง หรือติดต่อครูเพื่อขอรีเซ็ตรหัสผ่าน' });
+      }
+    } else {
+      // First time setting password for legacy student account
+      const { hash, salt } = hashPassword(password);
+      db.prepare('UPDATE students SET password_hash = ?, salt = ? WHERE id = ?').run(hash, salt, student.id);
+    }
+
+    // Generate fresh session token
+    const token = generateToken();
+    db.prepare("UPDATE students SET session_token = ?, last_active = datetime('now', 'localtime') WHERE id = ?")
+      .run(token, student.id);
+
+    res.json({
+      success: true,
+      token,
+      student: {
+        id: student.id,
+        name: student.name,
+        studentNumber: student.student_number
+      },
+      classroom: {
+        id: classroom.id,
+        code: classroom.code,
+        name: classroom.name,
+        description: classroom.description,
+        teacherName: classroom.teacher_name,
+        hasTeacherApiKey: !!classroom.gemini_api_key
+      }
+    });
+  } catch (err) {
+    console.error('Student login error:', err);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' });
+  }
+});
+
+// Join classroom via code (Unified / Backward compatibility)
 app.post('/api/student/join', (req, res) => {
-  const { code, name, studentNumber = '' } = req.body;
+  const { code, name, studentNumber = '', password = '' } = req.body;
   if (!code || !name || name.trim() === '') {
     return res.status(400).json({ error: 'กรุณากรอกรหัสห้องเรียนและชื่อ-นามสกุล' });
   }
@@ -683,7 +842,12 @@ app.post('/api/student/join', (req, res) => {
 
     let token = '';
     if (student) {
-      // Refresh session token
+      // If password provided and student has password, verify it
+      if (password && student.password_hash && student.salt) {
+        if (!verifyPassword(password, student.password_hash, student.salt)) {
+          return res.status(401).json({ error: 'รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบรหัสผ่านอีกครั้ง' });
+        }
+      }
       token = generateToken();
       db.prepare("UPDATE students SET session_token = ?, name = ?, student_number = ?, last_active = datetime('now', 'localtime') WHERE id = ?")
         .run(token, trimmedName, cleanNumber, student.id);
@@ -692,10 +856,17 @@ app.post('/api/student/join', (req, res) => {
     } else {
       const studentId = 'std_' + crypto.randomBytes(8).toString('hex');
       token = generateToken();
+      let pHash = null;
+      let pSalt = null;
+      if (password) {
+        const { hash, salt } = hashPassword(password);
+        pHash = hash;
+        pSalt = salt;
+      }
       db.prepare(`
-        INSERT INTO students (id, classroom_id, student_number, name, session_token)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(studentId, classroom.id, cleanNumber, trimmedName, token);
+        INSERT INTO students (id, classroom_id, student_number, name, password_hash, salt, session_token)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(studentId, classroom.id, cleanNumber, trimmedName, pHash, pSalt, token);
       student = { id: studentId, student_number: cleanNumber, name: trimmedName };
     }
 

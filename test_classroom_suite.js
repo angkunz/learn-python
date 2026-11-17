@@ -59,23 +59,73 @@ async function runTests() {
   assert.strictEqual(classroom.hasApiKey, true);
   console.log(`   ✅ Classroom created! Name: "${classroom.name}", Code: [${classroom.code}]`);
 
-  // 4. Student Join via Code
-  console.log('\n4. Testing Student Join via Code...');
-  const joinRes = await fetch(`${baseUrl}/api/student/join`, {
+  // 4. Student Register & Login with Password / PIN
+  console.log('\n4. Testing Student Account Register & Login...');
+  const regStdRes = await fetch(`${baseUrl}/api/student/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       code: classroom.code,
       name: 'เด็กชายสมเกียรติ มุ่งมั่น',
-      studentNumber: '05'
+      studentNumber: '05',
+      password: 'mypassword123'
     })
   });
-  const joinData = await joinRes.json();
-  assert.strictEqual(joinRes.status, 200, `Join failed: ${JSON.stringify(joinData)}`);
-  assert.ok(joinData.token);
-  const studentToken = joinData.token;
-  const studentId = joinData.student.id;
-  console.log(`   ✅ Student joined! Name: ${joinData.student.name}, Student ID: ${studentId}`);
+  const regStdText = await regStdRes.text();
+  let regStdData;
+  try {
+    regStdData = JSON.parse(regStdText);
+  } catch (err) {
+    console.error('Register response was not JSON! Status:', regStdRes.status, 'Body:', regStdText);
+    throw err;
+  }
+  assert.strictEqual(regStdRes.status, 200, `Student register failed: ${JSON.stringify(regStdData)}`);
+  assert.ok(regStdData.token);
+  const studentId = regStdData.student.id;
+  console.log(`   ✅ Student registered account! ID: ${studentId}, Name: ${regStdData.student.name}`);
+
+  // Test Student Login
+  const loginStdRes = await fetch(`${baseUrl}/api/student/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      code: classroom.code,
+      studentNumber: '05',
+      password: 'mypassword123'
+    })
+  });
+  const loginStdData = await loginStdRes.json();
+  assert.strictEqual(loginStdRes.status, 200, 'Student login failed');
+  assert.ok(loginStdData.token);
+  let studentToken = loginStdData.token;
+  console.log('   ✅ Student login with Student Number and Password verified!');
+
+  // Test Teacher Reset Student Password
+  const resetRes = await fetch(`${baseUrl}/api/teacher/classrooms/${classroom.id}/students/${studentId}/reset-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${teacherToken}`
+    },
+    body: JSON.stringify({ newPassword: 'newpin9999' })
+  });
+  assert.strictEqual(resetRes.status, 200);
+  console.log('   ✅ Teacher reset student password verified!');
+
+  // Verify login with new password
+  const newLoginRes = await fetch(`${baseUrl}/api/student/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      code: classroom.code,
+      studentNumber: '05',
+      password: 'newpin9999'
+    })
+  });
+  assert.strictEqual(newLoginRes.status, 200);
+  const newLoginData = await newLoginRes.json();
+  studentToken = newLoginData.token;
+  console.log('   ✅ Student login with updated password verified!');
 
   // 5. Student Progress & Code Submission
   console.log('\n5. Testing Student Code Submissions (Pass & Error Tracking)...');

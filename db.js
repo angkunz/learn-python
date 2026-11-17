@@ -42,6 +42,8 @@ db.exec(`
     classroom_id TEXT NOT NULL,
     student_number TEXT,
     name TEXT NOT NULL,
+    password_hash TEXT,
+    salt TEXT,
     session_token TEXT UNIQUE NOT NULL,
     last_active DATETIME DEFAULT CURRENT_TIMESTAMP,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -92,5 +94,13 @@ db.exec(`
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
   );
 `);
+
+// Safe column migrations for existing databases
+try {
+  db.exec('ALTER TABLE students ADD COLUMN password_hash TEXT;');
+} catch {}
+try {
+  db.exec('ALTER TABLE students ADD COLUMN salt TEXT;');
+} catch {}
 
 module.exports = db;

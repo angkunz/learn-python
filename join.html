@@ -8,11 +8,11 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
   <style>
     .join-container {
-      min-height: calc(100vh - 80px);
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 100px 24px 40px;
       position: relative;
       z-index: 2;
     }
@@ -20,7 +20,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 40px;
+      padding: 36px;
       width: 100%;
       max-width: 480px;
       box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.15);
@@ -28,44 +28,74 @@
     }
     .join-header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
     }
     .join-icon {
-      font-size: 3rem;
-      margin-bottom: 12px;
+      font-size: 2.8rem;
+      margin-bottom: 8px;
       display: inline-block;
-      animation: float 3s ease-in-out infinite;
     }
     .join-title {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 800;
       color: var(--text-primary);
-      margin: 0 0 8px;
+      margin: 0 0 6px;
     }
     .join-desc {
       color: var(--text-secondary);
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.9rem;
+      line-height: 1.4;
       margin: 0;
     }
+    .join-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .join-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .join-tab.active {
+      color: var(--primary);
+    }
+    .join-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .form-label {
       display: block;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       color: var(--text-primary);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .form-input {
       width: 100%;
-      padding: 14px 16px;
+      padding: 12px 14px;
       background: var(--bg-alt);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 10px;
       color: var(--text-primary);
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-family: inherit;
       transition: all 0.2s;
       box-sizing: border-box;
@@ -73,13 +103,13 @@
     .form-input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
       background: var(--surface);
     }
     .code-input {
       font-family: 'Fira Code', monospace;
-      letter-spacing: 4px;
-      font-size: 1.5rem;
+      letter-spacing: 3px;
+      font-size: 1.3rem;
       font-weight: 700;
       text-transform: uppercase;
       text-align: center;
@@ -87,49 +117,57 @@
     }
     .btn-join {
       width: 100%;
-      padding: 15px;
+      padding: 14px;
       background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
       color: white;
       border: none;
-      border-radius: 12px;
-      font-size: 1.1rem;
+      border-radius: 10px;
+      font-size: 1.05rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-      margin-top: 10px;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+      margin-top: 8px;
     }
     .btn-join:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
     }
     .btn-join:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none;
     }
+    .error-box {
+      display: none;
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-top: 14px;
+      text-align: center;
+    }
     .join-info-box {
-      margin-top: 24px;
+      margin-top: 20px;
       background: rgba(99, 102, 241, 0.08);
       border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 0.85rem;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.82rem;
       color: var(--text-secondary);
       line-height: 1.5;
     }
     .join-links {
       text-align: center;
-      margin-top: 20px;
-      font-size: 0.9rem;
+      margin-top: 18px;
+      font-size: 0.88rem;
     }
     .join-links a {
       color: var(--primary-light);
       text-decoration: none;
       font-weight: 600;
-    }
-    .join-links a:hover {
-      text-decoration: underline;
     }
   </style>
 </head>
@@ -165,60 +203,123 @@
   <div class="join-card">
     <div class="join-header">
       <div class="join-icon">🏫</div>
-      <h1 class="join-title">เข้าร่วมห้องเรียน</h1>
-      <p class="join-desc">กรอกรหัสห้องเรียนที่ได้รับจากคุณครูเพื่อเริ่มเรียน</p>
+      <h1 class="join-title">ห้องเรียน PyLearn</h1>
+      <p class="join-desc">เข้าสู่ระบบด้วยเลขประจำตัว หรือลงทะเบียนเข้าห้องเรียนใหม่</p>
     </div>
 
-    <form id="join-form" onsubmit="handleJoin(event)">
+    <div class="join-tabs">
+      <button class="join-tab active" id="tab-login" onclick="switchJoinTab('login')">เข้าสู่ระบบ (มีบัญชีแล้ว)</button>
+      <button class="join-tab" id="tab-register" onclick="switchJoinTab('register')">ลงทะเบียนเข้าห้องเรียนใหม่</button>
+    </div>
+
+    <!-- FORM 1: Student Login -->
+    <form id="form-login" onsubmit="handleStudentLogin(event)">
       <div class="form-group">
         <label class="form-label">รหัสห้องเรียน (Classroom Code)</label>
         <input 
           type="text" 
-          id="classroom-code" 
+          id="login-code" 
           class="form-input code-input" 
           placeholder="PY----" 
           maxlength="6" 
           required 
           autocomplete="off"
-          autofocus
         >
       </div>
 
-      <div style="display:grid; grid-template-columns: 100px 1fr; gap: 12px;" class="form-group">
-        <div>
-          <label class="form-label">เลขที่</label>
-          <input 
-            type="text" 
-            id="student-number" 
-            class="form-input" 
-            placeholder="เช่น 1" 
-            maxlength="4"
-          >
-        </div>
-        <div>
-          <label class="form-label">ชื่อ - นามสกุล <span style="color:var(--red)">*</span></label>
-          <input 
-            type="text" 
-            id="student-name" 
-            class="form-input" 
-            placeholder="เช่น เด็กชายรักเรียน ขยันดี" 
-            required 
-            autocomplete="name"
-          >
-        </div>
+      <div class="form-group">
+        <label class="form-label">เลขประจำตัวนักเรียน / เลขที่ <span style="color:var(--red)">*</span></label>
+        <input 
+          type="text" 
+          id="login-number" 
+          class="form-input" 
+          placeholder="เช่น 64010123 หรือ 15" 
+          required 
+          autocomplete="username"
+        >
       </div>
 
-      <button type="submit" class="btn-join" id="submit-btn">
-        🚀 เข้าสู่ห้องเรียน
-      </button>
+      <div class="form-group">
+        <label class="form-label">รหัสผ่าน / PIN ของคุณ <span style="color:var(--red)">*</span></label>
+        <input 
+          type="password" 
+          id="login-password" 
+          class="form-input" 
+          placeholder="••••••••" 
+          required 
+          autocomplete="current-password"
+        >
+      </div>
 
-      <div id="error-message" style="display:none; color:var(--red); font-size:0.9rem; margin-top:14px; text-align:center; padding:10px; background:rgba(239,68,68,0.1); border-radius:8px;"></div>
+      <button type="submit" class="btn-join" id="btn-login-submit">
+        🚀 เข้าสู่ระบบห้องเรียน
+      </button>
     </form>
 
+    <!-- FORM 2: Student Register (First Time) -->
+    <form id="form-register" style="display:none;" onsubmit="handleStudentRegister(event)">
+      <div class="form-group">
+        <label class="form-label">รหัสห้องเรียน (Classroom Code)</label>
+        <input 
+          type="text" 
+          id="reg-code" 
+          class="form-input code-input" 
+          placeholder="PY----" 
+          maxlength="6" 
+          required 
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">เลขประจำตัวนักเรียน / เลขที่ <span style="color:var(--red)">*</span></label>
+        <input 
+          type="text" 
+          id="reg-number" 
+          class="form-input" 
+          placeholder="เช่น 64010123 หรือ 15" 
+          required 
+          autocomplete="username"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ชื่อ - นามสกุล <span style="color:var(--red)">*</span></label>
+        <input 
+          type="text" 
+          id="reg-name" 
+          class="form-input" 
+          placeholder="เช่น เด็กชายรักเรียน ขยันดี" 
+          required 
+          autocomplete="name"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ตั้งรหัสผ่าน / PIN (อย่างน้อย 4 ตัวอักษร) <span style="color:var(--red)">*</span></label>
+        <input 
+          type="password" 
+          id="reg-password" 
+          class="form-input" 
+          placeholder="••••" 
+          minlength="4" 
+          required 
+          autocomplete="new-password"
+        >
+        <small style="color:var(--text-secondary);font-size:0.78rem;display:block;margin-top:4px;">
+          🔒 ตั้งรหัสผ่านที่จำง่าย สำหรับใช้เข้าสู่ระบบในครั้งถัดไป
+        </small>
+      </div>
+
+      <button type="submit" class="btn-join" id="btn-reg-submit">
+        ✨ สร้างบัญชีและเข้าสู่ห้องเรียน
+      </button>
+    </form>
+
+    <div id="join-error" class="error-box"></div>
+
     <div class="join-info-box">
-      💡 <b>สิทธิประโยชน์เมื่อเรียนในห้องเรียน:</b><br>
-      • สามารถใช้ AI ช่วยตรวจโค้ดและแนะแนวทางได้ไม่จำกัด โดยใช้โควตา API Key ของคุณครู<br>
-      • คุณครูสามารถดูพัฒนาการและความคืบหน้า เพื่อช่วยสอนอย่างตรงจุดได้
+      💡 <b>เรียนในห้องเรียน:</b> ได้รับสิทธิ์ใช้งาน AI ตรวจโค้ดและวิเคราะห์รายบุคคลฟรี โดยใช้โควตาของครูประจำห้องเรียน
     </div>
 
     <div class="join-links">
@@ -230,51 +331,104 @@
 <script src="js/app.js"></script>
 <script src="js/classroom-client.js"></script>
 <script>
-  // Auto-fill code from URL query ?code=...
   document.addEventListener('DOMContentLoaded', () => {
+    // Read ?code=... from query parameter
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     if (code) {
-      const codeInput = document.getElementById('classroom-code');
-      codeInput.value = code.toUpperCase();
-      document.getElementById('student-name').focus();
+      document.getElementById('login-code').value = code.toUpperCase();
+      document.getElementById('reg-code').value = code.toUpperCase();
+      document.getElementById('login-number').focus();
     }
 
-    // Check if already in a session
-    const session = ClassroomClient.getSession();
-    if (session && session.student && session.classroom) {
-      document.getElementById('classroom-code').value = session.classroom.code;
-      document.getElementById('student-name').value = session.student.name;
-      if (session.student.studentNumber) {
-        document.getElementById('student-number').value = session.student.studentNumber;
-      }
+    // Auto-fill remembered student number if exists
+    const rememberedNum = localStorage.getItem('pylearn_remembered_student_num');
+    if (rememberedNum) {
+      document.getElementById('login-number').value = rememberedNum;
     }
   });
 
-  async function handleJoin(e) {
-    e.preventDefault();
-    const code = document.getElementById('classroom-code').value.trim();
-    const number = document.getElementById('student-number').value.trim();
-    const name = document.getElementById('student-name').value.trim();
-    const btn = document.getElementById('submit-btn');
-    const errEl = document.getElementById('error-message');
+  function switchJoinTab(tab) {
+    const tabLogin = document.getElementById('tab-login');
+    const tabReg = document.getElementById('tab-register');
+    const formLogin = document.getElementById('form-login');
+    const formReg = document.getElementById('form-register');
+    const errBox = document.getElementById('join-error');
+    errBox.style.display = 'none';
 
-    errEl.style.display = 'none';
+    // Synchronize code input value across tabs
+    const currentCode = document.getElementById('login-code').value || document.getElementById('reg-code').value;
+    const currentNum = document.getElementById('login-number').value || document.getElementById('reg-number').value;
+
+    if (tab === 'login') {
+      tabLogin.classList.add('active');
+      tabReg.classList.remove('active');
+      formLogin.style.display = 'block';
+      formReg.style.display = 'none';
+      if (currentCode) document.getElementById('login-code').value = currentCode;
+      if (currentNum) document.getElementById('login-number').value = currentNum;
+    } else {
+      tabReg.classList.add('active');
+      tabLogin.classList.remove('active');
+      formReg.style.display = 'block';
+      formLogin.style.display = 'none';
+      if (currentCode) document.getElementById('reg-code').value = currentCode;
+      if (currentNum) document.getElementById('reg-number').value = currentNum;
+    }
+  }
+
+  async function handleStudentLogin(e) {
+    e.preventDefault();
+    const code = document.getElementById('login-code').value.trim();
+    const studentNumber = document.getElementById('login-number').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('btn-login-submit');
+    const errBox = document.getElementById('join-error');
+
+    errBox.style.display = 'none';
     btn.disabled = true;
-    btn.textContent = '⏳ กำลังเข้าสู่ห้องเรียน...';
+    btn.textContent = '⏳ กำลังเข้าสู่ระบบ...';
 
     try {
-      const res = await ClassroomClient.join(code, name, number);
-      // Success!
-      showToast(`ยินดีต้อนรับสู่ห้องเรียน ${res.classroom.name}! 🎓`, 'success');
+      const res = await ClassroomClient.login(code, studentNumber, password);
+      localStorage.setItem('pylearn_remembered_student_num', studentNumber);
+      showToast(`ยินดีต้อนรับกลับ ${res.student.name}! 🎓`, 'success');
       setTimeout(() => {
         window.location.href = 'lesson.html';
-      }, 800);
+      }, 600);
     } catch (err) {
-      errEl.textContent = '❌ ' + err.message;
-      errEl.style.display = 'block';
+      errBox.textContent = '❌ ' + err.message;
+      errBox.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = '🚀 เข้าสู่ห้องเรียน';
+      btn.textContent = '🚀 เข้าสู่ระบบห้องเรียน';
+    }
+  }
+
+  async function handleStudentRegister(e) {
+    e.preventDefault();
+    const code = document.getElementById('reg-code').value.trim();
+    const studentNumber = document.getElementById('reg-number').value.trim();
+    const name = document.getElementById('reg-name').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const btn = document.getElementById('btn-reg-submit');
+    const errBox = document.getElementById('join-error');
+
+    errBox.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังสร้างบัญชี...';
+
+    try {
+      const res = await ClassroomClient.register(code, studentNumber, name, password);
+      localStorage.setItem('pylearn_remembered_student_num', studentNumber);
+      showToast(`สร้างบัญชีสำเร็จ! ยินดีต้อนรับสู่ห้องเรียน ${res.classroom.name} 🎓`, 'success');
+      setTimeout(() => {
+        window.location.href = 'lesson.html';
+      }, 600);
+    } catch (err) {
+      errBox.textContent = '❌ ' + err.message;
+      errBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '✨ สร้างบัญชีและเข้าสู่ห้องเรียน';
     }
   }
 </script>

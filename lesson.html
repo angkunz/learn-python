@@ -44,7 +44,7 @@
         <span class="icon-moon">🌙</span>
       </span>
     </label>
-    <button class="nav-btn" onclick="showApiKeyModal(null)" title="ตั้งค่า AI Key">⚙️ API Key</button>
+    <button class="nav-btn" id="nav-api-key-btn" onclick="showApiKeyModal(null)" title="ตั้งค่า AI Key">⚙️ API Key</button>
   </div>
 </nav>
 
@@ -573,14 +573,16 @@ async function runAICheck(lessonId, exId, editorId) {
     if (fb.score >= 80) celebrate();
 
   } catch(e) {
+    const isClassroom = window.ClassroomClient && window.ClassroomClient.isInClassroom();
     aiResult.innerHTML = `
       <div style="color:var(--red);font-size:0.875rem;padding:8px;">
         ❌ ${e.message}
+        ${!isClassroom ? `
         <br><button onclick="showApiKeyModal(()=>runAICheck('${lessonId}','${exId}','${editorId}'))"
           style="margin-top:8px;padding:6px 14px;border-radius:8px;border:1px solid var(--purple);
           background:var(--purple-dim);color:var(--purple-light);cursor:pointer;font-size:0.8rem;">
           🔑 ตั้งค่า API Key
-        </button>
+        </button>` : ''}
       </div>`;
   }
 
