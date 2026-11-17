@@ -28,9 +28,10 @@
   </a>
   <div class="nav-links">
     <a href="index.html" class="active" id="nav-home">หน้าแรก</a>
+    <a href="join.html" style="color:var(--cyan);font-weight:700;">🏫 เข้าห้องเรียน</a>
+    <a href="teacher-login.html" style="color:#a5b4fc;font-weight:700;">👩‍🏫 สำหรับครูผู้สอน</a>
     <a href="index.html#curriculum">หลักสูตร</a>
-    <a href="index.html#features">ฟีเจอร์</a>
-    <a href="playground.html">ลองเขียนโค้ด (Playground)</a>
+    <a href="playground.html">Playground</a>
   </div>
   <div class="nav-actions">
     <span id="nav-xp" class="nav-xp-badge">⭐ 0 XP</span>
@@ -41,28 +42,41 @@
         <span class="icon-moon">🌙</span>
       </span>
     </label>
-    <button class="nav-btn" onclick="startLearning()">เริ่มเรียน →</button>
+    <a href="join.html" class="nav-btn" style="text-decoration:none;">เข้าห้องเรียน →</a>
   </div>
 </nav>
 
 <!-- Hero -->
 <section class="hero">
   <div class="hero-content">
-    <div class="hero-badge">🎓 แพลตฟอร์มเรียน Python ภาษาไทย</div>
+    <div class="hero-badge">🎓 แพลตฟอร์มเรียน Python ภาษาไทย พร้อมระบบห้องเรียนจริง</div>
     <h1 class="hero-title">
       เรียน <span class="gradient-text">Python</span><br>
       จากศูนย์สู่มืออาชีพ
     </h1>
     <p class="hero-subtitle">
       หลักสูตรครบครัน <span id="hero-lesson-count"></span> บทเรียน <span id="hero-exercise-count"></span> โจทย์ฝึกหัด รันโค้ดได้จริงในเบราว์เซอร์
-      และมี AI ให้คะแนนและ feedback แบบ real-time
+      พร้อมระบบห้องเรียนสำหรับครูผู้สอน และ AI โค้ชช่วยตรวจวิเคราะห์รายบุคคล
     </p>
-    <div class="hero-actions">
-      <button class="btn-primary" onclick="startLearning()">
-        🚀 เริ่มเรียนเลย
+
+    <!-- Classroom active notice if student is logged in -->
+    <div id="hero-classroom-notice" style="display:none; margin-bottom: 20px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 12px; padding: 12px 18px; text-align: left;">
+      <div style="font-weight: 700; color: #818cf8; margin-bottom: 4px;">🏫 คุณกำลังอยู่ในห้องเรียน: <span id="hero-classroom-name"></span></div>
+      <div style="font-size: 0.88rem; color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between;">
+        <span>นักเรียน: <b id="hero-student-name" style="color:var(--text-primary);"></b></span>
+        <a href="lesson.html" style="color:var(--cyan); font-weight:700; text-decoration:none;">เข้าสู่บทเรียนทันที →</a>
+      </div>
+    </div>
+
+    <div class="hero-actions" style="flex-wrap: wrap; gap: 12px;">
+      <button class="btn-primary" onclick="location.href='join.html'" style="display:flex;align-items:center;gap:8px;">
+        <span>🏫</span> เข้าร่วมห้องเรียน (นักเรียน)
       </button>
-      <button class="btn-secondary" onclick="document.getElementById('curriculum').scrollIntoView({behavior:'smooth'})">
-        📚 ดูหลักสูตร
+      <button class="btn-secondary" onclick="location.href='teacher-login.html'" style="display:flex;align-items:center;gap:8px;border-color:rgba(99,102,241,0.4);background:rgba(99,102,241,0.08);">
+        <span>👩‍🏫</span> ระบบครูผู้สอน (Classroom LMS)
+      </button>
+      <button class="btn-secondary" onclick="startLearning()">
+        🚀 โหมดเรียนรู้เดี่ยว
       </button>
     </div>
     <div class="hero-stats">
@@ -364,6 +378,22 @@ function typeCode(el, code, i=0) {
     }, 3000);
   }
 }
+</script>
+<script src="js/classroom-client.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.ClassroomClient) {
+      const session = window.ClassroomClient.getSession();
+      if (session && session.classroom && session.student) {
+        const notice = document.getElementById('hero-classroom-notice');
+        if (notice) {
+          notice.style.display = 'block';
+          document.getElementById('hero-classroom-name').textContent = session.classroom.name;
+          document.getElementById('hero-student-name').textContent = session.student.name;
+        }
+      }
+    }
+  });
 </script>
 </body>
 </html>

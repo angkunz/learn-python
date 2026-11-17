@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ห้องเรียน — PyLearn Classroom</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+  <style>
+    .join-container {
+      min-height: calc(100vh - 80px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .join-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.15);
+      backdrop-filter: blur(12px);
+    }
+    .join-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .join-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+    }
+    .join-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0 0 8px;
+    }
+    .join-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1.05rem;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+      background: var(--surface);
+    }
+    .code-input {
+      font-family: 'Fira Code', monospace;
+      letter-spacing: 4px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--cyan);
+    }
+    .btn-join {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      margin-top: 10px;
+    }
+    .btn-join:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+    .btn-join:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .join-info-box {
+      margin-top: 24px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .join-links {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+    }
+    .join-links a {
+      color: var(--primary-light);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .join-links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-icon">🐍</div>
+    PyLearn
+  </a>
+  <div class="nav-links">
+    <a href="index.html">หน้าแรก</a>
+    <a href="playground.html">Playground</a>
+  </div>
+  <div class="nav-actions">
+    <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
+      <input type="checkbox" class="theme-switch-cb">
+      <span class="theme-switch-slider">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+      </span>
+    </label>
+    <a href="teacher-login.html" class="nav-btn" style="text-decoration:none;">👩‍🏫 สำหรับครูผู้สอน</a>
+  </div>
+</nav>
+
+<div class="join-container">
+  <div class="join-card">
+    <div class="join-header">
+      <div class="join-icon">🏫</div>
+      <h1 class="join-title">เข้าร่วมห้องเรียน</h1>
+      <p class="join-desc">กรอกรหัสห้องเรียนที่ได้รับจากคุณครูเพื่อเริ่มเรียน</p>
+    </div>
+
+    <form id="join-form" onsubmit="handleJoin(event)">
+      <div class="form-group">
+        <label class="form-label">รหัสห้องเรียน (Classroom Code)</label>
+        <input 
+          type="text" 
+          id="classroom-code" 
+          class="form-input code-input" 
+          placeholder="PY----" 
+          maxlength="6" 
+          required 
+          autocomplete="off"
+          autofocus
+        >
+      </div>
+
+      <div style="display:grid; grid-template-columns: 100px 1fr; gap: 12px;" class="form-group">
+        <div>
+          <label class="form-label">เลขที่</label>
+          <input 
+            type="text" 
+            id="student-number" 
+            class="form-input" 
+            placeholder="เช่น 1" 
+            maxlength="4"
+          >
+        </div>
+        <div>
+          <label class="form-label">ชื่อ - นามสกุล <span style="color:var(--red)">*</span></label>
+          <input 
+            type="text" 
+            id="student-name" 
+            class="form-input" 
+            placeholder="เช่น เด็กชายรักเรียน ขยันดี" 
+            required 
+            autocomplete="name"
+          >
+        </div>
+      </div>
+
+      <button type="submit" class="btn-join" id="submit-btn">
+        🚀 เข้าสู่ห้องเรียน
+      </button>
+
+      <div id="error-message" style="display:none; color:var(--red); font-size:0.9rem; margin-top:14px; text-align:center; padding:10px; background:rgba(239,68,68,0.1); border-radius:8px;"></div>
+    </form>
+
+    <div class="join-info-box">
+      💡 <b>สิทธิประโยชน์เมื่อเรียนในห้องเรียน:</b><br>
+      • สามารถใช้ AI ช่วยตรวจโค้ดและแนะแนวทางได้ไม่จำกัด โดยใช้โควตา API Key ของคุณครู<br>
+      • คุณครูสามารถดูพัฒนาการและความคืบหน้า เพื่อช่วยสอนอย่างตรงจุดได้
+    </div>
+
+    <div class="join-links">
+      <a href="index.html">← กลับหน้าหลัก หรือเรียนแบบบุคคลทั่วไป</a>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/classroom-client.js"></script>
+<script>
+  // Auto-fill code from URL query ?code=...
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+      const codeInput = document.getElementById('classroom-code');
+      codeInput.value = code.toUpperCase();
+      document.getElementById('student-name').focus();
+    }
+
+    // Check if already in a session
+    const session = ClassroomClient.getSession();
+    if (session && session.student && session.classroom) {
+      document.getElementById('classroom-code').value = session.classroom.code;
+      document.getElementById('student-name').value = session.student.name;
+      if (session.student.studentNumber) {
+        document.getElementById('student-number').value = session.student.studentNumber;
+      }
+    }
+  });
+
+  async function handleJoin(e) {
+    e.preventDefault();
+    const code = document.getElementById('classroom-code').value.trim();
+    const number = document.getElementById('student-number').value.trim();
+    const name = document.getElementById('student-name').value.trim();
+    const btn = document.getElementById('submit-btn');
+    const errEl = document.getElementById('error-message');
+
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังเข้าสู่ห้องเรียน...';
+
+    try {
+      const res = await ClassroomClient.join(code, name, number);
+      // Success!
+      showToast(`ยินดีต้อนรับสู่ห้องเรียน ${res.classroom.name}! 🎓`, 'success');
+      setTimeout(() => {
+        window.location.href = 'lesson.html';
+      }, 800);
+    } catch (err) {
+      errEl.textContent = '❌ ' + err.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '🚀 เข้าสู่ห้องเรียน';
+    }
+  }
+</script>
+</body>
+</html>

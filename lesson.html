@@ -86,6 +86,7 @@
 <script src="js/lessons-data.js?v=3"></script>
 <script src="js/app.js?v=4"></script>
 <script src="js/editor.js?v=7"></script>
+<script src="js/classroom-client.js?v=1"></script>
 <script src="js/ai-feedback.js?v=3"></script>
 <script>
 // ============================================================
@@ -99,12 +100,19 @@ let pyodideReady = false;
 let lastRunOutput = {};  // exId -> output string
 
 // ── Boot ──
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // If in Classroom mode, render header banner and verify session
+  if (window.ClassroomClient) {
+    window.ClassroomClient.renderHeaderBanner();
+    await window.ClassroomClient.checkSession();
+  }
+
   updateXPDisplay();
 
   const params = new URLSearchParams(location.search);
   const lessonId = params.get('id') || LESSONS_DATA[0].id;
   currentLesson = getLessonById(lessonId);
+  window.currentLesson = currentLesson;
   if (!currentLesson) { location.href = 'index.html'; return; }
 
   renderSidebar();
@@ -424,12 +432,19 @@ async function runCode(lessonId, exId, editorId) {
     );
 
     lastRunOutput[exId] = result.output;
+    window.currentExerciseId = exId;
 
     if (result.success) {
       outputEl.className = 'output-content success';
       outputEl.textContent = result.output || '(ไม่มี output)';
       statusEl.className = 'output-status success';
       statusEl.textContent = '✅ สำเร็จ';
+
+      // Sync progress to classroom server
+      if (window.ClassroomClient) {
+        window.ClassroomClient.syncProgress(lessonId, exId, true, 20, code, 'pass', null, null, result.output || '');
+      }
+
       // Auto-mark exercise done on successful run
       if (markExerciseDone(lessonId, exId)) {
         showToast(`+20 XP ทำโจทย์ "${currentLesson.exercises.find(e=>e.id===exId)?.title}" สำเร็จ!`, 'success');
@@ -448,6 +463,13 @@ async function runCode(lessonId, exId, editorId) {
       outputEl.textContent = result.output;
       statusEl.className = 'output-status error';
       statusEl.textContent = '❌ Error';
+
+      // Detect error type for classroom teacher analytics
+      const errMatch = (result.output || '').match(/([a-zA-Z0-9_]+Error):/);
+      const errorType = errMatch ? errMatch[1] : 'RuntimeError';
+      if (window.ClassroomClient) {
+        window.ClassroomClient.syncProgress(lessonId, exId, false, 0, code, 'fail', errorType, (result.output || '').slice(0, 300), result.output || '');
+      }
     }
   } catch(e) {
     outputEl.className = 'output-content error';
@@ -502,6 +524,7 @@ async function runAICheck(lessonId, exId, editorId) {
   if (!editor) return;
   const code = getEditorCode(editor);
   const exercise = currentLesson.exercises.find(e => e.id === exId);
+  window.currentExerciseId = exId;
   const aiResult = document.getElementById(`ai-result-${exId}`);
   const aiBtn = document.getElementById(`ai-btn-${exId}`);
   const mode = getCheckMode(); // 'ai' or 'auto'
@@ -601,6 +624,9 @@ function resetCode(lessonId, exId, editorId) {
 // ── Complete Lesson ──
 function completeLesson() {
   const isNew = markLessonDone(currentLesson.id);
+  if (window.ClassroomClient) {
+    window.ClassroomClient.syncProgress(currentLesson.id, 'all', true, 50, '', 'pass', null, null, 'บทเรียนสำเร็จ');
+  }
   if (isNew) {
     celebrate();
     showToast(`🏆 +50 XP ผ่านบท "${currentLesson.title}" แล้ว!`, 'success', 4000);

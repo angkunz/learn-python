@@ -227,6 +227,31 @@ async function showApiKeyModal(onSave) {
 
 // ── Main Entry ──
 async function getAIFeedback(lessonTitle, exerciseTitle, exerciseDesc, userCode, runOutput, solution, hint, starterCode, difficulty, expectedOutput) {
+  // If student is in Classroom mode, use Teacher's Gemini API key via backend proxy!
+  if (window.ClassroomClient && window.ClassroomClient.isInClassroom()) {
+    try {
+      const fb = await window.ClassroomClient.requestTeacherAI({
+        lessonId: window.currentLesson ? window.currentLesson.id : '',
+        exerciseId: window.currentExerciseId || '',
+        userCode,
+        runOutput,
+        lessonTitle,
+        exerciseTitle,
+        exerciseDesc,
+        solution,
+        hint,
+        starterCode,
+        difficulty,
+        expectedOutput
+      });
+      return fb;
+    } catch (err) {
+      console.warn('Classroom AI error:', err);
+      throw err;
+    }
+  }
+
+  // Standalone mode: uses local personal API key
   let apiKey = await getApiKey();
   if (!apiKey) {
     return new Promise((resolve) => {
