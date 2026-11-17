@@ -22,6 +22,45 @@ const ClassroomClient = {
 
   clearSession() {
     localStorage.removeItem(CLASSROOM_SESSION_KEY);
+    localStorage.removeItem('python_progress_v2');
+    localStorage.removeItem('python_xp');
+    if (typeof updateXPDisplay === 'function') {
+      updateXPDisplay();
+    }
+  },
+
+  // ── Apply Student Progress & XP from Server to Local State ──
+  applyProgress(progressList = []) {
+    const localProgress = {};
+    let totalXp = 0;
+    (progressList || []).forEach(p => {
+      const exMap = {};
+      (p.exercisesCompleted || []).forEach(exId => {
+        exMap[exId] = true;
+      });
+      localProgress[p.lessonId] = {
+        done: !!p.completed,
+        exercises: exMap
+      };
+      totalXp += (p.xp || 0);
+    });
+
+    localStorage.setItem('python_progress_v2', JSON.stringify(localProgress));
+    localStorage.setItem('python_xp', String(totalXp));
+
+    if (typeof updateXPDisplay === 'function') {
+      updateXPDisplay();
+    }
+    const navXp = document.getElementById('nav-xp');
+    if (navXp) {
+      navXp.textContent = `⭐ ${totalXp} XP`;
+    }
+    if (typeof renderSidebar === 'function') {
+      renderSidebar();
+    }
+    if (typeof renderLevels === 'function') {
+      renderLevels();
+    }
   },
 
   isInClassroom() {
@@ -59,6 +98,7 @@ const ClassroomClient = {
       throw new Error(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
     }
     this.setSession(data);
+    this.applyProgress(data.progress || []);
     return data;
   },
 
@@ -74,6 +114,7 @@ const ClassroomClient = {
       throw new Error(data.error || 'ลงทะเบียนไม่สำเร็จ');
     }
     this.setSession(data);
+    this.applyProgress([]); // Brand new student starts with 0 XP & clean progress
     return data;
   },
 
@@ -98,6 +139,8 @@ const ClassroomClient = {
     session.classroom = data.classroom;
     session.hasClassroom = true;
     this.setSession(session);
+    // Refresh student progress from server
+    await this.checkSession();
     return data;
   },
 
@@ -113,6 +156,7 @@ const ClassroomClient = {
       throw new Error(data.error || 'ไม่สามารถเข้าร่วมห้องเรียนได้');
     }
     this.setSession(data);
+    this.applyProgress(data.progress || []);
     return data;
   },
 
@@ -133,6 +177,7 @@ const ClassroomClient = {
       session.student = data.student;
       session.classroom = data.classroom;
       this.setSession(session);
+      this.applyProgress(data.progress || []);
       return data;
     } catch {
       return null;

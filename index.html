@@ -383,8 +383,15 @@ function typeCode(el, code, i=0) {
 </script>
 <script src="js/classroom-client.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     if (window.ClassroomClient) {
+      if (window.ClassroomClient.isInClassroom()) {
+        await window.ClassroomClient.checkSession();
+        updateXPDisplay();
+        const statXp = document.getElementById('stat-xp');
+        if (statXp) statXp.textContent = getXP();
+        renderLevels();
+      }
       const session = window.ClassroomClient.getSession();
       if (session && session.classroom && session.student) {
         const notice = document.getElementById('hero-classroom-notice');

@@ -835,7 +835,8 @@ app.post('/api/student/register', async (req, res) => {
         teacherName: classroom.teacher_name,
         hasTeacherApiKey: !!classroom.gemini_api_key,
         curriculum: parseCurriculum(classroom.curriculum_lessons)
-      } : null
+      } : null,
+      progress: []
     });
   } catch (err) {
     console.error('Student register error:', err);
@@ -884,6 +885,8 @@ app.post('/api/student/login', async (req, res) => {
 
     const hasClassroom = !!(student.cid && student.classroom_code);
 
+    const progressList = await db.prepare('SELECT * FROM student_progress WHERE student_id = ?').all(student.id);
+
     res.json({
       success: true,
       token,
@@ -903,7 +906,14 @@ app.post('/api/student/login', async (req, res) => {
         teacherName: student.teacher_name,
         hasTeacherApiKey: !!student.gemini_api_key,
         curriculum: parseCurriculum(student.curriculum_lessons)
-      } : null
+      } : null,
+      progress: progressList.map(p => ({
+        lessonId: p.lesson_id,
+        completed: p.completed === 1,
+        xp: p.xp,
+        attempts: p.attempts,
+        exercisesCompleted: JSON.parse(p.exercises_completed || '[]')
+      }))
     });
   } catch (err) {
     console.error('Student login error:', err);
@@ -1014,6 +1024,8 @@ app.post('/api/student/join', async (req, res) => {
       student = { id: studentId, student_number: cleanNumber, name: trimmedName };
     }
 
+    const progressList = await db.prepare('SELECT * FROM student_progress WHERE student_id = ?').all(student.id);
+
     res.json({
       success: true,
       token,
@@ -1030,7 +1042,14 @@ app.post('/api/student/join', async (req, res) => {
         teacherName: classroom.teacher_name,
         hasTeacherApiKey: !!classroom.gemini_api_key,
         curriculum: parseCurriculum(classroom.curriculum_lessons)
-      }
+      },
+      progress: progressList.map(p => ({
+        lessonId: p.lesson_id,
+        completed: p.completed === 1,
+        xp: p.xp,
+        attempts: p.attempts,
+        exercisesCompleted: JSON.parse(p.exercises_completed || '[]')
+      }))
     });
   } catch (err) {
     console.error('Join classroom error:', err);
