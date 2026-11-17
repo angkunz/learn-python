@@ -189,6 +189,7 @@ body {
   color: var(--ink);
   text-decoration: none;
   letter-spacing: -0.3px;
+  flex-shrink: 0;
 }
 
 .nav-logo-icon {
@@ -242,6 +243,11 @@ body {
   color: #fff;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-btn:hover {
@@ -3220,11 +3226,11 @@ footer {
   }
 
   .lesson-layout {
-    padding-top: 72px;
+    padding-top: 60px;
   }
 
   .hero {
-    padding-top: 110px;
+    padding-top: 96px;
   }
 
   .hero-title {
@@ -3232,13 +3238,35 @@ footer {
     letter-spacing: -1px;
   }
 
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    gap: 12px;
+  }
+
+  .hero-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+
   .hero-stats {
     gap: 0;
-    padding: 14px 4px;
+    padding: 12px 4px;
+    margin-top: 32px;
   }
 
   .stat-item {
-    padding: 0 16px;
+    padding: 0 10px;
+  }
+
+  .stat-number {
+    font-size: 1.45rem;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
   }
 
   .type-grid {
@@ -3253,6 +3281,105 @@ footer {
     display: none;
   }
 
+  /* ── Mobile Navbar ── */
+  .navbar {
+    height: 60px;
+    padding: 0 12px;
+  }
+
+  .nav-progress-bar {
+    top: 60px;
+  }
+
+  .nav-logo {
+    font-size: 1.05rem;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .nav-logo-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  .nav-actions {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .nav-actions > a[href*="playground.html"] {
+    display: none;
+  }
+
+  .nav-xp-badge {
+    padding: 4px 8px;
+    font-size: 0.76rem;
+    white-space: nowrap;
+    gap: 4px;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+  }
+
+  .theme-switch {
+    transform: scale(0.78);
+    transform-origin: center right;
+    margin: 0 -2px;
+    flex-shrink: 0;
+  }
+
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  /* Classroom mode navbar */
+  .nav-classroom-tag {
+    padding: 2px 7px;
+    font-size: 0.74rem;
+    gap: 4px;
+    margin-left: 6px;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+  }
+
+  .nav-classroom-tag .tag-name {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-classroom-tag .tag-code {
+    padding: 1px 5px;
+    font-size: 0.7rem;
+  }
+
+  .nav-student-trigger {
+    padding: 4px 8px;
+    font-size: 0.76rem;
+    gap: 5px;
+  }
+
+  .nav-student-name {
+    max-width: 75px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-student-xp {
+    padding: 1px 6px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .nav-student-menu {
+    width: min(290px, calc(100vw - 20px));
+    right: 0;
+  }
+
   .exercise-header {
     flex-direction: column;
     align-items: flex-start;
@@ -3261,6 +3388,113 @@ footer {
   .lesson-nav-btns>* {
     flex: 1;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 8px;
+  }
+
+  .nav-logo {
+    font-size: 0.98rem;
+    gap: 6px;
+  }
+
+  .nav-logo-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+
+  .nav-actions {
+    gap: 5px;
+  }
+
+  .nav-xp-badge {
+    padding: 3px 6px;
+    font-size: 0.72rem;
+    gap: 3px;
+  }
+
+  .theme-switch {
+    transform: scale(0.74);
+    margin: 0 -3px;
+  }
+
+  .nav-btn {
+    padding: 5px 9px;
+    font-size: 0.75rem;
+  }
+
+  .nav-classroom-tag .tag-name {
+    display: none;
+  }
+
+  .nav-classroom-tag {
+    padding: 2px 6px;
+    margin-left: 4px;
+  }
+
+  .nav-student-name {
+    max-width: 60px;
+  }
+
+  .nav-student-trigger {
+    padding: 3px 6px;
+    gap: 4px;
+  }
+
+  .stat-item {
+    padding: 0 6px;
+  }
+
+  .stat-number {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .navbar {
+    padding: 0 6px;
+  }
+
+  .nav-logo {
+    font-size: 0.9rem;
+    gap: 4px;
+  }
+
+  .nav-logo-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+
+  .nav-actions {
+    gap: 4px;
+  }
+
+  .nav-xp-badge {
+    padding: 2px 5px;
+    font-size: 0.68rem;
+  }
+
+  .nav-btn {
+    padding: 4px 7px;
+    font-size: 0.72rem;
+  }
+
+  .theme-switch {
+    transform: scale(0.7);
+    margin: 0 -4px;
+  }
+
+  .nav-student-xp {
+    display: none;
+  }
+
+  .nav-student-name {
+    max-width: 50px;
   }
 }
 
@@ -3480,6 +3714,7 @@ html {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 /* ── ทรานซิชันตอนสลับ (เปิดเฉพาะตอนกด) ── */
@@ -3507,7 +3742,7 @@ html {
 
 /* ── XP Badge ── */
 .nav-xp-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
@@ -3518,6 +3753,8 @@ html {
   font-weight: 600;
   color: var(--ink);
   box-shadow: 2px 2px 0 var(--ink);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 [data-theme="dark"] .nav-xp-badge {
   background: var(--yellow);
