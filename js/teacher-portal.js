@@ -52,6 +52,24 @@ async function teacherFetch(url, options = {}) {
     window.location.href = 'teacher-login.html';
     throw new Error('Unauthorized');
   }
+
+  // Safe json parser
+  const rawTextPromise = res.text();
+  res.json = async () => {
+    const text = await rawTextPromise;
+    try {
+      return JSON.parse(text);
+    } catch {
+      if (window.location.protocol === 'file:') {
+        throw new Error('คุณกำลังเปิดไฟล์ผ่าน file:// กรุณาเปิดผ่าน http://localhost:3000');
+      }
+      if (res.status === 404 || text.includes('The page') || text.includes('Cannot GET')) {
+        throw new Error(`ไม่พบ API เซิร์ฟเวอร์ (${res.status} Not Found) กรุณาตรวจสอบว่ารัน 'node server.js' แล้วหรือยัง`);
+      }
+      throw new Error(`เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (${res.status}): ${text.slice(0, 80)}`);
+    }
+  };
+
   return res;
 }
 

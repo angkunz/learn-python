@@ -29,6 +29,24 @@ const ClassroomClient = {
     return !!(session && session.token && session.classroom);
   },
 
+  async safeJson(res) {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      if (window.location.protocol === 'file:') {
+        throw new Error('คุณกำลังเปิดไฟล์ผ่าน file:// กรุณาเปิดผ่าน http://localhost:3000');
+      }
+      if (window.location.port !== '3000' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        throw new Error(`คุณกำลังเปิดผ่านพอร์ต :${window.location.port || '80'} (ไม่ใช่พอร์ต 3000) กรุณาเปิดผ่าน http://localhost:3000`);
+      }
+      if (res.status === 404 || text.includes('The page') || text.includes('Cannot GET') || text.includes('<!DOCTYPE html>')) {
+        throw new Error(`ไม่พบ API เซิร์ฟเวอร์ (${res.status} Not Found) กรุณาตรวจสอบว่ารัน 'node server.js' หรือ 'npm start' แล้วหรือยัง`);
+      }
+      throw new Error(`เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (${res.status}): ${text.slice(0, 100)}`);
+    }
+  },
+
   // ── API: Student Login (Existing Account) ──
   async login(studentIdCode, password) {
     const res = await fetch('/api/student/login', {
@@ -36,7 +54,7 @@ const ClassroomClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ studentIdCode, password })
     });
-    const data = await res.json();
+    const data = await this.safeJson(res);
     if (!res.ok) {
       throw new Error(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
     }
@@ -51,7 +69,7 @@ const ClassroomClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ studentIdCode, name, gradeClass, studentNumber, password, classroomCode })
     });
-    const data = await res.json();
+    const data = await this.safeJson(res);
     if (!res.ok) {
       throw new Error(data.error || 'ลงทะเบียนไม่สำเร็จ');
     }
@@ -73,7 +91,7 @@ const ClassroomClient = {
       },
       body: JSON.stringify({ code })
     });
-    const data = await res.json();
+    const data = await this.safeJson(res);
     if (!res.ok) {
       throw new Error(data.error || 'เข้าร่วมห้องเรียนไม่สำเร็จ');
     }
@@ -90,7 +108,7 @@ const ClassroomClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, name, studentNumber, password })
     });
-    const data = await res.json();
+    const data = await this.safeJson(res);
     if (!res.ok) {
       throw new Error(data.error || 'ไม่สามารถเข้าร่วมห้องเรียนได้');
     }

@@ -260,6 +260,24 @@
     }
   }
 
+  async function safeParseJson(res) {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      if (window.location.protocol === 'file:') {
+        throw new Error('คุณกำลังเปิดไฟล์ผ่าน file:// ทำให้ไม่สามารถเชื่อมต่อระบบหลังบ้านได้ กรุณาเปิดเว็บผ่าน http://localhost:3000');
+      }
+      if (window.location.port !== '3000' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        throw new Error(`คุณกำลังเปิดผ่านพอร์ต :${window.location.port || '80'} (ไม่ใช่พอร์ตของเซิร์ฟเวอร์ Node.js) กรุณาเปิดผ่าน http://localhost:3000`);
+      }
+      if (res.status === 404 || text.includes('The page') || text.includes('Cannot GET') || text.includes('<!DOCTYPE html>')) {
+        throw new Error(`ไม่พบ API เซิร์ฟเวอร์ (${res.status} Not Found) กรุณาตรวจสอบว่ารัน 'node server.js' หรือ 'npm start' แล้วหรือยัง`);
+      }
+      throw new Error(`เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (${res.status}): ${text.slice(0, 100)}`);
+    }
+  }
+
   async function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value.trim();
@@ -277,7 +295,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (!res.ok) throw new Error(data.error || 'เข้าสู่ระบบไม่สำเร็จ');
 
       localStorage.setItem(TEACHER_TOKEN_KEY, data.token);
@@ -312,7 +330,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (!res.ok) throw new Error(data.error || 'ลงทะเบียนไม่สำเร็จ');
 
       localStorage.setItem(TEACHER_TOKEN_KEY, data.token);
