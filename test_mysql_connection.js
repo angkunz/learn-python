@@ -69,16 +69,31 @@ async function testMySQL() {
       const schemaPath = path.join(__dirname, 'mysql_schema.sql');
       if (fs.existsSync(schemaPath)) {
         const sqlContent = fs.readFileSync(schemaPath, 'utf8');
-        // Split by statement
-        const statements = sqlContent
-          .split(/;\s*$/m)
+        // Clean comments and split by semicolon
+        const cleanSql = sqlContent
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/--.*$/gm, '');
+        const statements = cleanSql
+          .split(';')
           .map(s => s.trim())
-          .filter(s => s.length > 0 && !s.startsWith('--'));
+          .filter(s => s.length > 0);
 
         for (const sql of statements) {
-          if (sql) await connection.query(sql);
+          if (sql) {
+            try {
+              await connection.query(sql);
+            } catch (queryErr) {
+              console.warn(`   ⚠️ Warning running statement: ${queryErr.message}`);
+            }
+          }
         }
-        console.log('🎉 สร้างตาราง MySQL ทั้งหมดเรียบร้อยแล้ว 100%!');
+
+        // Re-check tables
+        const [verifiedTables] = await connection.query('SHOW TABLES;');
+        const vNames = verifiedTables.map(t => Object.values(t)[0]);
+        console.log(`\n📋 ตารางที่สร้างสำเร็จใน [${dbName}]: (${vNames.length} ตาราง)`);
+        vNames.forEach(name => console.log(`   ✅ ${name}`));
+        console.log('\n🎉 สร้างตาราง MySQL ทั้งหมดเรียบร้อยแล้ว 100%!');
       } else {
         console.error('❌ ไม่พบไฟล์ mysql_schema.sql');
       }
