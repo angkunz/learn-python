@@ -35,16 +35,21 @@
       margin-bottom: 8px;
     }
     .playground-card {
-      background: rgba(13, 17, 23, 0.7);
-      border: 1px solid rgba(124, 58, 237, 0.3);
+      background: var(--surface, #ffffff);
+      border: var(--bw, 2px) solid var(--ink, #16161a);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow, 4px 4px 0 var(--ink));
       display: flex;
       flex-direction: row;
       gap: 24px;
       flex: 1;
       min-height: 0; /* important for flex children to scroll */
+    }
+    [data-theme="dark"] .playground-card {
+      background: rgba(13, 17, 23, 0.7);
+      border-color: rgba(124, 58, 237, 0.3);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
     }
     .playground-left, .playground-right {
       flex: 1;

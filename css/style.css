@@ -1315,6 +1315,66 @@ footer {
   gap: 5px;
 }
 
+/* ── Section Container (Theory & Exercise Cards) ── */
+.section-container {
+  background: var(--surface, #ffffff);
+  border: var(--bw, 2px) solid var(--ink, #16161a);
+  border-radius: var(--radius-xl, 20px);
+  padding: 28px;
+  margin-top: 24px;
+  box-shadow: var(--shadow, 4px 4px 0 var(--ink));
+  color: var(--text-primary);
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+[data-theme="dark"] .section-container {
+  background: var(--surface-2, #181b26);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.theory-section-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border, #e2e8f0);
+}
+[data-theme="dark"] .theory-section-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.theory-section-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--primary, #4f46e5);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+[data-theme="dark"] .theory-section-title {
+  color: var(--primary-light, #818cf8);
+}
+
+.theory-section-desc {
+  color: var(--text-secondary, #5A5A66);
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+[data-theme="dark"] .theory-section-desc {
+  color: #94a3b8;
+}
+
+/* When theory-content is inside section-container, remove redundant nested border/shadow */
+.section-container > .theory-content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+}
+
 /* ── Theory Content ── */
 .theory-content {
   background: #fff;
