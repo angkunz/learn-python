@@ -11,22 +11,29 @@ const path = require('path');
 async function testMySQL() {
   console.log('🐬 กำลังทดสอบการเชื่อมต่อ MySQL / MariaDB...\n');
 
+  const isTiDB = String(process.env.MYSQL_HOST || '').includes('tidbcloud.com') || 
+                 parseInt(process.env.MYSQL_PORT || '0') === 4000 || 
+                 process.env.MYSQL_SSL === 'true';
+
   const config = process.env.MYSQL_URL ? {
-    uri: process.env.MYSQL_URL
+    uri: process.env.MYSQL_URL,
+    ...(isTiDB ? { ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true } } : {})
   } : {
     host: process.env.MYSQL_HOST || 'localhost',
-    port: parseInt(process.env.MYSQL_PORT || '3306'),
+    port: parseInt(process.env.MYSQL_PORT || (isTiDB ? '4000' : '3306')),
     user: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || '',
     database: process.env.MYSQL_DATABASE || 'pylearn',
-    charset: 'utf8mb4'
+    charset: 'utf8mb4',
+    ...(isTiDB ? { ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true } } : {})
   };
 
   console.log(`📌 ข้อมูลการเชื่อมต่อ:`);
   console.log(`   - Host: ${config.host || 'URI'}`);
-  console.log(`   - Port: ${config.port || '3306'}`);
+  console.log(`   - Port: ${config.port || (isTiDB ? '4000' : '3306')}`);
   console.log(`   - User: ${config.user || '-'}`);
-  console.log(`   - Database: ${config.database || '-'}\n`);
+  console.log(`   - Database: ${config.database || '-'}`);
+  console.log(`   - SSL: ${isTiDB ? 'เปิดใช้งาน (TLSv1.2 สำหรับ TiDB Cloud / Cloud MySQL)' : 'ปิด (Localhost)'}\n`);
 
   let connection;
   try {
