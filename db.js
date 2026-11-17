@@ -31,6 +31,7 @@ db.exec(`
     code TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
+    curriculum_lessons TEXT,
     gemini_api_key TEXT,
     gemini_model TEXT DEFAULT 'gemini-2.5-flash',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -98,6 +99,9 @@ db.exec(`
 `);
 
 // Safe column migrations for existing databases
+try {
+  db.exec('ALTER TABLE classrooms ADD COLUMN curriculum_lessons TEXT;');
+} catch {}
 try {
   db.exec('ALTER TABLE students ADD COLUMN password_hash TEXT;');
 } catch {}

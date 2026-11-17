@@ -104,6 +104,14 @@ function renderClassroomCards() {
       ? '<span class="cls-api-status ready">⚡ AI พร้อมใช้งาน</span>'
       : '<span class="cls-api-status missing">⚠️ ยังไม่ใส่ AI Key</span>';
 
+    let lessonCount = 15;
+    if (cls.curriculum_lessons) {
+      try {
+        const c = JSON.parse(cls.curriculum_lessons);
+        if (c.lessonIds && Array.isArray(c.lessonIds)) lessonCount = c.lessonIds.length;
+      } catch {}
+    }
+
     return `
       <div class="classroom-card ${isAct}" onclick="selectClassroom('${cls.id}')" id="cls-card-${cls.id}">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -111,14 +119,17 @@ function renderClassroomCards() {
             ${cls.code}
             <button class="btn-copy-code" onclick="event.stopPropagation(); copyJoinLink('${cls.code}')" title="คัดลอกลิงก์ให้นักเรียน">📋</button>
           </span>
-          <button class="btn-copy-code" onclick="event.stopPropagation(); openEditClassroomModal('${cls.id}')" title="ตั้งค่าห้องเรียน / API Key" style="font-size:1.1rem;">⚙️</button>
+          <div style="display:flex; gap:4px;">
+            <button class="btn-copy-code" onclick="event.stopPropagation(); openCurriculumModal('${cls.id}')" title="กำหนดหลักสูตร" style="font-size:1.1rem;">📚</button>
+            <button class="btn-copy-code" onclick="event.stopPropagation(); openEditClassroomModal('${cls.id}')" title="ตั้งค่าห้องเรียน / API Key" style="font-size:1.1rem;">⚙️</button>
+          </div>
         </div>
 
         <div class="cls-name">${escapeHtml(cls.name)}</div>
         <div class="cls-desc">${escapeHtml(cls.description || 'ไม่มีคำอธิบาย')}</div>
 
         <div class="cls-footer">
-          <div>👥 นักเรียน: <b>${cls.student_count || 0}</b> คน</div>
+          <div>👥 <b>${cls.student_count || 0}</b> คน | 📚 <b>${lessonCount}</b> บท</div>
           <div>${apiBadge}</div>
         </div>
       </div>
@@ -176,6 +187,11 @@ async function loadClassroomOverview(id) {
     document.getElementById('stat-active-today').textContent = data.stats.activeStudentsToday;
     document.getElementById('stat-pass-rate').textContent = `${data.stats.passRate}%`;
     document.getElementById('stat-ai-queries').textContent = data.stats.totalAIQuestions;
+
+    // Update active curriculum count in header badge
+    const activeLessonCount = data.classroom?.curriculum?.lessonIds?.length || 15;
+    const currBadge = document.getElementById('curr-lesson-count');
+    if (currBadge) currBadge.textContent = activeLessonCount;
 
     // Render Pedagogical Insights
     const insightsList = document.getElementById('insights-list');
@@ -275,6 +291,7 @@ async function loadClassroomMatrix(id) {
     if (!res.ok) throw new Error('Failed to load matrix');
     const data = await res.json();
     currentMatrixData = data.students || [];
+    currentClassroomCurriculum = data.classroom?.curriculum || null;
     renderMatrixTable(currentMatrixData);
   } catch (err) {
     console.error('Error loading matrix:', err);
@@ -299,14 +316,17 @@ function renderMatrixTable(students) {
     return;
   }
 
-  // Get available lesson list (from LESSONS_DATA if loaded)
-  const allLessons = typeof LESSONS_DATA !== 'undefined' ? LESSONS_DATA.slice(0, 12) : [];
+  // Get active lesson list for this classroom's curriculum
+  let activeLessons = typeof LESSONS_DATA !== 'undefined' ? LESSONS_DATA : [];
+  if (currentClassroomCurriculum && currentClassroomCurriculum.lessonIds && currentClassroomCurriculum.lessonIds.length > 0) {
+    activeLessons = activeLessons.filter(l => currentClassroomCurriculum.lessonIds.includes(l.id));
+  }
 
   tbody.innerHTML = students.map(s => {
-    // Generate mini dots for lessons
+    // Generate mini dots for active lessons
     let dotsHtml = '';
-    if (allLessons.length > 0) {
-      dotsHtml = allLessons.map(l => {
+    if (activeLessons.length > 0) {
+      dotsHtml = activeLessons.map(l => {
         const prog = s.progress && s.progress[l.id];
         if (prog && prog.completed) return `<span class="status-dot completed" title="${l.title}: สำเร็จแล้ว">✓</span>`;
         if (prog && prog.attempts > 0) return `<span class="status-dot in-progress" title="${l.title}: กำลังทำ">⏳</span>`;
@@ -662,6 +682,158 @@ function switchDetailsTab(tabName) {
 
   document.getElementById('overview-view').style.display = tabName === 'overview' ? 'block' : 'none';
   document.getElementById('matrix-view').style.display = tabName === 'matrix' ? 'block' : 'none';
+}
+
+// ── Classroom Curriculum Manager ──
+function openCurriculumModal(classroomId) {
+  const cls = classrooms.find(c => c.id === classroomId);
+  if (!cls) return;
+
+  const modal = document.getElementById('curriculum-modal');
+  modal.style.display = 'flex';
+  document.getElementById('curr-modal-cls-name').textContent = cls.name;
+  document.getElementById('curr-save-error').style.display = 'none';
+
+  // Parse existing curriculum or default to all
+  let activeIds = [];
+  let isSequential = false;
+  if (cls.curriculum_lessons) {
+    try {
+      const c = JSON.parse(cls.curriculum_lessons);
+      if (c.lessonIds && Array.isArray(c.lessonIds)) activeIds = c.lessonIds;
+      if (c.sequential) isSequential = true;
+    } catch {}
+  }
+  if (activeIds.length === 0) {
+    activeIds = (typeof LESSONS_DATA !== 'undefined' ? LESSONS_DATA : []).map(l => l.id);
+  }
+
+  document.getElementById('curr-sequential-checkbox').checked = isSequential;
+  renderCurriculumModalList(activeIds);
+}
+
+function closeCurriculumModal() {
+  document.getElementById('curriculum-modal').style.display = 'none';
+}
+
+function renderCurriculumModalList(activeIds) {
+  const container = document.getElementById('curriculum-lessons-list');
+  if (!container || typeof LESSONS_DATA === 'undefined') return;
+
+  container.innerHTML = LESSONS_DATA.map(l => {
+    const isChecked = activeIds.includes(l.id) ? 'checked' : '';
+    const exCount = l.exercises ? l.exercises.length : 0;
+    const levelLabel = {
+      elementary: '🌸 ประถม',
+      beginner: '🌱 ผู้เริ่มต้น',
+      intermediate: '🚀 ระดับกลาง',
+      advanced: '⚡ ระดับสูง'
+    }[l.level] || l.level;
+
+    return `
+      <label style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-alt); border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:all 0.15s;" class="curr-lesson-item">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <input type="checkbox" class="curr-lesson-cb" value="${l.id}" ${isChecked} onchange="updateCurriculumSummary()" style="width:18px; height:18px; cursor:pointer;">
+          <span style="font-size:1.2rem;">${l.icon || '📘'}</span>
+          <div>
+            <div style="font-weight:700; font-size:0.92rem; color:var(--text-primary);">${l.order}. ${escapeHtml(l.title)}</div>
+            <div style="font-size:0.78rem; color:var(--text-secondary);">${escapeHtml(l.description || '')}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:0.75rem; padding:2px 8px; border-radius:6px; background:rgba(99,102,241,0.1); color:var(--primary-light); font-weight:600;">
+            ${levelLabel}
+          </span>
+          <span style="font-size:0.75rem; color:var(--text-secondary);">
+            ${exCount} โจทย์
+          </span>
+        </div>
+      </label>
+    `;
+  }).join('');
+
+  updateCurriculumSummary();
+}
+
+function applyCurriculumPreset(type) {
+  const checkboxes = document.querySelectorAll('.curr-lesson-cb');
+  if (typeof LESSONS_DATA === 'undefined') return;
+
+  let targetIds = [];
+  if (type === 'all') {
+    targetIds = LESSONS_DATA.map(l => l.id);
+  } else if (type === 'junior') {
+    targetIds = LESSONS_DATA.slice(0, 6).map(l => l.id);
+  } else if (type === 'high') {
+    targetIds = LESSONS_DATA.slice(0, 10).map(l => l.id);
+  } else if (type === 'advanced') {
+    targetIds = LESSONS_DATA.slice(0, 12).map(l => l.id);
+  } else if (type === 'none') {
+    targetIds = [];
+  }
+
+  checkboxes.forEach(cb => {
+    cb.checked = targetIds.includes(cb.value);
+  });
+
+  updateCurriculumSummary();
+}
+
+function updateCurriculumSummary() {
+  const checked = document.querySelectorAll('.curr-lesson-cb:checked');
+  const count = checked.length;
+  document.getElementById('curr-selected-count').textContent = count;
+
+  let exSum = 0;
+  if (typeof LESSONS_DATA !== 'undefined') {
+    checked.forEach(cb => {
+      const l = LESSONS_DATA.find(item => item.id === cb.value);
+      if (l && l.exercises) exSum += l.exercises.length;
+    });
+  }
+  document.getElementById('curr-selected-exercises').textContent = exSum;
+}
+
+async function saveClassroomCurriculum() {
+  if (!selectedClassroomId) return;
+  const checked = Array.from(document.querySelectorAll('.curr-lesson-cb:checked')).map(cb => cb.value);
+  const isSequential = document.getElementById('curr-sequential-checkbox').checked;
+  const errBox = document.getElementById('curr-save-error');
+  const btn = document.getElementById('btn-curr-save');
+
+  if (checked.length === 0) {
+    errBox.textContent = '❌ กรุณาเลือกบทเรียนอย่างน้อย 1 บทเรียน';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  errBox.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังบันทึก...';
+
+  try {
+    const res = await teacherFetch(`/api/teacher/classrooms/${selectedClassroomId}/curriculum`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        lessonIds: checked,
+        sequential: isSequential
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'บันทึกหลักสูตรไม่สำเร็จ');
+
+    closeCurriculumModal();
+    if (window.showToast) window.showToast(`บันทึกหลักสูตรเรียบร้อยแล้ว (${checked.length} บทเรียน)`, 'success');
+    
+    await loadTeacherProfile();
+    selectClassroom(selectedClassroomId);
+  } catch (err) {
+    errBox.textContent = '❌ ' + err.message;
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 บันทึกหลักสูตรห้องเรียน';
+  }
 }
 
 function escapeHtml(str) {

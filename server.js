@@ -79,6 +79,15 @@ function createTeacherToken(teacher) {
   return `${teacher.id}:${sign}`;
 }
 
+function parseCurriculum(raw) {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 function authenticateStudent(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -87,7 +96,7 @@ function authenticateStudent(req, res, next) {
   const token = authHeader.split(' ')[1];
   try {
     const stmt = db.prepare(`
-      SELECT s.*, c.name as classroom_name, c.code as classroom_code, c.gemini_api_key, c.gemini_model, c.teacher_id, t.name as teacher_name
+      SELECT s.*, c.name as classroom_name, c.code as classroom_code, c.curriculum_lessons, c.gemini_api_key, c.gemini_model, c.teacher_id, t.name as teacher_name
       FROM students s
       LEFT JOIN classrooms c ON s.classroom_id = c.id
       LEFT JOIN teachers t ON c.teacher_id = t.id
@@ -309,6 +318,43 @@ app.put('/api/teacher/classrooms/:id', authenticateTeacher, (req, res) => {
   }
 });
 
+// Update Classroom Curriculum
+app.put('/api/teacher/classrooms/:id/curriculum', authenticateTeacher, (req, res) => {
+  const { id } = req.params;
+  const { lessonIds, sequential = false } = req.body;
+
+  try {
+    const cls = db.prepare('SELECT id FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    if (!cls) {
+      return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
+    }
+
+    if (!Array.isArray(lessonIds) || lessonIds.length === 0) {
+      return res.status(400).json({ error: 'กรุณาเลือกบทเรียนอย่างน้อย 1 บทเรียน' });
+    }
+
+    const curriculumData = JSON.stringify({
+      lessonIds,
+      sequential: !!sequential,
+      updated_at: new Date().toISOString()
+    });
+
+    db.prepare('UPDATE classrooms SET curriculum_lessons = ? WHERE id = ?').run(curriculumData, id);
+
+    res.json({
+      success: true,
+      message: 'บันทึกหลักสูตรประจำห้องเรียนเรียบร้อยแล้ว',
+      curriculum: {
+        lessonIds,
+        sequential: !!sequential
+      }
+    });
+  } catch (err) {
+    console.error('Update curriculum error:', err);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการบันทึกหลักสูตร' });
+  }
+});
+
 app.delete('/api/teacher/classrooms/:id', authenticateTeacher, (req, res) => {
   const { id } = req.params;
   try {
@@ -410,6 +456,7 @@ app.get('/api/teacher/classrooms/:id/overview', authenticateTeacher, (req, res) 
         description: classroom.description,
         hasApiKey: !!classroom.gemini_api_key,
         gemini_model: classroom.gemini_model,
+        curriculum: parseCurriculum(classroom.curriculum_lessons),
         created_at: classroom.created_at
       },
       stats: {
@@ -434,7 +481,7 @@ app.get('/api/teacher/classrooms/:id/overview', authenticateTeacher, (req, res) 
 app.get('/api/teacher/classrooms/:id/matrix', authenticateTeacher, (req, res) => {
   const { id } = req.params;
   try {
-    const classroom = db.prepare('SELECT id, name FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const classroom = db.prepare('SELECT id, name, curriculum_lessons FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!classroom) {
       return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
     }
@@ -473,6 +520,11 @@ app.get('/api/teacher/classrooms/:id/matrix', authenticateTeacher, (req, res) =>
     });
 
     res.json({
+      classroom: {
+        id: classroom.id,
+        name: classroom.name,
+        curriculum: parseCurriculum(classroom.curriculum_lessons)
+      },
       students: students.map(s => ({
         ...s,
         progress: progressMap[s.id] || {}
@@ -746,7 +798,8 @@ app.post('/api/student/register', (req, res) => {
         name: classroom.name,
         description: classroom.description,
         teacherName: classroom.teacher_name,
-        hasTeacherApiKey: !!classroom.gemini_api_key
+        hasTeacherApiKey: !!classroom.gemini_api_key,
+        curriculum: parseCurriculum(classroom.curriculum_lessons)
       } : null
     });
   } catch (err) {
@@ -767,7 +820,7 @@ app.post('/api/student/login', (req, res) => {
 
   try {
     const student = db.prepare(`
-      SELECT s.*, c.id as cid, c.name as classroom_name, c.code as classroom_code, c.description as classroom_desc, c.gemini_api_key, c.gemini_model, t.name as teacher_name 
+      SELECT s.*, c.id as cid, c.name as classroom_name, c.code as classroom_code, c.description as classroom_desc, c.curriculum_lessons, c.gemini_api_key, c.gemini_model, t.name as teacher_name 
       FROM students s 
       LEFT JOIN classrooms c ON s.classroom_id = c.id 
       LEFT JOIN teachers t ON c.teacher_id = t.id 
@@ -813,7 +866,8 @@ app.post('/api/student/login', (req, res) => {
         name: student.classroom_name,
         description: student.classroom_desc,
         teacherName: student.teacher_name,
-        hasTeacherApiKey: !!student.gemini_api_key
+        hasTeacherApiKey: !!student.gemini_api_key,
+        curriculum: parseCurriculum(student.curriculum_lessons)
       } : null
     });
   } catch (err) {
@@ -853,7 +907,8 @@ app.post('/api/student/join-classroom', authenticateStudent, (req, res) => {
         name: classroom.name,
         description: classroom.description,
         teacherName: classroom.teacher_name,
-        hasTeacherApiKey: !!classroom.gemini_api_key
+        hasTeacherApiKey: !!classroom.gemini_api_key,
+        curriculum: parseCurriculum(classroom.curriculum_lessons)
       }
     });
   } catch (err) {
@@ -938,7 +993,8 @@ app.post('/api/student/join', (req, res) => {
         name: classroom.name,
         description: classroom.description,
         teacherName: classroom.teacher_name,
-        hasTeacherApiKey: !!classroom.gemini_api_key
+        hasTeacherApiKey: !!classroom.gemini_api_key,
+        curriculum: parseCurriculum(classroom.curriculum_lessons)
       }
     });
   } catch (err) {
@@ -970,7 +1026,8 @@ app.get('/api/student/session', authenticateStudent, (req, res) => {
       code: student.classroom_code,
       name: student.classroom_name,
       teacherName: student.teacher_name,
-      hasTeacherApiKey: !!student.gemini_api_key
+      hasTeacherApiKey: !!student.gemini_api_key,
+      curriculum: parseCurriculum(student.curriculum_lessons)
     } : null,
     progress: progress.map(p => ({
       lessonId: p.lesson_id,

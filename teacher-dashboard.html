@@ -88,7 +88,10 @@
           แชร์รหัสห้องเรียนหรือลิงก์ด้านบนให้นักเรียน เพื่อให้นักเรียนเข้าร่วมและใช้งาน AI ตรวจโค้ดฟรี
         </div>
       </div>
-      <div style="display:flex; gap:10px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn-secondary" onclick="openCurriculumModal(selectedClassroomId)" style="font-size:0.88rem; padding:8px 14px; background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.3); color:var(--primary-light);" title="กำหนดบทเรียนที่นักเรียนในห้องนี้จะได้เรียน">
+          📚 กำหนดหลักสูตร (<span id="curr-lesson-count">15</span> บท)
+        </button>
         <button class="btn-secondary" onclick="openEditClassroomModal(selectedClassroomId)" style="font-size:0.88rem; padding:8px 14px;">
           ⚙️ ตั้งค่าห้อง / API Key
         </button>
@@ -333,6 +336,56 @@
         <button type="submit" class="btn-primary" id="btn-update-submit">บันทึกการเปลี่ยนแปลง</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- MODAL 4: Classroom Curriculum Manager -->
+<div class="modal-overlay" id="curriculum-modal" style="display:none;" onclick="if(event.target===this)closeCurriculumModal()">
+  <div class="modal-card" style="max-width:760px; max-height:90vh; display:flex; flex-direction:column;">
+    <div class="modal-title" style="flex-shrink:0;">
+      <span>📚 กำหนดหลักสูตรประจำห้องเรียน: <span id="curr-modal-cls-name" style="color:var(--primary-light);">...</span></span>
+      <button class="modal-close-btn" onclick="closeCurriculumModal()">✕</button>
+    </div>
+    
+    <div style="flex-shrink:0; margin-bottom:14px; font-size:0.86rem; color:var(--text-secondary); line-height:1.5;">
+      💡 เลือกบทเรียนที่คุณครูต้องการเปิดสอนในห้องเรียนนี้ นักเรียนที่เข้าร่วมห้องเรียนจะมองเห็นและทำแบบฝึกหัดได้เฉพาะบทเรียนที่คุณครูกำหนดไว้เท่านั้น
+    </div>
+
+    <!-- Presets -->
+    <div style="flex-shrink:0; display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
+      <span style="font-size:0.82rem; font-weight:700; color:var(--text-primary); align-self:center;">เทมเพลตด่วน:</span>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('all')" style="padding:4px 10px; font-size:0.8rem;">⚡ ทั้งหมด (15 บท)</button>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('junior')" style="padding:4px 10px; font-size:0.8rem;">🌱 พื้นฐาน ม.ต้น (บทที่ 1-6)</button>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('high')" style="padding:4px 10px; font-size:0.8rem;">🚀 เขียนโค้ด ม.ปลาย (บทที่ 1-10)</button>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('advanced')" style="padding:4px 10px; font-size:0.8rem;">⚡ ม.ปลาย ขั้นสูง (บทที่ 1-12)</button>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('none')" style="padding:4px 10px; font-size:0.8rem; color:var(--red);">ล้างทั้งหมด</button>
+    </div>
+
+    <!-- Lesson Checkboxes List -->
+    <div id="curriculum-lessons-list" style="flex:1; overflow-y:auto; padding-right:6px; margin-bottom:16px; display:flex; flex-direction:column; gap:8px;">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Sequential Learning Option & Summary Footer -->
+    <div style="flex-shrink:0; padding-top:14px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <label style="display:flex; align-items:center; gap:8px; font-size:0.86rem; font-weight:600; cursor:pointer;">
+        <input type="checkbox" id="curr-sequential-checkbox" style="width:16px; height:16px; cursor:pointer;">
+        <span>🔒 บังคับเรียนตามลำดับ (ต้องผ่านบทก่อนหน้าจึงจะปลดล็อกบทถัดไป)</span>
+      </label>
+
+      <div style="font-size:0.88rem; color:var(--text-secondary);">
+        เปิดสอน: <b id="curr-selected-count" style="color:var(--primary-light);">15</b> จาก 15 บท (<span id="curr-selected-exercises">45</span> โจทย์)
+      </div>
+    </div>
+
+    <div id="curr-save-error" style="display:none; color:var(--red); font-size:0.85rem; margin-top:10px;"></div>
+
+    <div style="flex-shrink:0; display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+      <button type="button" class="btn-secondary" onclick="closeCurriculumModal()">ยกเลิก</button>
+      <button type="button" class="btn-primary" id="btn-curr-save" onclick="saveClassroomCurriculum()">
+        💾 บันทึกหลักสูตรห้องเรียน
+      </button>
+    </div>
   </div>
 </div>
 

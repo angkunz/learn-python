@@ -267,92 +267,193 @@ body {
   transition: width .5s ease;
 }
 
-/* ── Unified Classroom Navbar Integration (No Overlapping Bars) ── */
-.classroom-nav-pill {
+/* ── Clean Classroom Navbar & Student Profile Dropdown ── */
+body.is-classroom-mode .hide-in-classroom {
+  display: none !important;
+}
+
+.nav-classroom-tag {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   background: var(--yellow-soft, #fef3c7);
-  color: var(--ink, #16161a);
-  border: var(--bw, 2px) solid var(--ink, #16161a);
-  padding: 4px 12px;
+  border: 1.5px solid var(--ink, #16161a);
   border-radius: var(--pill, 100px);
-  font-size: 0.85rem;
+  padding: 4px 12px;
+  font-size: 0.82rem;
   font-weight: 700;
+  color: var(--ink, #16161a);
   box-shadow: 2px 2px 0 var(--ink, #16161a);
-  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 8px;
 }
-
-[data-theme="dark"] .classroom-nav-pill {
+[data-theme="dark"] .nav-classroom-tag {
   background: #1e1b4b;
-  color: #e0e7ff;
   border-color: #6366f1;
+  color: #e0e7ff;
+  box-shadow: 2px 2px 0 #6366f1;
 }
-
-.classroom-nav-pill .badge-code {
+.nav-classroom-tag .tag-code {
   background: var(--orange, #f97316);
   color: #fff;
   padding: 1px 7px;
-  border-radius: var(--pill, 100px);
+  border-radius: 6px;
   font-family: 'Fira Code', monospace;
-  font-size: 0.8rem;
-  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
 }
 
-.classroom-nav-pill .teacher-lbl {
-  color: var(--text-secondary, #5A5A66);
-  font-weight: 500;
-  font-size: 0.8rem;
+/* Student Profile Dropdown */
+.nav-student-dropdown {
+  position: relative;
+  display: inline-block;
 }
-
-.student-identity-badge {
+.nav-student-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: 8px;
+  background: var(--surface, #ffffff);
+  border: 1.5px solid var(--ink, #16161a);
   border-radius: var(--pill, 100px);
-  background: rgba(99, 102, 241, 0.1);
-  border: 1.5px solid rgba(99, 102, 241, 0.3);
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
   color: var(--text-primary);
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: all 0.15s ease;
+}
+.nav-student-trigger:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+[data-theme="dark"] .nav-student-trigger {
+  background: var(--surface-2);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+.nav-student-avatar {
+  font-size: 0.95rem;
+}
+.nav-student-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-.badge-ai-ready {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(34, 197, 94, 0.15);
-  border: 1.5px solid #22c55e;
-  color: #16a34a;
-  padding: 3px 8px;
+.nav-student-xp {
+  color: #ca8a04;
+  background: rgba(234, 179, 8, 0.15);
+  padding: 2px 8px;
   border-radius: var(--pill, 100px);
   font-size: 0.78rem;
   font-weight: 700;
-  white-space: nowrap;
 }
-[data-theme="dark"] .badge-ai-ready {
-  color: #4ade80;
+[data-theme="dark"] .nav-student-xp {
+  color: #facc15;
+}
+.nav-student-caret {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
 }
 
-.btn-leave-class {
-  background: transparent;
-  border: 1.5px solid var(--border, #cbd5e1);
-  color: var(--text-secondary, #64748b);
-  padding: 4px 10px;
-  border-radius: var(--pill, 100px);
+.nav-student-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: var(--surface, #ffffff);
+  border: 2px solid var(--ink, #16161a);
+  border-radius: 16px;
+  box-shadow: 4px 6px 0 var(--ink);
+  padding: 16px;
+  z-index: 1000;
+  display: none;
+  animation: dropIn 0.15s ease-out;
+}
+.nav-student-menu.open {
+  display: block;
+}
+[data-theme="dark"] .nav-student-menu {
+  background: #181b26;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.menu-header {
+  margin-bottom: 12px;
+}
+.menu-name {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.menu-sub {
   font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+.menu-divider {
+  height: 1px;
+  background: var(--border, #e2e8f0);
+  margin: 10px 0;
+}
+.menu-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+.menu-info-lbl {
+  color: var(--text-secondary);
+}
+.menu-info-val {
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
+  color: var(--text-primary);
 }
-.btn-leave-class:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: #ef4444;
+.menu-link-btn {
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  background: var(--primary, #4f46e5);
+  color: #fff !important;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  transition: opacity 0.15s;
+}
+.menu-link-btn:hover {
+  opacity: 0.9;
+}
+.menu-leave-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
   color: #ef4444;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s;
 }
+.menu-leave-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Fallback legacy badges */
+.classroom-nav-pill { display: none; }
+.student-identity-badge { display: none; }
+.badge-ai-ready { display: none; }
+.btn-leave-class { display: none; }
 
 /* ── Hero Section ── */
 .hero {

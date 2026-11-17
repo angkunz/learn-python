@@ -61,7 +61,8 @@ async function runTests() {
 
   // 4. Student Register (Step 1: ID, Name, Grade, Number, Password) & Join Classroom (Step 2)
   console.log('\n4. Testing Student Account Register & Login flow...');
-  const testStudentIdCode = '50' + Math.floor(1000 + Math.random() * 9000);
+  const testStudentIdCode = '5' + Date.now().toString().slice(-5);
+  const testStudentNumber = String(Math.floor(10 + Math.random() * 80));
   const regStdRes = await fetch(`${baseUrl}/api/student/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -69,7 +70,7 @@ async function runTests() {
       studentIdCode: testStudentIdCode,
       name: 'เด็กชายสมเกียรติ มุ่งมั่น',
       gradeClass: 'ม.4/1',
-      studentNumber: '05',
+      studentNumber: testStudentNumber,
       password: 'mypassword123'
     })
   });
@@ -235,6 +236,37 @@ async function runTests() {
   const csvText = await csvRes.text();
   assert.ok(csvText.includes('เด็กชายสมเกียรติ มุ่งมั่น'));
   console.log('   ✅ CSV Export generated successfully (UTF-8 with Thai support)!');
+
+  // 10. Teacher Sets Custom Classroom Curriculum & Student Sync
+  console.log('\n10. Testing Teacher Custom Classroom Curriculum Definition & Student Sync...');
+  const customLessons = ['1-hello-world', '2-variables', '3-data-types', '4-operators', '5-if-else', '6-lists'];
+  const setCurrRes = await fetch(`${baseUrl}/api/teacher/classrooms/${classroom.id}/curriculum`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${teacherToken}`
+    },
+    body: JSON.stringify({
+      lessonIds: customLessons,
+      sequential: true
+    })
+  });
+  const setCurrData = await setCurrRes.json();
+  assert.strictEqual(setCurrRes.status, 200);
+  assert.strictEqual(setCurrData.success, true);
+  assert.deepStrictEqual(setCurrData.curriculum.lessonIds, customLessons);
+  console.log(`   ✅ Teacher configured custom curriculum: [${customLessons.length} lessons, sequential: true]`);
+
+  // Verify Student Session receives this curriculum
+  const stdSessionRes = await fetch(`${baseUrl}/api/student/session`, {
+    headers: { 'Authorization': `Bearer ${studentToken}` }
+  });
+  const stdSessionData = await stdSessionRes.json();
+  assert.strictEqual(stdSessionRes.status, 200);
+  assert.ok(stdSessionData.classroom.curriculum);
+  assert.strictEqual(stdSessionData.classroom.curriculum.lessonIds.length, 6);
+  assert.strictEqual(stdSessionData.classroom.curriculum.sequential, true);
+  console.log('   ✅ Student session verified to receive teacher-defined curriculum automatically!');
 
   console.log('\n======================================================');
   console.log('🎉 ALL TESTS PASSED! PyLearn Classroom is 100% operational!');

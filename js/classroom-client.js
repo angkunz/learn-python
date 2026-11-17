@@ -173,79 +173,142 @@ const ClassroomClient = {
     return data.feedback;
   },
 
-  // ── UI Integration: Seamlessly embed into Main Navbar (No Overlapping Bars) ──
+  // ── UI Integration: Clean, Uncluttered Navbar ──
   integrateNavbar() {
-    // 1. Remove any legacy banner if exists
-    const legacy = document.getElementById('classroom-banner-container');
-    if (legacy) legacy.remove();
-
     const session = this.getSession();
     const navbar = document.querySelector('.navbar');
     if (!navbar) return;
 
-    // Find API Key button anywhere in navbar
+    // Clean up any legacy injected elements
+    document.getElementById('classroom-banner-container')?.remove();
+    document.getElementById('nav-student-pill')?.remove();
+    navbar.querySelectorAll('.classroom-nav-pill').forEach(el => el.remove());
+
     const apiKeyBtn = navbar.querySelector('button[onclick*="showApiKeyModal"], button[title*="API Key"]');
 
     if (!session || !session.classroom) {
-      // Standalone mode: ensure API Key button is visible
+      document.body.classList.remove('is-classroom-mode');
       if (apiKeyBtn) apiKeyBtn.style.display = '';
       return;
     }
 
-    // In Classroom Mode: HIDE the API Key button completely!
-    if (apiKeyBtn) {
-      apiKeyBtn.style.display = 'none';
+    // Set classroom mode on body
+    document.body.classList.add('is-classroom-mode');
+
+    // 1. In Classroom Mode: HIDE all redundant links in navbar
+    if (apiKeyBtn) apiKeyBtn.style.display = 'none';
+
+    // Hide redundant navigation links (เข้าห้องเรียน, สำหรับครูผู้สอน)
+    navbar.querySelectorAll('a[href*="join.html"], a[href*="teacher-login.html"]').forEach(el => {
+      el.style.display = 'none';
+      el.classList.add('hide-in-classroom');
+    });
+
+    // Ensure .nav-links has clean, relevant links for student
+    const navLinks = navbar.querySelector('.nav-links');
+    if (navLinks) {
+      let lessonLink = navLinks.querySelector('a[href="lesson.html"]');
+      if (!lessonLink && !document.getElementById('lesson-breadcrumb')) {
+        lessonLink = document.createElement('a');
+        lessonLink.href = 'lesson.html';
+        lessonLink.textContent = 'บทเรียน';
+        lessonLink.style.fontWeight = '700';
+        navLinks.appendChild(lessonLink);
+      }
     }
 
     const { student, classroom } = session;
-    const studentLabel = student.studentNumber ? `เลขที่ ${student.studentNumber} : ${student.name}` : student.name;
+    const studentLabel = student.studentNumber ? `เลขที่ ${student.studentNumber}: ${student.name}` : student.name;
+    const currentXp = (window.getXP && typeof window.getXP === 'function') ? window.getXP() : (student.totalXp || 0);
 
-    // Check if classroom pill already injected
-    let classPill = navbar.querySelector('.classroom-nav-pill');
-    if (!classPill) {
-      classPill = document.createElement('div');
-      classPill.className = 'classroom-nav-pill';
-
-      // Insert after nav-logo or in breadcrumb
-      const breadcrumb = document.getElementById('lesson-breadcrumb');
-      if (breadcrumb) {
-        breadcrumb.prepend(classPill);
-      } else {
-        const navLinks = navbar.querySelector('.nav-links');
-        if (navLinks) {
-          navLinks.prepend(classPill);
-        } else {
-          navbar.querySelector('.nav-logo')?.insertAdjacentElement('afterend', classPill);
-        }
-      }
+    // 2. Compact Classroom Badge right next to Logo
+    let tag = navbar.querySelector('.nav-classroom-tag');
+    if (!tag) {
+      tag = document.createElement('div');
+      tag.className = 'nav-classroom-tag';
+      navbar.querySelector('.nav-logo')?.insertAdjacentElement('afterend', tag);
     }
-
-    classPill.innerHTML = `
-      <span>🏫 <b>${escapeHtml(classroom.name)}</b></span>
-      <span class="badge-code">${escapeHtml(classroom.code)}</span>
-      <span class="teacher-lbl">(ครู: ${escapeHtml(classroom.teacherName)})</span>
+    tag.innerHTML = `
+      <span class="tag-icon">🏫</span>
+      <span class="tag-name">${escapeHtml(classroom.name)}</span>
+      <span class="tag-code">${escapeHtml(classroom.code)}</span>
     `;
+    tag.title = `ครูผู้สอน: ${classroom.teacherName}`;
 
-    // Inject Student info & Leave button into nav-actions
+    // 3. Compact Student Profile Dropdown in .nav-actions
     const navActions = navbar.querySelector('.nav-actions');
     if (navActions) {
-      let studentPill = navActions.querySelector('#nav-student-pill');
-      if (!studentPill) {
-        studentPill = document.createElement('div');
-        studentPill.id = 'nav-student-pill';
-        studentPill.style.display = 'flex';
-        studentPill.style.alignItems = 'center';
-        studentPill.style.gap = '8px';
+      // Hide loose XP badge if present in nav-actions to save space
+      const looseXp = navActions.querySelector('#nav-xp');
+      if (looseXp) looseXp.style.display = 'none';
+
+      let dropdownWrap = navActions.querySelector('.nav-student-dropdown');
+      if (!dropdownWrap) {
+        dropdownWrap = document.createElement('div');
+        dropdownWrap.className = 'nav-student-dropdown';
         // Prepend before theme switch
-        navActions.prepend(studentPill);
+        navActions.prepend(dropdownWrap);
       }
 
-      studentPill.innerHTML = `
-        <span class="student-identity-badge" title="บัญชีนักเรียน">👤 ${escapeHtml(studentLabel)}</span>
-        <span class="badge-ai-ready" title="AI ใช้โควตาของครูประจำห้องเรียน">⚡ AI โดยครู</span>
-        <button class="btn-leave-class" onclick="ClassroomClient.confirmLeave()" title="ออกจากห้องเรียน">ออกจากห้อง</button>
+      dropdownWrap.innerHTML = `
+        <button class="nav-student-trigger" onclick="ClassroomClient.toggleMenu(event)" title="ข้อมูลผู้เรียนและห้องเรียน">
+          <span class="nav-student-avatar">👤</span>
+          <span class="nav-student-name">${escapeHtml(studentLabel)}</span>
+          <span class="nav-student-xp">⭐ <span id="nav-xp-counter">${currentXp}</span> XP</span>
+          <span class="nav-student-caret">▾</span>
+        </button>
+        <div class="nav-student-menu" id="nav-student-menu">
+          <div class="menu-header">
+            <div class="menu-name">${escapeHtml(student.name)}</div>
+            <div class="menu-sub">${student.gradeClass ? 'ชั้น ' + escapeHtml(student.gradeClass) : ''} ${student.studentNumber ? 'เลขที่ ' + escapeHtml(student.studentNumber) : ''} (รหัส: ${escapeHtml(student.studentIdCode || '-')})</div>
+          </div>
+          <div class="menu-divider"></div>
+          <div class="menu-info-row">
+            <span class="menu-info-lbl">🏫 ห้องเรียน:</span>
+            <span class="menu-info-val">${escapeHtml(classroom.name)} (${escapeHtml(classroom.code)})</span>
+          </div>
+          <div class="menu-info-row">
+            <span class="menu-info-lbl">👩‍🏫 ครูผู้สอน:</span>
+            <span class="menu-info-val">${escapeHtml(classroom.teacherName)}</span>
+          </div>
+          <div class="menu-info-row">
+            <span class="menu-info-lbl">⚡ ตรวจโค้ด AI:</span>
+            <span class="menu-info-val" style="color:#10b981;font-weight:700;">พร้อมใช้งาน (โควตาครู)</span>
+          </div>
+          <div class="menu-divider"></div>
+          <a href="lesson.html" class="menu-link-btn">📚 เข้าสู่บทเรียน</a>
+          <button class="menu-leave-btn" onclick="ClassroomClient.confirmLeave()">
+            🚪 ออกจากห้องเรียน
+          </button>
+        </div>
       `;
     }
+  },
+
+  toggleMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('nav-student-menu');
+    if (menu) {
+      menu.classList.toggle('open');
+    }
+  },
+
+  // Helper: get active curriculum lessons
+  getCurriculumLessons(allLessons) {
+    const session = this.getSession();
+    if (!session || !session.classroom || !session.classroom.curriculum) {
+      return allLessons;
+    }
+    const curr = session.classroom.curriculum;
+    if (curr.lessonIds && Array.isArray(curr.lessonIds) && curr.lessonIds.length > 0) {
+      return allLessons.filter(l => curr.lessonIds.includes(l.id));
+    }
+    return allLessons;
+  },
+
+  isSequential() {
+    const session = this.getSession();
+    return !!(session?.classroom?.curriculum?.sequential);
   },
 
   // Backward compatible alias
@@ -260,6 +323,13 @@ const ClassroomClient = {
     }
   }
 };
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.nav-student-dropdown')) {
+    document.getElementById('nav-student-menu')?.classList.remove('open');
+  }
+});
 
 function escapeHtml(str) {
   if (!str) return '';

@@ -389,7 +389,24 @@ function typeCode(el, code, i=0) {
         if (notice) {
           notice.style.display = 'block';
           document.getElementById('hero-classroom-name').textContent = session.classroom.name;
-          document.getElementById('hero-student-name').textContent = session.student.name;
+          document.getElementById('hero-student-name').textContent = `${session.student.name} (${session.student.gradeClass ? 'ชั้น ' + session.student.gradeClass : ''} ${session.student.studentNumber ? 'เลขที่ ' + session.student.studentNumber : ''})`;
+        }
+
+        // Clean and focus hero action buttons for classroom student
+        const heroActions = document.querySelector('.hero-actions');
+        if (heroActions) {
+          let currCount = 15;
+          if (session.classroom.curriculum && session.classroom.curriculum.lessonIds) {
+            currCount = session.classroom.curriculum.lessonIds.length;
+          }
+          heroActions.innerHTML = `
+            <a href="lesson.html" class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
+              <span>📚</span> เข้าสู่บทเรียนประจำห้องเรียน (${currCount} บทเรียน) →
+            </a>
+            <a href="playground.html" class="btn-secondary" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
+              <span>💻</span> ลองเขียนโค้ด (Playground)
+            </a>
+          `;
         }
       }
     }
