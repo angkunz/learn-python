@@ -1136,8 +1136,9 @@ app.post('/api/student/progress', authenticateStudent, async (req, res) => {
 
 // Student AI Feedback Proxy (Using Teacher's Key securely!)
 app.post('/api/student/ai-feedback', authenticateStudent, async (req, res) => {
-  const student = req.student;
-  const { 
+  try {
+    const student = req.student;
+    const { 
     lessonId, 
     exerciseId = 'ex_1', 
     userCode = '', 
@@ -1356,13 +1357,18 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🚀 PyLearn Classroom Edition is running!`);
-  console.log(`📍 URL: http://localhost:${PORT}`);
-  console.log(`🎓 Student Portal: http://localhost:${PORT}/join.html`);
-  console.log(`👩‍🏫 Teacher Portal: http://localhost:${PORT}/teacher-login.html`);
-  console.log(`🐬 Database Engine: ${db.driver === 'mysql' ? 'MySQL / TiDB Cloud (Online)' : 'SQLite (Local)'}`);
-  console.log(`====================================================`);
-});
+// Start Server (when run locally)
+if (require.main === module && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(`🚀 PyLearn Classroom Edition is running!`);
+    console.log(`📍 URL: http://localhost:${PORT}`);
+    console.log(`🎓 Student Portal: http://localhost:${PORT}/join.html`);
+    console.log(`👩‍🏫 Teacher Portal: http://localhost:${PORT}/teacher-login.html`);
+    console.log(`🐬 Database Engine: ${db.driver === 'mysql' ? 'MySQL / TiDB Cloud (Online)' : 'SQLite (Local)'}`);
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = app;
+
