@@ -42,7 +42,7 @@ function generateClassroomCode() {
 }
 
 // ── Authentication Middleware ──
-function authenticateTeacher(req, res, next) {
+async function authenticateTeacher(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบ' });
@@ -50,16 +50,12 @@ function authenticateTeacher(req, res, next) {
 
   const token = authHeader.split(' ')[1];
   try {
-    // Check teacher token session
-    const stmt = db.prepare('SELECT id, name, email FROM teachers WHERE salt = ? OR id = ?');
-    // For simplicity, we use token mapping or sign
-    const sessionStmt = db.prepare('SELECT * FROM teachers WHERE id = ?');
     const parts = token.split(':');
     if (parts.length !== 2) {
       return res.status(401).json({ error: 'Token ไม่ถูกต้อง' });
     }
     const [teacherId, sign] = parts;
-    const teacher = sessionStmt.get(teacherId);
+    const teacher = await db.prepare('SELECT * FROM teachers WHERE id = ?').get(teacherId);
     if (!teacher) {
       return res.status(401).json({ error: 'ไม่พบข้อมูลครูผู้สอน' });
     }
@@ -88,26 +84,26 @@ function parseCurriculum(raw) {
   }
 }
 
-function authenticateStudent(req, res, next) {
+async function authenticateStudent(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบนักเรียนก่อน' });
   }
   const token = authHeader.split(' ')[1];
   try {
-    const stmt = db.prepare(`
+    const student = await db.prepare(`
       SELECT s.*, c.name as classroom_name, c.code as classroom_code, c.curriculum_lessons, c.gemini_api_key, c.gemini_model, c.teacher_id, t.name as teacher_name
       FROM students s
       LEFT JOIN classrooms c ON s.classroom_id = c.id
       LEFT JOIN teachers t ON c.teacher_id = t.id
       WHERE s.session_token = ?
-    `);
-    const student = stmt.get(token);
+    `).get(token);
+
     if (!student) {
       return res.status(401).json({ error: 'Session นักเรียนไม่ถูกต้องหรือหมดอายุ' });
     }
     // Update last active
-    db.prepare("UPDATE students SET last_active = datetime('now', 'localtime') WHERE id = ?").run(student.id);
+    await db.prepare("UPDATE students SET last_active = datetime('now', 'localtime') WHERE id = ?").run(student.id);
     req.student = student;
     next();
   } catch (err) {
@@ -119,7 +115,7 @@ function authenticateStudent(req, res, next) {
 // 1. TEACHER AUTH & PROFILE APIS
 // ============================================================
 
-app.post('/api/teacher/register', (req, res) => {
+app.post('/api/teacher/register', async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
@@ -129,7 +125,7 @@ app.post('/api/teacher/register', (req, res) => {
   }
 
   try {
-    const existing = db.prepare('SELECT id FROM teachers WHERE email = ?').get(email.toLowerCase().trim());
+    const existing = await db.prepare('SELECT id FROM teachers WHERE email = ?').get(email.toLowerCase().trim());
     if (existing) {
       return res.status(400).json({ error: 'อีเมลนี้ถูกใช้งานแล้ว กรุณาใช้อีเมลอื่นหรือเข้าสู่ระบบ' });
     }
@@ -137,7 +133,7 @@ app.post('/api/teacher/register', (req, res) => {
     const id = 'tch_' + crypto.randomBytes(8).toString('hex');
     const { hash, salt } = hashPassword(password);
 
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO teachers (id, name, email, password_hash, salt)
       VALUES (?, ?, ?, ?, ?)
     `).run(id, name.trim(), email.toLowerCase().trim(), hash, salt);
@@ -156,14 +152,14 @@ app.post('/api/teacher/register', (req, res) => {
   }
 });
 
-app.post('/api/teacher/login', (req, res) => {
+app.post('/api/teacher/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'กรุณากรอกอีเมลและรหัสผ่าน' });
   }
 
   try {
-    const teacher = db.prepare('SELECT * FROM teachers WHERE email = ?').get(email.toLowerCase().trim());
+    const teacher = await db.prepare('SELECT * FROM teachers WHERE email = ?').get(email.toLowerCase().trim());
     if (!teacher || !verifyPassword(password, teacher.password_hash, teacher.salt)) {
       return res.status(401).json({ error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
     }
@@ -180,8 +176,8 @@ app.post('/api/teacher/login', (req, res) => {
   }
 });
 
-app.get('/api/teacher/me', authenticateTeacher, (req, res) => {
-  const classrooms = db.prepare(`
+app.get('/api/teacher/me', authenticateTeacher, async (req, res) => {
+  const classrooms = await db.prepare(`
     SELECT c.*, 
       (SELECT COUNT(*) FROM students WHERE classroom_id = c.id) as student_count
     FROM classrooms c 
@@ -259,7 +255,7 @@ app.post('/api/teacher/test-api-key', authenticateTeacher, async (req, res) => {
 // 2. CLASSROOM MANAGEMENT APIS (TEACHER)
 // ============================================================
 
-app.post('/api/teacher/classrooms', authenticateTeacher, (req, res) => {
+app.post('/api/teacher/classrooms', authenticateTeacher, async (req, res) => {
   const { name, description = '', geminiApiKey = '', geminiModel = 'gemini-2.5-flash' } = req.body;
   if (!name || name.trim() === '') {
     return res.status(400).json({ error: 'กรุณาระบุชื่อห้องเรียน' });
@@ -272,7 +268,7 @@ app.post('/api/teacher/classrooms', authenticateTeacher, (req, res) => {
     let attempts = 0;
     while (!isUnique && attempts < 10) {
       code = generateClassroomCode();
-      const existing = db.prepare('SELECT id FROM classrooms WHERE code = ?').get(code);
+      const existing = await db.prepare('SELECT id FROM classrooms WHERE code = ?').get(code);
       if (!existing) isUnique = true;
       attempts++;
     }
@@ -280,7 +276,7 @@ app.post('/api/teacher/classrooms', authenticateTeacher, (req, res) => {
     const id = 'cls_' + crypto.randomBytes(8).toString('hex');
     const cleanKey = geminiApiKey.trim().replace(/[^\w\-\.]/g, '');
 
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO classrooms (id, teacher_id, code, name, description, gemini_api_key, gemini_model)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(id, req.teacher.id, code, name.trim(), description.trim(), cleanKey || null, geminiModel);
@@ -303,12 +299,12 @@ app.post('/api/teacher/classrooms', authenticateTeacher, (req, res) => {
   }
 });
 
-app.put('/api/teacher/classrooms/:id', authenticateTeacher, (req, res) => {
+app.put('/api/teacher/classrooms/:id', authenticateTeacher, async (req, res) => {
   const { id } = req.params;
   const { name, description, geminiApiKey, geminiModel } = req.body;
 
   try {
-    const cls = db.prepare('SELECT * FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const cls = await db.prepare('SELECT * FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!cls) {
       return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
     }
@@ -323,7 +319,7 @@ app.put('/api/teacher/classrooms/:id', authenticateTeacher, (req, res) => {
       updateKey = cleanKey ? cleanKey : null;
     }
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE classrooms 
       SET name = ?, description = ?, gemini_api_key = ?, gemini_model = ?
       WHERE id = ?
@@ -347,12 +343,12 @@ app.put('/api/teacher/classrooms/:id', authenticateTeacher, (req, res) => {
 });
 
 // Update Classroom Curriculum
-app.put('/api/teacher/classrooms/:id/curriculum', authenticateTeacher, (req, res) => {
+app.put('/api/teacher/classrooms/:id/curriculum', authenticateTeacher, async (req, res) => {
   const { id } = req.params;
   const { lessonIds, sequential = false } = req.body;
 
   try {
-    const cls = db.prepare('SELECT id FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const cls = await db.prepare('SELECT id FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!cls) {
       return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
     }
@@ -367,7 +363,7 @@ app.put('/api/teacher/classrooms/:id/curriculum', authenticateTeacher, (req, res
       updated_at: new Date().toISOString()
     });
 
-    db.prepare('UPDATE classrooms SET curriculum_lessons = ? WHERE id = ?').run(curriculumData, id);
+    await db.prepare('UPDATE classrooms SET curriculum_lessons = ? WHERE id = ?').run(curriculumData, id);
 
     res.json({
       success: true,
@@ -383,15 +379,15 @@ app.put('/api/teacher/classrooms/:id/curriculum', authenticateTeacher, (req, res
   }
 });
 
-app.delete('/api/teacher/classrooms/:id', authenticateTeacher, (req, res) => {
+app.delete('/api/teacher/classrooms/:id', authenticateTeacher, async (req, res) => {
   const { id } = req.params;
   try {
-    const cls = db.prepare('SELECT * FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const cls = await db.prepare('SELECT * FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!cls) {
       return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
     }
 
-    db.prepare('DELETE FROM classrooms WHERE id = ?').run(id);
+    await db.prepare('DELETE FROM classrooms WHERE id = ?').run(id);
     res.json({ success: true, message: 'ลบห้องเรียนเรียบร้อยแล้ว' });
   } catch (err) {
     console.error('Delete classroom error:', err);
@@ -404,28 +400,36 @@ app.delete('/api/teacher/classrooms/:id', authenticateTeacher, (req, res) => {
 // ============================================================
 
 // Overview & Analytics for a specific classroom
-app.get('/api/teacher/classrooms/:id/overview', authenticateTeacher, (req, res) => {
+app.get('/api/teacher/classrooms/:id/overview', authenticateTeacher, async (req, res) => {
   const { id } = req.params;
   try {
-    const classroom = db.prepare('SELECT * FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const classroom = await db.prepare('SELECT * FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!classroom) {
       return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
     }
 
     // 1. Students count & active
-    const totalStudents = db.prepare('SELECT COUNT(*) as count FROM students WHERE classroom_id = ?').get(id).count;
-    const activeStudentsToday = db.prepare(`
+    const totalStudentsRow = await db.prepare('SELECT COUNT(*) as count FROM students WHERE classroom_id = ?').get(id);
+    const totalStudents = totalStudentsRow ? totalStudentsRow.count : 0;
+
+    const activeRow = await db.prepare(`
       SELECT COUNT(*) as count FROM students 
       WHERE classroom_id = ? AND date(last_active) >= date('now', '-1 day', 'localtime')
-    `).get(id).count;
+    `).get(id);
+    const activeStudentsToday = activeRow ? activeRow.count : 0;
 
     // 2. Total exercises completed & total submissions
-    const totalSubmissions = db.prepare('SELECT COUNT(*) as count FROM code_submissions WHERE classroom_id = ?').get(id).count;
-    const totalPassed = db.prepare("SELECT COUNT(*) as count FROM code_submissions WHERE classroom_id = ? AND status = 'pass'").get(id).count;
-    const totalAIQuestions = db.prepare('SELECT COUNT(*) as count FROM ai_interactions WHERE classroom_id = ?').get(id).count;
+    const totalSubRow = await db.prepare('SELECT COUNT(*) as count FROM code_submissions WHERE classroom_id = ?').get(id);
+    const totalSubmissions = totalSubRow ? totalSubRow.count : 0;
+
+    const totalPassRow = await db.prepare("SELECT COUNT(*) as count FROM code_submissions WHERE classroom_id = ? AND status = 'pass'").get(id);
+    const totalPassed = totalPassRow ? totalPassRow.count : 0;
+
+    const totalAIRow = await db.prepare('SELECT COUNT(*) as count FROM ai_interactions WHERE classroom_id = ?').get(id);
+    const totalAIQuestions = totalAIRow ? totalAIRow.count : 0;
 
     // 3. Common Error Types (Top Focus Areas)
-    const errorStats = db.prepare(`
+    const errorStats = await db.prepare(`
       SELECT error_type, COUNT(*) as count
       FROM code_submissions
       WHERE classroom_id = ? AND status = 'fail' AND error_type IS NOT NULL AND error_type != ''
@@ -435,7 +439,7 @@ app.get('/api/teacher/classrooms/:id/overview', authenticateTeacher, (req, res) 
     `).all(id);
 
     // 4. Most Challenging Lessons / Exercises (Bottlenecks)
-    const bottleneckLessons = db.prepare(`
+    const bottleneckLessons = await db.prepare(`
       SELECT lesson_id, 
         COUNT(CASE WHEN status = 'fail' THEN 1 END) as fail_count,
         COUNT(*) as total_attempts
@@ -448,7 +452,7 @@ app.get('/api/teacher/classrooms/:id/overview', authenticateTeacher, (req, res) 
     `).all(id);
 
     // 5. Lesson Progress breakdown across classroom
-    const lessonCompletionStats = db.prepare(`
+    const lessonCompletionStats = await db.prepare(`
       SELECT lesson_id, 
         SUM(completed) as completed_count,
         COUNT(*) as student_count
@@ -506,15 +510,15 @@ app.get('/api/teacher/classrooms/:id/overview', authenticateTeacher, (req, res) 
 });
 
 // Classroom Students & Progress Matrix
-app.get('/api/teacher/classrooms/:id/matrix', authenticateTeacher, (req, res) => {
+app.get('/api/teacher/classrooms/:id/matrix', authenticateTeacher, async (req, res) => {
   const { id } = req.params;
   try {
-    const classroom = db.prepare('SELECT id, name, curriculum_lessons FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const classroom = await db.prepare('SELECT id, name, curriculum_lessons FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!classroom) {
       return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
     }
 
-    const students = db.prepare(`
+    const students = await db.prepare(`
       SELECT s.id, s.student_id_code, s.student_number, s.grade_class, s.name, s.last_active, s.created_at,
         COALESCE(SUM(sp.xp), 0) as total_xp,
         COALESCE(SUM(sp.completed), 0) as completed_lessons_count,
@@ -530,7 +534,7 @@ app.get('/api/teacher/classrooms/:id/matrix', authenticateTeacher, (req, res) =>
     `).all(id);
 
     // Get all progress rows for this classroom
-    const progressRows = db.prepare(`
+    const progressRows = await db.prepare(`
       SELECT student_id, lesson_id, completed, xp, attempts, updated_at
       FROM student_progress
       WHERE classroom_id = ?
@@ -565,15 +569,15 @@ app.get('/api/teacher/classrooms/:id/matrix', authenticateTeacher, (req, res) =>
 });
 
 // Individual Student Detailed Profile & Diagnostics
-app.get('/api/teacher/classrooms/:id/students/:studentId', authenticateTeacher, (req, res) => {
+app.get('/api/teacher/classrooms/:id/students/:studentId', authenticateTeacher, async (req, res) => {
   const { id, studentId } = req.params;
   try {
-    const classroom = db.prepare('SELECT id, name FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const classroom = await db.prepare('SELECT id, name FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!classroom) {
       return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
     }
 
-    const student = db.prepare(`
+    const student = await db.prepare(`
       SELECT s.*,
         COALESCE(SUM(sp.xp), 0) as total_xp,
         COALESCE(SUM(sp.completed), 0) as completed_lessons_count
@@ -588,12 +592,12 @@ app.get('/api/teacher/classrooms/:id/students/:studentId', authenticateTeacher, 
     }
 
     // Detailed lesson progress
-    const lessonProgress = db.prepare(`
+    const lessonProgress = await db.prepare(`
       SELECT * FROM student_progress WHERE student_id = ? ORDER BY lesson_id ASC
     `).all(studentId);
 
     // Recent code submissions (with actual code written!)
-    const recentSubmissions = db.prepare(`
+    const recentSubmissions = await db.prepare(`
       SELECT id, lesson_id, exercise_id, code, status, error_type, error_message, output, created_at
       FROM code_submissions
       WHERE student_id = ?
@@ -602,7 +606,7 @@ app.get('/api/teacher/classrooms/:id/students/:studentId', authenticateTeacher, 
     `).all(studentId);
 
     // Student error breakdown
-    const studentErrors = db.prepare(`
+    const studentErrors = await db.prepare(`
       SELECT error_type, COUNT(*) as count
       FROM code_submissions
       WHERE student_id = ? AND status = 'fail' AND error_type IS NOT NULL AND error_type != ''
@@ -611,7 +615,7 @@ app.get('/api/teacher/classrooms/:id/students/:studentId', authenticateTeacher, 
     `).all(studentId);
 
     // AI queries asked by this student
-    const aiQueries = db.prepare(`
+    const aiQueries = await db.prepare(`
       SELECT id, lesson_id, exercise_id, user_code, ai_feedback, error_detected, created_at
       FROM ai_interactions
       WHERE student_id = ?
@@ -620,8 +624,11 @@ app.get('/api/teacher/classrooms/:id/students/:studentId', authenticateTeacher, 
     `).all(studentId);
 
     // Calculate Learning Analytics Diagnosis
-    const totalSubmissions = db.prepare('SELECT COUNT(*) as count FROM code_submissions WHERE student_id = ?').get(studentId).count;
-    const totalPassed = db.prepare("SELECT COUNT(*) as count FROM code_submissions WHERE student_id = ? AND status = 'pass'").get(studentId).count;
+    const totalSubRow = await db.prepare('SELECT COUNT(*) as count FROM code_submissions WHERE student_id = ?').get(studentId);
+    const totalSubmissions = totalSubRow ? totalSubRow.count : 0;
+
+    const totalPassRow = await db.prepare("SELECT COUNT(*) as count FROM code_submissions WHERE student_id = ? AND status = 'pass'").get(studentId);
+    const totalPassed = totalPassRow ? totalPassRow.count : 0;
     const failRate = totalSubmissions > 0 ? ((totalSubmissions - totalPassed) / totalSubmissions) : 0;
 
     let skillLevel = 'เริ่มต้น (Novice)';
@@ -683,15 +690,15 @@ app.get('/api/teacher/classrooms/:id/students/:studentId', authenticateTeacher, 
 });
 
 // Export CSV
-app.get('/api/teacher/classrooms/:id/export-csv', authenticateTeacher, (req, res) => {
+app.get('/api/teacher/classrooms/:id/export-csv', authenticateTeacher, async (req, res) => {
   const { id } = req.params;
   try {
-    const classroom = db.prepare('SELECT name, code FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const classroom = await db.prepare('SELECT name, code FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!classroom) {
       return res.status(404).send('Not found');
     }
 
-    const students = db.prepare(`
+    const students = await db.prepare(`
       SELECT s.student_id_code, s.grade_class, s.student_number, s.name, 
         COALESCE(SUM(sp.xp), 0) as total_xp,
         COALESCE(SUM(sp.completed), 0) as completed_lessons,
@@ -734,7 +741,7 @@ app.get('/api/teacher/classrooms/:id/export-csv', authenticateTeacher, (req, res
 // ============================================================
 
 // Teacher reset student password
-app.post('/api/teacher/classrooms/:id/students/:studentId/reset-password', authenticateTeacher, (req, res) => {
+app.post('/api/teacher/classrooms/:id/students/:studentId/reset-password', authenticateTeacher, async (req, res) => {
   const { id, studentId } = req.params;
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 4) {
@@ -742,14 +749,14 @@ app.post('/api/teacher/classrooms/:id/students/:studentId/reset-password', authe
   }
 
   try {
-    const cls = db.prepare('SELECT id FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
+    const cls = await db.prepare('SELECT id FROM classrooms WHERE id = ? AND teacher_id = ?').get(id, req.teacher.id);
     if (!cls) return res.status(404).json({ error: 'ไม่พบห้องเรียนนี้' });
 
-    const student = db.prepare('SELECT id FROM students WHERE id = ? AND classroom_id = ?').get(studentId, id);
+    const student = await db.prepare('SELECT id FROM students WHERE id = ? AND classroom_id = ?').get(studentId, id);
     if (!student) return res.status(404).json({ error: 'ไม่พบนักเรียนนี้' });
 
     const { hash, salt } = hashPassword(newPassword);
-    db.prepare('UPDATE students SET password_hash = ?, salt = ? WHERE id = ?').run(hash, salt, studentId);
+    await db.prepare('UPDATE students SET password_hash = ?, salt = ? WHERE id = ?').run(hash, salt, studentId);
 
     res.json({ success: true, message: 'รีเซ็ตรหัสผ่านให้นักเรียนเรียบร้อยแล้ว' });
   } catch (err) {
@@ -763,7 +770,7 @@ app.post('/api/teacher/classrooms/:id/students/:studentId/reset-password', authe
 // ============================================================
 
 // Register new student (Step 1: ID, Name, Grade/Class, Number, Password)
-app.post('/api/student/register', (req, res) => {
+app.post('/api/student/register', async (req, res) => {
   const { studentIdCode, name, gradeClass, studentNumber, password, classroomCode = '' } = req.body;
   if (!studentIdCode || !name || !gradeClass || !studentNumber || !password) {
     return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบทุกช่อง (เลขประจำตัว, ชื่อ-นามสกุล, ชั้น, เลขที่, รหัสผ่าน)' });
@@ -779,7 +786,7 @@ app.post('/api/student/register', (req, res) => {
 
   try {
     // Check if student with this studentIdCode already registered
-    const existing = db.prepare('SELECT id FROM students WHERE student_id_code = ? OR (student_number = ? AND grade_class = ?)').get(cleanId, cleanNumber, cleanGrade);
+    const existing = await db.prepare('SELECT id FROM students WHERE student_id_code = ? OR (student_number = ? AND grade_class = ?)').get(cleanId, cleanNumber, cleanGrade);
     if (existing) {
       return res.status(400).json({ error: `เลขประจำตัว "${cleanId}" ได้ลงทะเบียนไว้แล้ว กรุณาเลือกแท็บ 'เข้าสู่ระบบ' เพื่อลงชื่อเข้าใช้` });
     }
@@ -789,7 +796,7 @@ app.post('/api/student/register', (req, res) => {
     let classroomId = null;
     if (classroomCode && classroomCode.trim() !== '') {
       const cleanCode = classroomCode.trim().toUpperCase();
-      classroom = db.prepare(`
+      classroom = await db.prepare(`
         SELECT c.*, t.name as teacher_name 
         FROM classrooms c 
         JOIN teachers t ON c.teacher_id = t.id 
@@ -804,7 +811,7 @@ app.post('/api/student/register', (req, res) => {
     const token = generateToken();
     const { hash, salt } = hashPassword(password);
 
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO students (id, classroom_id, student_id_code, student_number, grade_class, name, password_hash, salt, session_token)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(studentId, classroomId, cleanId, cleanNumber, cleanGrade, trimmedName, hash, salt, token);
@@ -838,7 +845,7 @@ app.post('/api/student/register', (req, res) => {
 
 // Login student with Student ID & Password
 // "แต่ถ้าเลขนั้น มีห้องเรียนอยู่แล้วก็ให้เข้าห้องเรียนเลย"
-app.post('/api/student/login', (req, res) => {
+app.post('/api/student/login', async (req, res) => {
   const { studentIdCode, password } = req.body;
   if (!studentIdCode || !password) {
     return res.status(400).json({ error: 'กรุณากรอกเลขประจำตัวนักเรียนและรหัสผ่าน' });
@@ -847,7 +854,7 @@ app.post('/api/student/login', (req, res) => {
   const cleanId = studentIdCode.trim();
 
   try {
-    const student = db.prepare(`
+    const student = await db.prepare(`
       SELECT s.*, c.id as cid, c.name as classroom_name, c.code as classroom_code, c.description as classroom_desc, c.curriculum_lessons, c.gemini_api_key, c.gemini_model, t.name as teacher_name 
       FROM students s 
       LEFT JOIN classrooms c ON s.classroom_id = c.id 
@@ -867,12 +874,12 @@ app.post('/api/student/login', (req, res) => {
     } else {
       // First time password setup for legacy account
       const { hash, salt } = hashPassword(password);
-      db.prepare('UPDATE students SET password_hash = ?, salt = ? WHERE id = ?').run(hash, salt, student.id);
+      await db.prepare('UPDATE students SET password_hash = ?, salt = ? WHERE id = ?').run(hash, salt, student.id);
     }
 
     // Refresh session token
     const token = generateToken();
-    db.prepare("UPDATE students SET session_token = ?, last_active = datetime('now', 'localtime') WHERE id = ?")
+    await db.prepare("UPDATE students SET session_token = ?, last_active = datetime('now', 'localtime') WHERE id = ?")
       .run(token, student.id);
 
     const hasClassroom = !!(student.cid && student.classroom_code);
@@ -905,7 +912,7 @@ app.post('/api/student/login', (req, res) => {
 });
 
 // Join classroom with code (Step 2 after registration or when not in classroom)
-app.post('/api/student/join-classroom', authenticateStudent, (req, res) => {
+app.post('/api/student/join-classroom', authenticateStudent, async (req, res) => {
   const { code } = req.body;
   if (!code || code.trim() === '') {
     return res.status(400).json({ error: 'กรุณากรอกรหัสห้องเรียน' });
@@ -913,7 +920,7 @@ app.post('/api/student/join-classroom', authenticateStudent, (req, res) => {
 
   const cleanCode = code.trim().toUpperCase();
   try {
-    const classroom = db.prepare(`
+    const classroom = await db.prepare(`
       SELECT c.*, t.name as teacher_name 
       FROM classrooms c 
       JOIN teachers t ON c.teacher_id = t.id 
@@ -925,7 +932,7 @@ app.post('/api/student/join-classroom', authenticateStudent, (req, res) => {
     }
 
     // Attach student to classroom
-    db.prepare('UPDATE students SET classroom_id = ? WHERE id = ?').run(classroom.id, req.student.id);
+    await db.prepare('UPDATE students SET classroom_id = ? WHERE id = ?').run(classroom.id, req.student.id);
 
     res.json({
       success: true,
@@ -946,7 +953,7 @@ app.post('/api/student/join-classroom', authenticateStudent, (req, res) => {
 });
 
 // Join classroom via code (Unified / Backward compatibility)
-app.post('/api/student/join', (req, res) => {
+app.post('/api/student/join', async (req, res) => {
   const { code, name, studentNumber = '', password = '' } = req.body;
   if (!code || !name || name.trim() === '') {
     return res.status(400).json({ error: 'กรุณากรอกรหัสห้องเรียนและชื่อ-นามสกุล' });
@@ -954,7 +961,7 @@ app.post('/api/student/join', (req, res) => {
 
   const cleanCode = code.trim().toUpperCase();
   try {
-    const classroom = db.prepare(`
+    const classroom = await db.prepare(`
       SELECT c.*, t.name as teacher_name 
       FROM classrooms c 
       JOIN teachers t ON c.teacher_id = t.id 
@@ -971,10 +978,10 @@ app.post('/api/student/join', (req, res) => {
     // Check if student with same name or number already in classroom, reuse or create
     let student = null;
     if (cleanNumber) {
-      student = db.prepare('SELECT * FROM students WHERE classroom_id = ? AND student_number = ?').get(classroom.id, cleanNumber);
+      student = await db.prepare('SELECT * FROM students WHERE classroom_id = ? AND student_number = ?').get(classroom.id, cleanNumber);
     }
     if (!student) {
-      student = db.prepare('SELECT * FROM students WHERE classroom_id = ? AND name = ?').get(classroom.id, trimmedName);
+      student = await db.prepare('SELECT * FROM students WHERE classroom_id = ? AND name = ?').get(classroom.id, trimmedName);
     }
 
     let token = '';
@@ -986,7 +993,7 @@ app.post('/api/student/join', (req, res) => {
         }
       }
       token = generateToken();
-      db.prepare("UPDATE students SET session_token = ?, name = ?, student_number = ?, last_active = datetime('now', 'localtime') WHERE id = ?")
+      await db.prepare("UPDATE students SET session_token = ?, name = ?, student_number = ?, last_active = datetime('now', 'localtime') WHERE id = ?")
         .run(token, trimmedName, cleanNumber, student.id);
       student.name = trimmedName;
       student.student_number = cleanNumber;
@@ -1000,7 +1007,7 @@ app.post('/api/student/join', (req, res) => {
         pHash = hash;
         pSalt = salt;
       }
-      db.prepare(`
+      await db.prepare(`
         INSERT INTO students (id, classroom_id, student_number, name, password_hash, salt, session_token)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `).run(studentId, classroom.id, cleanNumber, trimmedName, pHash, pSalt, token);
@@ -1032,11 +1039,11 @@ app.post('/api/student/join', (req, res) => {
 });
 
 // Student Session Check & Load Progress
-app.get('/api/student/session', authenticateStudent, (req, res) => {
+app.get('/api/student/session', authenticateStudent, async (req, res) => {
   const student = req.student;
   
   // Get all progress for this student
-  const progress = db.prepare('SELECT * FROM student_progress WHERE student_id = ?').all(student.id);
+  const progress = await db.prepare('SELECT * FROM student_progress WHERE student_id = ?').all(student.id);
 
   const hasClassroom = !!(student.classroom_id && student.classroom_code);
 
@@ -1068,7 +1075,7 @@ app.get('/api/student/session', authenticateStudent, (req, res) => {
 });
 
 // Record Student Progress & Code Submission
-app.post('/api/student/progress', authenticateStudent, (req, res) => {
+app.post('/api/student/progress', authenticateStudent, async (req, res) => {
   const student = req.student;
   const { 
     lessonId, 
@@ -1089,13 +1096,13 @@ app.post('/api/student/progress', authenticateStudent, (req, res) => {
   try {
     // 1. Log code submission history for Teacher code inspector & error analytics
     const subId = 'sub_' + crypto.randomBytes(8).toString('hex');
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO code_submissions (id, student_id, classroom_id, lesson_id, exercise_id, code, status, error_type, error_message, output)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(subId, student.id, student.classroom_id, lessonId, exerciseId, code, status, errorType, errorMessage, output);
 
     // 2. Upsert student_progress
-    const existing = db.prepare('SELECT * FROM student_progress WHERE student_id = ? AND lesson_id = ?').get(student.id, lessonId);
+    const existing = await db.prepare('SELECT * FROM student_progress WHERE student_id = ? AND lesson_id = ?').get(student.id, lessonId);
     
     if (existing) {
       let exList = JSON.parse(existing.exercises_completed || '[]');
@@ -1106,7 +1113,7 @@ app.post('/api/student/progress', authenticateStudent, (req, res) => {
       const updatedXp = existing.xp + (xpEarned || 0);
       const attempts = existing.attempts + 1;
 
-      db.prepare(`
+      await db.prepare(`
         UPDATE student_progress 
         SET completed = ?, xp = ?, exercises_completed = ?, last_exercise_id = ?, attempts = ?, updated_at = datetime('now', 'localtime')
         WHERE id = ?
@@ -1114,7 +1121,7 @@ app.post('/api/student/progress', authenticateStudent, (req, res) => {
     } else {
       const progId = 'prg_' + crypto.randomBytes(8).toString('hex');
       const exList = (status === 'pass') ? [exerciseId] : [];
-      db.prepare(`
+      await db.prepare(`
         INSERT INTO student_progress (id, student_id, classroom_id, lesson_id, completed, xp, exercises_completed, last_exercise_id, attempts)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
       `).run(progId, student.id, student.classroom_id, lessonId, completed ? 1 : 0, xpEarned || 0, JSON.stringify(exList), exerciseId);
@@ -1334,7 +1341,7 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
 
     // Save interaction log for Teacher Analytics!
     const intId = 'ai_' + crypto.randomBytes(8).toString('hex');
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO ai_interactions (id, student_id, classroom_id, lesson_id, exercise_id, user_code, ai_feedback, error_detected)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(intId, student.id, student.classroom_id, lessonId, exerciseId, userCode, JSON.stringify(parsedResult), detectedError);
@@ -1356,5 +1363,6 @@ app.listen(PORT, () => {
   console.log(`📍 URL: http://localhost:${PORT}`);
   console.log(`🎓 Student Portal: http://localhost:${PORT}/join.html`);
   console.log(`👩‍🏫 Teacher Portal: http://localhost:${PORT}/teacher-login.html`);
+  console.log(`🐬 Database Engine: ${db.driver === 'mysql' ? 'MySQL / TiDB Cloud (Online)' : 'SQLite (Local)'}`);
   console.log(`====================================================`);
 });
