@@ -12,19 +12,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 100px 24px 40px;
+      padding: 100px 24px 50px;
       position: relative;
       z-index: 2;
     }
     .join-card {
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 2px solid var(--ink);
       border-radius: 20px;
       padding: 36px;
       width: 100%;
       max-width: 480px;
-      box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.15);
+      box-shadow: 6px 6px 0 var(--ink);
       backdrop-filter: blur(12px);
+      position: relative;
     }
     .join-header {
       text-align: center;
@@ -92,7 +93,7 @@
       width: 100%;
       padding: 12px 14px;
       background: var(--bg-alt);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: 10px;
       color: var(--text-primary);
       font-size: 1rem;
@@ -108,8 +109,8 @@
     }
     .code-input {
       font-family: 'Fira Code', monospace;
-      letter-spacing: 3px;
-      font-size: 1.3rem;
+      letter-spacing: 4px;
+      font-size: 1.5rem;
       font-weight: 700;
       text-transform: uppercase;
       text-align: center;
@@ -169,6 +170,16 @@
       text-decoration: none;
       font-weight: 600;
     }
+
+    /* Step 2 Box */
+    .step2-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+      border: 1.5px solid rgba(99, 102, 241, 0.3);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -201,85 +212,62 @@
 
 <div class="join-container">
   <div class="join-card">
+
     <div class="join-header">
       <div class="join-icon">🏫</div>
-      <h1 class="join-title">ห้องเรียน PyLearn</h1>
-      <p class="join-desc">เข้าสู่ระบบด้วยเลขประจำตัว หรือลงทะเบียนเข้าห้องเรียนใหม่</p>
+      <h1 class="join-title">ระบบห้องเรียน PyLearn</h1>
+      <p class="join-desc" id="join-desc-text">ลงทะเบียนสร้างบัญชีนักเรียน หรือเข้าสู่ระบบ</p>
     </div>
 
-    <div class="join-tabs">
+    <!-- Navigation Tabs (Only in Step 1) -->
+    <div class="join-tabs" id="auth-tabs">
       <button class="join-tab active" id="tab-login" onclick="switchJoinTab('login')">เข้าสู่ระบบ (มีบัญชีแล้ว)</button>
-      <button class="join-tab" id="tab-register" onclick="switchJoinTab('register')">ลงทะเบียนเข้าห้องเรียนใหม่</button>
+      <button class="join-tab" id="tab-register" onclick="switchJoinTab('register')">ลงทะเบียนนักเรียนใหม่</button>
     </div>
 
-    <!-- FORM 1: Student Login -->
+    <!-- VIEW 1: Student Login -->
     <form id="form-login" onsubmit="handleStudentLogin(event)">
       <div class="form-group">
-        <label class="form-label">รหัสห้องเรียน (Classroom Code)</label>
+        <label class="form-label">เลขประจำตัวนักเรียน <span style="color:var(--red)">*</span></label>
         <input 
           type="text" 
-          id="login-code" 
-          class="form-input code-input" 
-          placeholder="PY----" 
-          maxlength="6" 
-          required 
-          autocomplete="off"
-        >
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">เลขประจำตัวนักเรียน / เลขที่ <span style="color:var(--red)">*</span></label>
-        <input 
-          type="text" 
-          id="login-number" 
+          id="login-id-code" 
           class="form-input" 
-          placeholder="เช่น 64010123 หรือ 15" 
+          placeholder="เช่น 10245" 
           required 
           autocomplete="username"
+          autofocus
         >
       </div>
 
       <div class="form-group">
-        <label class="form-label">รหัสผ่าน / PIN ของคุณ <span style="color:var(--red)">*</span></label>
+        <label class="form-label">รหัสผ่าน / PIN <span style="color:var(--red)">*</span></label>
         <input 
           type="password" 
           id="login-password" 
           class="form-input" 
-          placeholder="••••••••" 
+          placeholder="••••" 
           required 
           autocomplete="current-password"
         >
       </div>
 
       <button type="submit" class="btn-join" id="btn-login-submit">
-        🚀 เข้าสู่ระบบห้องเรียน
+        🚀 เข้าสู่ระบบ
       </button>
     </form>
 
-    <!-- FORM 2: Student Register (First Time) -->
+    <!-- VIEW 2: Student Register (Step 1) -->
     <form id="form-register" style="display:none;" onsubmit="handleStudentRegister(event)">
       <div class="form-group">
-        <label class="form-label">รหัสห้องเรียน (Classroom Code)</label>
+        <label class="form-label">เลขประจำตัวนักเรียน <span style="color:var(--red)">*</span></label>
         <input 
           type="text" 
-          id="reg-code" 
-          class="form-input code-input" 
-          placeholder="PY----" 
-          maxlength="6" 
+          id="reg-id-code" 
+          class="form-input" 
+          placeholder="เช่น 10245" 
           required 
           autocomplete="off"
-        >
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">เลขประจำตัวนักเรียน / เลขที่ <span style="color:var(--red)">*</span></label>
-        <input 
-          type="text" 
-          id="reg-number" 
-          class="form-input" 
-          placeholder="เช่น 64010123 หรือ 15" 
-          required 
-          autocomplete="username"
         >
       </div>
 
@@ -289,10 +277,35 @@
           type="text" 
           id="reg-name" 
           class="form-input" 
-          placeholder="เช่น เด็กชายรักเรียน ขยันดี" 
+          placeholder="เช่น ด.ช.พัชนันท์ แก้ววรรณา" 
           required 
           autocomplete="name"
         >
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;" class="form-group">
+        <div>
+          <label class="form-label">ชั้น (เช่น ม.4/1) <span style="color:var(--red)">*</span></label>
+          <input 
+            type="text" 
+            id="reg-grade" 
+            class="form-input" 
+            placeholder="เช่น ม.4/1" 
+            required 
+            autocomplete="off"
+          >
+        </div>
+        <div>
+          <label class="form-label">เลขที่ <span style="color:var(--red)">*</span></label>
+          <input 
+            type="text" 
+            id="reg-number" 
+            class="form-input" 
+            placeholder="เช่น 12" 
+            required 
+            autocomplete="off"
+          >
+        </div>
       </div>
 
       <div class="form-group">
@@ -307,44 +320,79 @@
           autocomplete="new-password"
         >
         <small style="color:var(--text-secondary);font-size:0.78rem;display:block;margin-top:4px;">
-          🔒 ตั้งรหัสผ่านที่จำง่าย สำหรับใช้เข้าสู่ระบบในครั้งถัดไป
+          🔒 ตั้งรหัสผ่านที่จำง่ายสำหรับใช้เข้าสู่ระบบในคาบเรียนถัดไป
         </small>
       </div>
 
       <button type="submit" class="btn-join" id="btn-reg-submit">
-        ✨ สร้างบัญชีและเข้าสู่ห้องเรียน
+        ✨ สร้างบัญชีนักเรียน →
       </button>
     </form>
 
+    <!-- VIEW 3: Step 2 Enter Classroom Code (Shown after registration or when student has no classroom) -->
+    <div id="step-classroom-code" style="display:none;">
+      <div class="step2-box">
+        <div style="font-size:2.2rem; margin-bottom:6px;">🎉</div>
+        <h3 style="margin:0 0 6px; font-size:1.15rem; color:var(--text-primary);" id="welcome-student-name">ยินดีต้อนรับ!</h3>
+        <p style="margin:0; font-size:0.85rem; color:var(--text-secondary);" id="welcome-student-info"></p>
+      </div>
+
+      <form onsubmit="handleJoinClassroom(event)">
+        <div class="form-group">
+          <label class="form-label" style="text-align:center; font-size:0.95rem;">
+            กรุณากรอกรหัสห้องเรียน 6 หลักที่คุณครูให้:
+          </label>
+          <input 
+            type="text" 
+            id="enter-class-code" 
+            class="form-input code-input" 
+            placeholder="PY----" 
+            maxlength="6" 
+            required 
+            autocomplete="off"
+            autofocus
+          >
+        </div>
+
+        <button type="submit" class="btn-join" id="btn-submit-code">
+          🚀 เข้าร่วมห้องเรียนและเริ่มเรียน
+        </button>
+      </form>
+    </div>
+
     <div id="join-error" class="error-box"></div>
 
-    <div class="join-info-box">
-      💡 <b>เรียนในห้องเรียน:</b> ได้รับสิทธิ์ใช้งาน AI ตรวจโค้ดและวิเคราะห์รายบุคคลฟรี โดยใช้โควตาของครูประจำห้องเรียน
+    <div class="join-info-box" id="info-footer">
+      💡 <b>สิทธิพิเศษในห้องเรียน:</b> นักเรียนสามารถใช้ AI ช่วยตรวจโค้ดได้ฟรี โดยใช้โควตา Gemini AI ของครูผู้สอน
     </div>
 
     <div class="join-links">
       <a href="index.html">← กลับหน้าหลัก หรือเรียนแบบบุคคลทั่วไป</a>
     </div>
+
   </div>
 </div>
 
 <script src="js/app.js"></script>
 <script src="js/classroom-client.js"></script>
 <script>
+  let pendingInviteCode = '';
+
   document.addEventListener('DOMContentLoaded', () => {
-    // Read ?code=... from query parameter
+    // Check if ?code=... is in URL
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     if (code) {
-      document.getElementById('login-code').value = code.toUpperCase();
-      document.getElementById('reg-code').value = code.toUpperCase();
-      document.getElementById('login-number').focus();
+      pendingInviteCode = code.toUpperCase();
+      const codeInput = document.getElementById('enter-class-code');
+      if (codeInput) codeInput.value = pendingInviteCode;
     }
 
-    // Auto-fill remembered student number if exists
-    const rememberedNum = localStorage.getItem('pylearn_remembered_student_num');
-    if (rememberedNum) {
-      document.getElementById('login-number').value = rememberedNum;
+    // Auto-fill remembered student ID
+    const rememberedId = localStorage.getItem('pylearn_remembered_student_id');
+    if (rememberedId) {
+      document.getElementById('login-id-code').value = rememberedId;
+      document.getElementById('login-password').focus();
     }
   });
 
@@ -353,34 +401,28 @@
     const tabReg = document.getElementById('tab-register');
     const formLogin = document.getElementById('form-login');
     const formReg = document.getElementById('form-register');
+    const stepCode = document.getElementById('step-classroom-code');
     const errBox = document.getElementById('join-error');
     errBox.style.display = 'none';
-
-    // Synchronize code input value across tabs
-    const currentCode = document.getElementById('login-code').value || document.getElementById('reg-code').value;
-    const currentNum = document.getElementById('login-number').value || document.getElementById('reg-number').value;
+    stepCode.style.display = 'none';
 
     if (tab === 'login') {
       tabLogin.classList.add('active');
       tabReg.classList.remove('active');
       formLogin.style.display = 'block';
       formReg.style.display = 'none';
-      if (currentCode) document.getElementById('login-code').value = currentCode;
-      if (currentNum) document.getElementById('login-number').value = currentNum;
     } else {
       tabReg.classList.add('active');
       tabLogin.classList.remove('active');
       formReg.style.display = 'block';
       formLogin.style.display = 'none';
-      if (currentCode) document.getElementById('reg-code').value = currentCode;
-      if (currentNum) document.getElementById('reg-number').value = currentNum;
     }
   }
 
+  // 1. Student Login
   async function handleStudentLogin(e) {
     e.preventDefault();
-    const code = document.getElementById('login-code').value.trim();
-    const studentNumber = document.getElementById('login-number').value.trim();
+    const studentIdCode = document.getElementById('login-id-code').value.trim();
     const password = document.getElementById('login-password').value;
     const btn = document.getElementById('btn-login-submit');
     const errBox = document.getElementById('join-error');
@@ -390,25 +432,34 @@
     btn.textContent = '⏳ กำลังเข้าสู่ระบบ...';
 
     try {
-      const res = await ClassroomClient.login(code, studentNumber, password);
-      localStorage.setItem('pylearn_remembered_student_num', studentNumber);
-      showToast(`ยินดีต้อนรับกลับ ${res.student.name}! 🎓`, 'success');
-      setTimeout(() => {
-        window.location.href = 'lesson.html';
-      }, 600);
+      const res = await ClassroomClient.login(studentIdCode, password);
+      localStorage.setItem('pylearn_remembered_student_id', studentIdCode);
+
+      // "แต่ถ้าเลขนั้น มีห้องเรียนอยู่แล้วก็ให้เข้าห้องเรียนเลย"
+      if (res.hasClassroom && res.classroom) {
+        showToast(`ยินดีต้อนรับกลับ ${res.student.name}! กำลังเข้าสู่ห้องเรียน... 🚀`, 'success');
+        setTimeout(() => {
+          window.location.href = 'lesson.html';
+        }, 500);
+      } else {
+        // No classroom yet -> show step 2 to enter code
+        showStepClassroomCode(res.student);
+      }
     } catch (err) {
       errBox.textContent = '❌ ' + err.message;
       errBox.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = '🚀 เข้าสู่ระบบห้องเรียน';
+      btn.textContent = '🚀 เข้าสู่ระบบ';
     }
   }
 
+  // 2. Student Register (Step 1)
   async function handleStudentRegister(e) {
     e.preventDefault();
-    const code = document.getElementById('reg-code').value.trim();
-    const studentNumber = document.getElementById('reg-number').value.trim();
+    const studentIdCode = document.getElementById('reg-id-code').value.trim();
     const name = document.getElementById('reg-name').value.trim();
+    const gradeClass = document.getElementById('reg-grade').value.trim();
+    const studentNumber = document.getElementById('reg-number').value.trim();
     const password = document.getElementById('reg-password').value;
     const btn = document.getElementById('btn-reg-submit');
     const errBox = document.getElementById('join-error');
@@ -418,9 +469,60 @@
     btn.textContent = '⏳ กำลังสร้างบัญชี...';
 
     try {
-      const res = await ClassroomClient.register(code, studentNumber, name, password);
-      localStorage.setItem('pylearn_remembered_student_num', studentNumber);
-      showToast(`สร้างบัญชีสำเร็จ! ยินดีต้อนรับสู่ห้องเรียน ${res.classroom.name} 🎓`, 'success');
+      const res = await ClassroomClient.register(studentIdCode, name, gradeClass, studentNumber, password, pendingInviteCode);
+      localStorage.setItem('pylearn_remembered_student_id', studentIdCode);
+
+      if (res.hasClassroom && res.classroom) {
+        showToast(`สร้างบัญชีสำเร็จ! เข้าสู่ห้องเรียน ${res.classroom.name} 🎓`, 'success');
+        setTimeout(() => {
+          window.location.href = 'lesson.html';
+        }, 600);
+      } else {
+        // Show step 2 to enter classroom code
+        showStepClassroomCode(res.student);
+      }
+    } catch (err) {
+      errBox.textContent = '❌ ' + err.message;
+      errBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '✨ สร้างบัญชีนักเรียน →';
+    }
+  }
+
+  // Show Step 2: Classroom Code Form
+  function showStepClassroomCode(student) {
+    document.getElementById('auth-tabs').style.display = 'none';
+    document.getElementById('form-login').style.display = 'none';
+    document.getElementById('form-register').style.display = 'none';
+    document.getElementById('join-error').style.display = 'none';
+
+    document.getElementById('welcome-student-name').textContent = `สวัสดี ${student.name}!`;
+    document.getElementById('welcome-student-info').textContent = `ชั้น ${student.gradeClass || ''} เลขที่ ${student.studentNumber} (รหัสประจำตัว: ${student.studentIdCode})`;
+
+    const stepCode = document.getElementById('step-classroom-code');
+    stepCode.style.display = 'block';
+
+    const codeInput = document.getElementById('enter-class-code');
+    if (pendingInviteCode) {
+      codeInput.value = pendingInviteCode;
+    }
+    codeInput.focus();
+  }
+
+  // 3. Step 2 Submit: Join Classroom with Code
+  async function handleJoinClassroom(e) {
+    e.preventDefault();
+    const code = document.getElementById('enter-class-code').value.trim();
+    const btn = document.getElementById('btn-submit-code');
+    const errBox = document.getElementById('join-error');
+
+    errBox.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังเข้าสู่ห้องเรียน...';
+
+    try {
+      const res = await ClassroomClient.joinClassroom(code);
+      showToast(`เข้าร่วมห้องเรียน "${res.classroom.name}" สำเร็จ! 🎓`, 'success');
       setTimeout(() => {
         window.location.href = 'lesson.html';
       }, 600);
@@ -428,7 +530,7 @@
       errBox.textContent = '❌ ' + err.message;
       errBox.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = '✨ สร้างบัญชีและเข้าสู่ห้องเรียน';
+      btn.textContent = '🚀 เข้าร่วมห้องเรียนและเริ่มเรียน';
     }
   }
 </script>

@@ -39,8 +39,10 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS students (
     id TEXT PRIMARY KEY,
-    classroom_id TEXT NOT NULL,
+    classroom_id TEXT,
+    student_id_code TEXT,
     student_number TEXT,
+    grade_class TEXT,
     name TEXT NOT NULL,
     password_hash TEXT,
     salt TEXT,
@@ -102,5 +104,43 @@ try {
 try {
   db.exec('ALTER TABLE students ADD COLUMN salt TEXT;');
 } catch {}
+try {
+  db.exec('ALTER TABLE students ADD COLUMN student_id_code TEXT;');
+} catch {}
+try {
+  db.exec('ALTER TABLE students ADD COLUMN grade_class TEXT;');
+} catch {}
+
+// Migration: Allow classroom_id to be NULL so students can register before joining a classroom
+try {
+  const tableInfo = db.prepare('PRAGMA table_info(students)').all();
+  const classCol = tableInfo.find(c => c.name === 'classroom_id');
+  if (classCol && classCol.notnull === 1) {
+    db.exec('PRAGMA foreign_keys = OFF;');
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS students_temp_migration (
+        id TEXT PRIMARY KEY,
+        classroom_id TEXT,
+        student_id_code TEXT,
+        student_number TEXT,
+        grade_class TEXT,
+        name TEXT NOT NULL,
+        password_hash TEXT,
+        salt TEXT,
+        session_token TEXT UNIQUE NOT NULL,
+        last_active DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (classroom_id) REFERENCES classrooms(id) ON DELETE CASCADE
+      );
+      INSERT INTO students_temp_migration (id, classroom_id, student_id_code, student_number, grade_class, name, password_hash, salt, session_token, last_active, created_at)
+      SELECT id, CASE WHEN classroom_id = '' THEN NULL ELSE classroom_id END, student_id_code, student_number, grade_class, name, password_hash, salt, session_token, last_active, created_at FROM students;
+      DROP TABLE students;
+      ALTER TABLE students_temp_migration RENAME TO students;
+      PRAGMA foreign_keys = ON;
+    `);
+  }
+} catch (migErr) {
+  console.error('Migration notice for students table:', migErr.message);
+}
 
 module.exports = db;

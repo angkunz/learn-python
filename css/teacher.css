@@ -429,22 +429,53 @@
 }
 
 .modal-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  color: #16161a;
+  border: 2px solid #16161a;
   border-radius: 20px;
-  padding: 28px;
+  padding: 32px;
   width: 100%;
   max-width: 650px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
   position: relative;
+}
+
+[data-theme="dark"] .modal-card {
+  background: #1e2430;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+}
+
+.modal-card .form-label {
+  color: #16161a;
+}
+[data-theme="dark"] .modal-card .form-label {
+  color: #f1f5f9;
+}
+
+.modal-card .form-input,
+.modal-card select,
+.modal-card textarea {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+  font-family: inherit;
+}
+[data-theme="dark"] .modal-card .form-input,
+[data-theme="dark"] .modal-card select,
+[data-theme="dark"] .modal-card textarea {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1.5px solid #334155 !important;
 }
 
 .modal-title {
   font-size: 1.4rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: inherit;
   margin: 0 0 16px;
   display: flex;
   align-items: center;
@@ -455,8 +486,12 @@
   background: none;
   border: none;
   font-size: 1.4rem;
-  color: var(--text-secondary);
+  color: inherit;
   cursor: pointer;
+  opacity: 0.6;
+}
+.modal-close-btn:hover {
+  opacity: 1;
 }
 
 /* Code Inspector Card */

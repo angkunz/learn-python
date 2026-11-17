@@ -59,46 +59,57 @@ async function runTests() {
   assert.strictEqual(classroom.hasApiKey, true);
   console.log(`   ✅ Classroom created! Name: "${classroom.name}", Code: [${classroom.code}]`);
 
-  // 4. Student Register & Login with Password / PIN
-  console.log('\n4. Testing Student Account Register & Login...');
+  // 4. Student Register (Step 1: ID, Name, Grade, Number, Password) & Join Classroom (Step 2)
+  console.log('\n4. Testing Student Account Register & Login flow...');
+  const testStudentIdCode = '50' + Math.floor(1000 + Math.random() * 9000);
   const regStdRes = await fetch(`${baseUrl}/api/student/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      code: classroom.code,
+      studentIdCode: testStudentIdCode,
       name: 'เด็กชายสมเกียรติ มุ่งมั่น',
+      gradeClass: 'ม.4/1',
       studentNumber: '05',
       password: 'mypassword123'
     })
   });
-  const regStdText = await regStdRes.text();
-  let regStdData;
-  try {
-    regStdData = JSON.parse(regStdText);
-  } catch (err) {
-    console.error('Register response was not JSON! Status:', regStdRes.status, 'Body:', regStdText);
-    throw err;
-  }
+  const regStdData = await regStdRes.json();
   assert.strictEqual(regStdRes.status, 200, `Student register failed: ${JSON.stringify(regStdData)}`);
   assert.ok(regStdData.token);
+  assert.strictEqual(regStdData.hasClassroom, false, 'Should not have classroom yet');
   const studentId = regStdData.student.id;
-  console.log(`   ✅ Student registered account! ID: ${studentId}, Name: ${regStdData.student.name}`);
+  let studentToken = regStdData.token;
+  console.log(`   ✅ Step 1: Student registered account! ID Code: ${testStudentIdCode}, Name: ${regStdData.student.name}`);
 
-  // Test Student Login
+  // Step 2: Join classroom via code
+  const joinRes = await fetch(`${baseUrl}/api/student/join-classroom`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${studentToken}`
+    },
+    body: JSON.stringify({ code: classroom.code })
+  });
+  const joinData = await joinRes.json();
+  assert.strictEqual(joinRes.status, 200, `Join classroom failed: ${JSON.stringify(joinData)}`);
+  assert.strictEqual(joinData.classroom.code, classroom.code);
+  console.log(`   ✅ Step 2: Student joined classroom [${classroom.code}] successfully!`);
+
+  // Test Student Login - since student already has classroom, should return hasClassroom: true
   const loginStdRes = await fetch(`${baseUrl}/api/student/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      code: classroom.code,
-      studentNumber: '05',
+      studentIdCode: testStudentIdCode,
       password: 'mypassword123'
     })
   });
   const loginStdData = await loginStdRes.json();
   assert.strictEqual(loginStdRes.status, 200, 'Student login failed');
   assert.ok(loginStdData.token);
-  let studentToken = loginStdData.token;
-  console.log('   ✅ Student login with Student Number and Password verified!');
+  assert.strictEqual(loginStdData.hasClassroom, true, 'Already in classroom -> direct entry');
+  studentToken = loginStdData.token;
+  console.log('   ✅ Student login with Student ID Code and Password verified! Enters classroom directly!');
 
   // Test Teacher Reset Student Password
   const resetRes = await fetch(`${baseUrl}/api/teacher/classrooms/${classroom.id}/students/${studentId}/reset-password`, {
@@ -117,8 +128,7 @@ async function runTests() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      code: classroom.code,
-      studentNumber: '05',
+      studentIdCode: testStudentIdCode,
       password: 'newpin9999'
     })
   });

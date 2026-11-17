@@ -288,7 +288,7 @@ function renderMatrixTable(students) {
   if (students.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align:center;padding:32px;color:var(--text-secondary);">
+        <td colspan="10" style="text-align:center;padding:32px;color:var(--text-secondary);">
           ยังไม่มีนักเรียนเข้าร่วมห้องเรียนนี้<br>
           <button class="btn-inspect" onclick="copyJoinLink('${document.getElementById('current-class-code').textContent}')" style="margin-top:12px;">
             📋 คัดลอกลิงก์เชิญนักเรียน
@@ -320,6 +320,8 @@ function renderMatrixTable(students) {
 
     return `
       <tr>
+        <td style="font-weight:700;color:var(--text-primary);font-family:monospace;">${s.student_id_code || '-'}</td>
+        <td style="color:var(--text-secondary);">${s.grade_class || '-'}</td>
         <td style="font-weight:700;color:var(--cyan);">${s.student_number || '-'}</td>
         <td style="font-weight:600;">${escapeHtml(s.name)}</td>
         <td style="color:#eab308;font-weight:700;">⭐ ${s.total_xp || 0} XP</td>
@@ -345,6 +347,8 @@ function filterMatrixStudents() {
   }
   const filtered = currentMatrixData.filter(s => 
     s.name.toLowerCase().includes(query) || 
+    (s.student_id_code && s.student_id_code.toLowerCase().includes(query)) ||
+    (s.grade_class && s.grade_class.toLowerCase().includes(query)) ||
     (s.student_number && s.student_number.includes(query))
   );
   renderMatrixTable(filtered);
@@ -366,10 +370,12 @@ async function openStudentDiagnosticsModal(studentId) {
     body.innerHTML = `
       <div style="border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <div>
-          <h2 style="margin:0 0 4px;font-size:1.4rem;color:var(--text-primary);">
-            👤 ${escapeHtml(student.name)} 
-            ${student.student_number ? `<span style="font-size:1rem;color:var(--cyan);">(เลขที่ ${student.student_number})</span>` : ''}
+          <h2 style="margin:0 0 4px;font-size:1.3rem;color:var(--text-primary);">
+            👤 ${escapeHtml(student.name)}
           </h2>
+          <div style="font-size:0.88rem;color:var(--cyan);font-weight:600;margin-bottom:4px;">
+            เลขประจำตัว: ${student.student_id_code || '-'} | ชั้น: ${student.grade_class || '-'} | เลขที่: ${student.student_number || '-'}
+          </div>
           <div style="font-size:0.85rem;color:var(--text-secondary);">
             สะสม <b>${student.total_xp} XP</b> | ผ่านแล้ว <b>${student.completed_lessons_count} บทเรียน</b> | ใช้งานล่าสุด: ${student.last_active || '-'}
           </div>

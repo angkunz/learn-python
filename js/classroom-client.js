@@ -30,11 +30,11 @@ const ClassroomClient = {
   },
 
   // ── API: Student Login (Existing Account) ──
-  async login(code, studentNumber, password) {
+  async login(studentIdCode, password) {
     const res = await fetch('/api/student/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, studentNumber, password })
+      body: JSON.stringify({ studentIdCode, password })
     });
     const data = await res.json();
     if (!res.ok) {
@@ -44,18 +44,42 @@ const ClassroomClient = {
     return data;
   },
 
-  // ── API: Student Register (New Account) ──
-  async register(code, studentNumber, name, password) {
+  // ── API: Student Register (Step 1: Create Account) ──
+  async register(studentIdCode, name, gradeClass, studentNumber, password, classroomCode = '') {
     const res = await fetch('/api/student/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, studentNumber, name, password })
+      body: JSON.stringify({ studentIdCode, name, gradeClass, studentNumber, password, classroomCode })
     });
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.error || 'ลงทะเบียนไม่สำเร็จ');
     }
     this.setSession(data);
+    return data;
+  },
+
+  // ── API: Join Classroom with Code (Step 2) ──
+  async joinClassroom(code) {
+    const session = this.getSession();
+    if (!session || !session.token) {
+      throw new Error('กรุณาเข้าสู่ระบบนักเรียนก่อน');
+    }
+    const res = await fetch('/api/student/join-classroom', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.token}`
+      },
+      body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'เข้าร่วมห้องเรียนไม่สำเร็จ');
+    }
+    session.classroom = data.classroom;
+    session.hasClassroom = true;
+    this.setSession(session);
     return data;
   },
 
