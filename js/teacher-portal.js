@@ -550,12 +550,28 @@ function closeCreateModal() {
   document.getElementById('create-modal').style.display = 'none';
 }
 
+function toggleCustomModelInput(type) {
+  const sel = document.getElementById(`${type}-cls-model`);
+  const wrap = document.getElementById(`${type}-cls-custom-model-wrap`);
+  const inp = document.getElementById(`${type}-cls-custom-model`);
+  if (!sel || !wrap) return;
+  if (sel.value === 'custom') {
+    wrap.style.display = 'block';
+    if (inp) inp.focus();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
 async function handleCreateClassroom(e) {
   e.preventDefault();
   const name = document.getElementById('create-cls-name').value.trim();
   const description = document.getElementById('create-cls-desc').value.trim();
   const geminiApiKey = document.getElementById('create-cls-key').value.trim();
-  const geminiModel = document.getElementById('create-cls-model').value;
+  const modelSelect = document.getElementById('create-cls-model').value;
+  const customModel = document.getElementById('create-cls-custom-model')?.value.trim() || '';
+  const geminiModel = (modelSelect === 'custom' && customModel) ? customModel : (modelSelect !== 'custom' ? modelSelect : 'gemini-2.5-flash');
+
   const btn = document.getElementById('btn-create-submit');
   const errBox = document.getElementById('create-cls-error');
 
@@ -594,7 +610,24 @@ function openEditClassroomModal(id) {
   document.getElementById('edit-cls-desc').value = cls.description || '';
   document.getElementById('edit-cls-key').value = ''; // keep empty unless changed
   document.getElementById('edit-cls-key').placeholder = cls.hasApiKey ? '(มี API Key อยู่แล้ว ใส่ใหม่หากต้องการเปลี่ยน)' : 'AIzaSy...';
-  document.getElementById('edit-cls-model').value = cls.gemini_model || 'gemini-2.5-flash';
+
+  // Handle Model dropdown selection & custom model
+  const modelSel = document.getElementById('edit-cls-model');
+  const customWrap = document.getElementById('edit-cls-custom-model-wrap');
+  const customInp = document.getElementById('edit-cls-custom-model');
+  const currentModel = cls.gemini_model || 'gemini-2.5-flash';
+
+  const hasOption = Array.from(modelSel.options).some(o => o.value === currentModel);
+  if (hasOption) {
+    modelSel.value = currentModel;
+    if (customWrap) customWrap.style.display = 'none';
+    if (customInp) customInp.value = '';
+  } else {
+    modelSel.value = 'custom';
+    if (customWrap) customWrap.style.display = 'block';
+    if (customInp) customInp.value = currentModel;
+  }
+
   document.getElementById('edit-cls-error').style.display = 'none';
   document.getElementById('test-key-status').innerHTML = '';
 }
@@ -611,7 +644,7 @@ async function testApiKeyInModal() {
     return;
   }
 
-  statusEl.innerHTML = '<span style="color:var(--text-secondary);">⏳ กำลังทดสอบเชื่อมต่อ Google Gemini...</span>';
+  statusEl.innerHTML = '<span style="color:var(--text-secondary);">⏳ กำลังทดสอบเชื่อมต่อ Google Gemini & ค้นหาโมเดล...</span>';
   try {
     const res = await teacherFetch('/api/teacher/test-api-key', {
       method: 'POST',
@@ -619,7 +652,26 @@ async function testApiKeyInModal() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'คีย์ใช้งานไม่ได้');
-    statusEl.innerHTML = '<span style="color:#4ade80;">✅ ' + data.message + '</span>';
+
+    if (data.availableModels && data.availableModels.length > 0) {
+      statusEl.innerHTML = `<span style="color:#4ade80;">✅ ${data.message} (ตรวจพบ ${data.availableModels.length} โมเดลที่พร้อมใช้งาน)</span>`;
+      // Inject dynamically found models from Google into the dropdown
+      const sel = document.getElementById('edit-cls-model');
+      if (sel) {
+        data.availableModels.slice(0, 8).forEach(m => {
+          if (!Array.from(sel.options).some(o => o.value === m.id)) {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = `✨ ${m.displayName || m.id} (ตรวจพบใหม่)`;
+            const customOpt = sel.querySelector('option[value="custom"]');
+            if (customOpt) sel.insertBefore(opt, customOpt);
+            else sel.appendChild(opt);
+          }
+        });
+      }
+    } else {
+      statusEl.innerHTML = '<span style="color:#4ade80;">✅ ' + data.message + '</span>';
+    }
   } catch (err) {
     statusEl.innerHTML = '<span style="color:#ef4444;">❌ ' + err.message + '</span>';
   }
@@ -631,7 +683,10 @@ async function handleUpdateClassroom(e) {
   const name = document.getElementById('edit-cls-name').value.trim();
   const description = document.getElementById('edit-cls-desc').value.trim();
   const keyInput = document.getElementById('edit-cls-key').value.trim();
-  const geminiModel = document.getElementById('edit-cls-model').value;
+  const modelSelect = document.getElementById('edit-cls-model').value;
+  const customModel = document.getElementById('edit-cls-custom-model')?.value.trim() || '';
+  const geminiModel = (modelSelect === 'custom' && customModel) ? customModel : (modelSelect !== 'custom' ? modelSelect : 'gemini-2.5-flash');
+
   const btn = document.getElementById('btn-update-submit');
   const errBox = document.getElementById('edit-cls-error');
 

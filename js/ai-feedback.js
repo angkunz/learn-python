@@ -376,9 +376,12 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
 
     if (!response.ok) {
       const body = await response.text().catch(() => '');
-      if (response.status === 400 || response.status === 403 || response.status === 404) {
+      if (response.status === 400 || response.status === 403) {
         clearApiKey();
         throw new Error('API Key ไม่ถูกต้อง กรุณาตั้งค่าใหม่');
+      }
+      if (response.status === 404) {
+        throw new Error('MODEL_NOT_FOUND');
       }
       if (response.status === 429) {
         throw new Error('API_RATE_LIMIT');
@@ -424,13 +427,13 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
   } catch (e) {
     if (e.message.includes('API Key')) throw e;
     
-    if (e.message === 'API_RATE_LIMIT' || e.message.includes('503')) {
+    if (e.message === 'MODEL_NOT_FOUND' || e.message === 'API_RATE_LIMIT' || e.message.includes('503')) {
       if (modelIndex + 1 < AI_MODELS.length) {
         const nextModel = AI_MODELS[modelIndex + 1];
-        console.log(`[AI Debug] Model ${AI_MODELS[modelIndex]} failed, switching to ${nextModel}...`);
+        console.log(`[AI Debug] Model ${AI_MODELS[modelIndex]} failed (${e.message}), switching to ${nextModel}...`);
         return callGemini(apiKey, lessonTitle, exerciseTitle, exerciseDesc, userCode, runOutput, solution, hint, starterCode, difficulty, expectedOutput, modelIndex + 1);
       }
-      console.warn('API_RATE_LIMIT exceeded on all fallback models. Falling back to heuristic.');
+      console.warn('API_RATE_LIMIT or MODEL_NOT_FOUND on all fallback models. Falling back to heuristic.');
       return heuristicScore(userCode, runOutput, expectedOutput, solution, true);
     }
     console.warn('Gemini error:', e);
