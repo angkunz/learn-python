@@ -271,10 +271,6 @@ const ClassroomClient = {
             <span class="menu-info-lbl">👩‍🏫 ครูผู้สอน:</span>
             <span class="menu-info-val">${escapeHtml(classroom.teacherName)}</span>
           </div>
-          <div class="menu-info-row">
-            <span class="menu-info-lbl">⚡ ตรวจโค้ด AI:</span>
-            <span class="menu-info-val" style="color:#10b981;font-weight:700;">พร้อมใช้งาน (โควตาครู)</span>
-          </div>
           <div class="menu-divider"></div>
           <a href="lesson.html" class="menu-link-btn">📚 เข้าสู่บทเรียน</a>
           <button class="menu-leave-btn" onclick="ClassroomClient.confirmLeave()">
