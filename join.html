@@ -181,6 +181,63 @@
       font-weight: 600;
     }
 
+    /* Small Teacher Link */
+    .btn-teacher-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: var(--pill, 100px);
+      background: rgba(99, 102, 241, 0.1);
+      border: 1.5px solid rgba(99, 102, 241, 0.35);
+      color: #6366f1;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-teacher-pill:hover {
+      background: #6366f1;
+      color: #ffffff;
+      border-color: #6366f1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    [data-theme="dark"] .btn-teacher-pill {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: rgba(129, 140, 248, 0.4);
+      color: #a5b4fc;
+    }
+    [data-theme="dark"] .btn-teacher-pill:hover {
+      background: #6366f1;
+      color: #ffffff;
+    }
+    .teacher-footer-link {
+      display: inline-block;
+      color: #6366f1;
+      font-size: 0.86rem;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px dashed rgba(99, 102, 241, 0.3);
+      transition: all 0.2s;
+    }
+    .teacher-footer-link:hover {
+      background: rgba(99, 102, 241, 0.15);
+      color: #4f46e5;
+      border-style: solid;
+    }
+    [data-theme="dark"] .teacher-footer-link {
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(129, 140, 248, 0.3);
+    }
+    [data-theme="dark"] .teacher-footer-link:hover {
+      background: rgba(99, 102, 241, 0.22);
+      color: #c7d2fe;
+    }
+
     /* Step 2 Box */
     .step2-box {
       background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
@@ -216,12 +273,18 @@
         <span class="icon-moon">🌙</span>
       </span>
     </label>
-    <a href="teacher-login.html" class="nav-btn" style="text-decoration:none;">👩‍🏫 สำหรับครูผู้สอน</a>
   </div>
 </nav>
 
 <div class="join-container">
   <div class="join-card">
+
+    <!-- Small Teacher Button in Card Top -->
+    <div style="display:flex; justify-content:flex-end; margin-bottom: 6px;">
+      <a href="teacher-login.html" class="btn-teacher-pill" title="สำหรับครูผู้สอน จัดการห้องเรียน">
+        <span>👩‍🏫</span> สำหรับครูผู้สอน →
+      </a>
+    </div>
 
     <div class="join-header">
       <div class="join-icon">🏫</div>
@@ -377,7 +440,12 @@
     </div>
 
     <div class="join-links">
-      <a href="index.html">← กลับหน้าหลัก หรือเรียนแบบบุคคลทั่วไป</a>
+      <div style="margin-bottom: 12px;">
+        <a href="teacher-login.html" class="teacher-footer-link">
+          👩‍🏫 คุณครูต้องการจัดการห้องเรียน? <b>เข้าสู่ระบบสำหรับครูผู้สอน (LMS) →</b>
+        </a>
+      </div>
+      <a href="index.html" style="color:var(--text-secondary); text-decoration:none; font-size:0.85rem;">← กลับหน้าหลัก หรือเรียนแบบบุคคลทั่วไป</a>
     </div>
 
   </div>
