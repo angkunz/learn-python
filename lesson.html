@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com https://unpkg.com https://cdn.jsdelivr.net https://files.pythonhosted.org https://pypi.org; worker-src blob:;">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com https://unpkg.com https://cdn.jsdelivr.net https://files.pythonhosted.org https://pypi.org; worker-src blob:;">
   <title>บทเรียน — PyLearn</title>
   <meta name="description" content="เรียนรู้ Python แบบ interactive พร้อมโค้ดเอดิเตอร์และ AI feedback">
   <link rel="stylesheet" href="css/style.css">
@@ -12,237 +14,247 @@
 
   <style>
     /* Extra Lesson-page styles */
-    .cm-editor { font-size: 14px !important; }
-    .ͼ1 .cm-scroller { overflow: auto !important; }
+    .cm-editor {
+      font-size: 14px !important;
+    }
+
+    .ͼ1 .cm-scroller {
+      overflow: auto !important;
+    }
   </style>
   <script>
     if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
   </script>
 </head>
+
 <body>
 
-<!-- Background -->
-<div class="bg-grid"></div>
-<div class="bg-orb bg-orb-1" style="opacity:0.5;"></div>
-<div class="bg-orb bg-orb-2" style="opacity:0.5;"></div>
+  <!-- Background -->
+  <div class="bg-grid"></div>
+  <div class="bg-orb bg-orb-1" style="opacity:0.5;"></div>
+  <div class="bg-orb bg-orb-2" style="opacity:0.5;"></div>
 
-<!-- Navbar -->
-<nav class="navbar">
-  <a class="nav-logo" href="index.html" title="PyLearn">
-    <img src="img/logo-horizontal.png" alt="PyLearn" class="nav-logo-img">
-  </a>
-  <div class="nav-links" id="lesson-breadcrumb" style="flex:1;padding:0 16px;">
-    <!-- Breadcrumb inserted by JS -->
-  </div>
-  <div class="nav-actions">
-    <a href="playground.html" style="color:var(--text-secondary);text-decoration:none;font-size:0.85rem;font-weight:600;"> Playground </a>
-    <span id="nav-xp" class="nav-xp-badge">⭐ 0 XP</span>
-    <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
-      <input type="checkbox" class="theme-switch-cb">
-      <span class="theme-switch-slider">
-        <span class="icon-sun">☀️</span>
-        <span class="icon-moon">🌙</span>
-      </span>
-    </label>
-    <button class="nav-btn" id="nav-api-key-btn" onclick="showApiKeyModal(null)" title="ตั้งค่า AI Key">⚙️ API Key</button>
-  </div>
-</nav>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a class="nav-logo" href="index.html" title="PyLearn">
+      <img src="img/logo-horizontal.png" alt="PyLearn" class="nav-logo-img">
+    </a>
+    <div class="nav-links" id="lesson-breadcrumb" style="flex:1;padding:0 16px;">
+      <!-- Breadcrumb inserted by JS -->
+    </div>
+    <div class="nav-actions">
+      <a href="playground.html"
+        style="color:var(--text-secondary);text-decoration:none;font-size:0.85rem;font-weight:600;"> Playground </a>
+      <span id="nav-xp" class="nav-xp-badge">⭐ 0 XP</span>
+      <label class="theme-switch" title="สลับโหมดมืด/สว่าง">
+        <input type="checkbox" class="theme-switch-cb">
+        <span class="theme-switch-slider">
+          <span class="icon-sun">☀️</span>
+          <span class="icon-moon">🌙</span>
+        </span>
+      </label>
+      <button class="nav-btn" id="nav-api-key-btn" onclick="showApiKeyModal(null)" title="ตั้งค่า AI Key">⚙️ API
+        Key</button>
+    </div>
+  </nav>
 
-<!-- Pyodide loading bar -->
-<div class="nav-progress-bar" id="py-progress-bar" style="width:0%"></div>
+  <!-- Pyodide loading bar -->
+  <div class="nav-progress-bar" id="py-progress-bar" style="width:0%"></div>
 
-<!-- Layout -->
-<div class="lesson-layout">
+  <!-- Layout -->
+  <div class="lesson-layout">
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">บทเรียนทั้งหมด</div>
-      <div class="sidebar-search">
-        <span class="sidebar-search-icon">🔍</span>
-        <input type="text" id="sidebar-search" placeholder="ค้นหาบทเรียน...">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">บทเรียนทั้งหมด</div>
+        <button type="button" class="sidebar-close-btn" onclick="document.body.classList.remove('sidebar-open')"
+          aria-label="ปิดสารบัญ">✕</button>
+        <div class="sidebar-search">
+          <span class="sidebar-search-icon">🔍</span>
+          <input type="text" id="sidebar-search" placeholder="ค้นหาบทเรียน...">
+        </div>
       </div>
-    </div>
-    <div id="sidebar-content">
-      <!-- Generated by JS -->
-    </div>
-  </aside>
+      <div id="sidebar-content">
+        <!-- Generated by JS -->
+      </div>
+    </aside>
 
-  <!-- Main -->
-  <main class="lesson-main">
-    <div class="lesson-content" id="lesson-content">
-      <!-- Generated by JS -->
-    </div>
-  </main>
+    <!-- Main -->
+    <main class="lesson-main">
+      <div class="lesson-content" id="lesson-content">
+        <!-- Generated by JS -->
+      </div>
+    </main>
 
-</div>
+  </div>
 
-<!-- CDN Scripts -->
-<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
-
+  <!-- CDN Scripts -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
 
 
 
-<script src="js/lessons-data.js?v=3"></script>
-<script src="js/app.js?v=4"></script>
-<script src="js/editor.js?v=7"></script>
-<script src="js/classroom-client.js?v=1"></script>
-<script src="js/ai-feedback.js?v=3"></script>
-<script>
-// ============================================================
-// LESSON PAGE CONTROLLER
-// ============================================================
 
-let currentLesson = null;
-let currentExerciseIdx = 0;
-let editors = {};  // editorId -> CM EditorView
-let pyodideReady = false;
-let lastRunOutput = {};  // exId -> output string
+  <script src="js/lessons-data.js?v=3"></script>
+  <script src="js/app.js?v=4"></script>
+  <script src="js/editor.js?v=7"></script>
+  <script src="js/classroom-client.js?v=1"></script>
+  <script src="js/ai-feedback.js?v=3"></script>
+  <script>
+    // ============================================================
+    // LESSON PAGE CONTROLLER
+    // ============================================================
 
-// ── Active Lessons Helper (Respects Teacher Classroom Curriculum) ──
-function getActiveLessonsList() {
-  const session = window.ClassroomClient?.getSession();
-  const curr = session?.classroom?.curriculum;
-  if (curr && curr.lessonIds && Array.isArray(curr.lessonIds) && curr.lessonIds.length > 0) {
-    return LESSONS_DATA.filter(l => curr.lessonIds.includes(l.id)).sort((a,b) => a.order - b.order);
-  }
-  const grade = getGradeLevel();
-  const visibleLevels = getLevelsByGrade(grade);
-  return LESSONS_DATA
-    .filter(l => visibleLevels.includes(l.level))
-    .slice()
-    .sort((a,b) => {
-      const lo = { elementary: 0, beginner: 1, intermediate: 2, advanced: 3 };
-      return lo[a.level] - lo[b.level] || a.order - b.order;
+    let currentLesson = null;
+    let currentExerciseIdx = 0;
+    let editors = {};  // editorId -> CM EditorView
+    let pyodideReady = false;
+    let lastRunOutput = {};  // exId -> output string
+
+    // ── Active Lessons Helper (Respects Teacher Classroom Curriculum) ──
+    function getActiveLessonsList() {
+      const session = window.ClassroomClient?.getSession();
+      const curr = session?.classroom?.curriculum;
+      if (curr && curr.lessonIds && Array.isArray(curr.lessonIds) && curr.lessonIds.length > 0) {
+        return LESSONS_DATA.filter(l => curr.lessonIds.includes(l.id)).sort((a, b) => a.order - b.order);
+      }
+      const grade = getGradeLevel();
+      const visibleLevels = getLevelsByGrade(grade);
+      return LESSONS_DATA
+        .filter(l => visibleLevels.includes(l.level))
+        .slice()
+        .sort((a, b) => {
+          const lo = { elementary: 0, beginner: 1, intermediate: 2, advanced: 3 };
+          return lo[a.level] - lo[b.level] || a.order - b.order;
+        });
+    }
+
+    // ── Boot ──
+    document.addEventListener('DOMContentLoaded', async () => {
+      // If in Classroom mode, render header banner and verify session
+      if (window.ClassroomClient) {
+        window.ClassroomClient.renderHeaderBanner();
+        await window.ClassroomClient.checkSession();
+      }
+
+      updateXPDisplay();
+
+      const activeLessons = getActiveLessonsList();
+      const params = new URLSearchParams(location.search);
+      let requestedId = params.get('id');
+
+      if (requestedId && !activeLessons.some(l => l.id === requestedId)) {
+        requestedId = activeLessons[0]?.id;
+        showToast('บทเรียนที่คุณเปิดไม่ได้เปิดสอนในห้องเรียนนี้', 'info');
+      }
+
+      const lessonId = requestedId || activeLessons[0]?.id || LESSONS_DATA[0].id;
+      currentLesson = getLessonById(lessonId);
+      window.currentLesson = currentLesson;
+      if (!currentLesson) { location.href = 'index.html'; return; }
+
+      renderSidebar();
+      renderLesson(currentLesson);
+      setupSidebarSearch();
+
+      // Init Pyodide
+      initPyodideWithUI();
     });
-}
 
-// ── Boot ──
-document.addEventListener('DOMContentLoaded', async () => {
-  // If in Classroom mode, render header banner and verify session
-  if (window.ClassroomClient) {
-    window.ClassroomClient.renderHeaderBanner();
-    await window.ClassroomClient.checkSession();
-  }
+    // (No cm-ready needed — textarea editor is synchronous)
 
-  updateXPDisplay();
-
-  const activeLessons = getActiveLessonsList();
-  const params = new URLSearchParams(location.search);
-  let requestedId = params.get('id');
-
-  if (requestedId && !activeLessons.some(l => l.id === requestedId)) {
-    requestedId = activeLessons[0]?.id;
-    showToast('บทเรียนที่คุณเปิดไม่ได้เปิดสอนในห้องเรียนนี้', 'info');
-  }
-
-  const lessonId = requestedId || activeLessons[0]?.id || LESSONS_DATA[0].id;
-  currentLesson = getLessonById(lessonId);
-  window.currentLesson = currentLesson;
-  if (!currentLesson) { location.href = 'index.html'; return; }
-
-  renderSidebar();
-  renderLesson(currentLesson);
-  setupSidebarSearch();
-
-  // Init Pyodide
-  initPyodideWithUI();
-});
-
-// (No cm-ready needed — textarea editor is synchronous)
-
-// ── Pyodide UI ──
-async function initPyodideWithUI() {
-  const bar = document.getElementById('py-progress-bar');
-  let progress = 10;
-  bar.style.width = progress + '%';
-  
-  // Fake progress animation while waiting for download
-  const interval = setInterval(() => {
-    if (progress < 90) {
-      progress += (90 - progress) * 0.1; // Slow down as it gets closer to 90
+    // ── Pyodide UI ──
+    async function initPyodideWithUI() {
+      const bar = document.getElementById('py-progress-bar');
+      let progress = 10;
       bar.style.width = progress + '%';
+
+      // Fake progress animation while waiting for download
+      const interval = setInterval(() => {
+        if (progress < 90) {
+          progress += (90 - progress) * 0.1; // Slow down as it gets closer to 90
+          bar.style.width = progress + '%';
+        }
+      }, 500);
+
+      try {
+        await initPyodide();
+        clearInterval(interval);
+        bar.style.width = '100%';
+        pyodideReady = true;
+        setTimeout(() => { bar.style.opacity = '0'; }, 500);
+        showToast('Python Runtime พร้อมแล้ว! 🐍', 'success');
+      } catch (e) {
+        clearInterval(interval);
+        bar.style.background = 'var(--red)';
+        showToast('โหลด Python ล้มเหลว ลองรีเฟรชหน้า', 'error');
+      }
     }
-  }, 500);
 
-  try {
-    await initPyodide();
-    clearInterval(interval);
-    bar.style.width = '100%';
-    pyodideReady = true;
-    setTimeout(() => { bar.style.opacity = '0'; }, 500);
-    showToast('Python Runtime พร้อมแล้ว! 🐍', 'success');
-  } catch(e) {
-    clearInterval(interval);
-    bar.style.background = 'var(--red)';
-    showToast('โหลด Python ล้มเหลว ลองรีเฟรชหน้า', 'error');
-  }
-}
+    // ── Sidebar ──
+    function renderSidebar() {
+      const container = document.getElementById('sidebar-content');
+      const session = window.ClassroomClient?.getSession();
+      const curriculum = session?.classroom?.curriculum;
+      const isClassroom = !!(session && session.classroom);
+      const activeLessons = getActiveLessonsList();
+      const activeIds = activeLessons.map(l => l.id);
+      const isSequential = isClassroom && !!(curriculum?.sequential);
 
-// ── Sidebar ──
-function renderSidebar() {
-  const container = document.getElementById('sidebar-content');
-  const session = window.ClassroomClient?.getSession();
-  const curriculum = session?.classroom?.curriculum;
-  const isClassroom = !!(session && session.classroom);
-  const activeLessons = getActiveLessonsList();
-  const activeIds = activeLessons.map(l => l.id);
-  const isSequential = isClassroom && !!(curriculum?.sequential);
+      // Update sidebar title
+      const titleEl = document.querySelector('.sidebar-title');
+      if (titleEl) {
+        if (isClassroom) {
+          titleEl.innerHTML = `📚 หลักสูตร: <b>${escapeHtml(session.classroom.name)}</b> <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:normal;">(${activeLessons.length} บท)</span>`;
+        } else {
+          titleEl.textContent = 'บทเรียนทั้งหมด';
+        }
+      }
 
-  // Update sidebar title
-  const titleEl = document.querySelector('.sidebar-title');
-  if (titleEl) {
-    if (isClassroom) {
-      titleEl.innerHTML = `📚 หลักสูตร: <b>${escapeHtml(session.classroom.name)}</b> <span style="font-size:0.8rem;color:var(--text-secondary);font-weight:normal;">(${activeLessons.length} บท)</span>`;
-    } else {
-      titleEl.textContent = 'บทเรียนทั้งหมด';
-    }
-  }
+      // Find sequential lock boundary if enabled
+      let lockAfterIndex = 999999;
+      if (isSequential) {
+        const firstIncompleteIdx = activeLessons.findIndex(l => !isLessonDone(l.id));
+        lockAfterIndex = firstIncompleteIdx === -1 ? activeLessons.length : firstIncompleteIdx;
+      }
 
-  // Find sequential lock boundary if enabled
-  let lockAfterIndex = 999999;
-  if (isSequential) {
-    const firstIncompleteIdx = activeLessons.findIndex(l => !isLessonDone(l.id));
-    lockAfterIndex = firstIncompleteIdx === -1 ? activeLessons.length : firstIncompleteIdx;
-  }
+      const grade = getGradeLevel();
+      const levels = getLevelsByGrade(grade);
+      const colors = {
+        elementary: '#f472b6',
+        beginner: 'var(--green)',
+        intermediate: 'var(--cyan)',
+        advanced: 'var(--purple-light)'
+      };
 
-  const grade = getGradeLevel();
-  const levels = getLevelsByGrade(grade);
-  const colors = {
-    elementary: '#f472b6',
-    beginner: 'var(--green)',
-    intermediate: 'var(--cyan)',
-    advanced: 'var(--purple-light)'
-  };
+      container.innerHTML = levels.map(level => {
+        const info = getLevelInfo(level);
+        const lessons = getLessonsByLevel(level).filter(l => activeIds.includes(l.id));
+        if (lessons.length === 0) return '';
 
-  container.innerHTML = levels.map(level => {
-    const info = getLevelInfo(level);
-    const lessons = getLessonsByLevel(level).filter(l => activeIds.includes(l.id));
-    if (lessons.length === 0) return '';
-
-    return `
+        return `
     <div class="sidebar-level">
       <div class="sidebar-level-header">
         <span>${info.icon}</span>
         <span style="color:${colors[level]}">${info.label}</span>
       </div>
       ${lessons.map(l => {
-        const orderIdx = activeLessons.findIndex(item => item.id === l.id);
-        const isLocked = isSequential && orderIdx > lockAfterIndex;
-        const isCurrent = l.id === currentLesson?.id;
-        const isDone = isLessonDone(l.id);
+          const orderIdx = activeLessons.findIndex(item => item.id === l.id);
+          const isLocked = isSequential && orderIdx > lockAfterIndex;
+          const isCurrent = l.id === currentLesson?.id;
+          const isDone = isLessonDone(l.id);
 
-        if (isLocked) {
-          return `
+          if (isLocked) {
+            return `
             <div class="sidebar-lesson locked" onclick="showToast('🔒 ต้องผ่านบทเรียนก่อนหน้าก่อนนะ!', 'info')" style="opacity:0.5;cursor:not-allowed;" title="ต้องผ่านบทก่อนหน้าก่อน">
               <span class="sidebar-lesson-icon">🔒</span>
               <span class="sidebar-lesson-name">${l.order}. ${l.title}</span>
               <div class="sidebar-lesson-check">•</div>
             </div>
           `;
-        }
+          }
 
-        return `
+          return `
           <a class="sidebar-lesson ${isCurrent ? 'active' : ''}"
              href="lesson.html?id=${l.id}" id="sidebar-${l.id}">
             <span class="sidebar-lesson-icon">${l.icon}</span>
@@ -252,34 +264,34 @@ function renderSidebar() {
             </div>
           </a>
         `;
-      }).join('')}
+        }).join('')}
     </div>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-function setupSidebarSearch() {
-  document.getElementById('sidebar-search').addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    document.querySelectorAll('.sidebar-lesson').forEach(el => {
-      const name = el.querySelector('.sidebar-lesson-name')?.textContent?.toLowerCase() || '';
-      el.style.display = name.includes(q) ? '' : 'none';
-    });
-  });
-}
+    function setupSidebarSearch() {
+      document.getElementById('sidebar-search').addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.sidebar-lesson').forEach(el => {
+          const name = el.querySelector('.sidebar-lesson-name')?.textContent?.toLowerCase() || '';
+          el.style.display = name.includes(q) ? '' : 'none';
+        });
+      });
+    }
 
-// ── Render Lesson ──
-function renderLesson(lesson) {
-  const levelInfo = getLevelInfo(lesson.level);
-  const levelColors = {
-    elementary: '#f472b6',
-    beginner: 'var(--green)',
-    intermediate: 'var(--cyan)',
-    advanced: 'var(--purple-light)'
-  };
-  const color = levelColors[lesson.level] || 'var(--purple-light)';
+    // ── Render Lesson ──
+    function renderLesson(lesson) {
+      const levelInfo = getLevelInfo(lesson.level);
+      const levelColors = {
+        elementary: '#f472b6',
+        beginner: 'var(--green)',
+        intermediate: 'var(--cyan)',
+        advanced: 'var(--purple-light)'
+      };
+      const color = levelColors[lesson.level] || 'var(--purple-light)';
 
-  // Breadcrumb
-  document.getElementById('lesson-breadcrumb').innerHTML = `
+      // Breadcrumb
+      document.getElementById('lesson-breadcrumb').innerHTML = `
     <a href="index.html" style="color:var(--text-muted);text-decoration:none;font-size:0.85rem;">หน้าแรก</a>
     <span style="color:var(--text-muted);padding:0 6px;">›</span>
     <span style="color:var(--text-muted);font-size:0.85rem;">${levelInfo.label}</span>
@@ -287,11 +299,11 @@ function renderLesson(lesson) {
     <span style="color:var(--text-primary);font-size:0.85rem;font-weight:600;">${lesson.title}</span>
   `;
 
-  // Page title
-  document.title = `${lesson.title} — PyLearn`;
+      // Page title
+      document.title = `${lesson.title} — PyLearn`;
 
-  const content = document.getElementById('lesson-content');
-  content.innerHTML = `
+      const content = document.getElementById('lesson-content');
+      content.innerHTML = `
     <!-- Header -->
     <div class="lesson-header">
       <div class="lesson-header-top">
@@ -340,17 +352,17 @@ function renderLesson(lesson) {
     </div>
   `;
 
-  // Render exercises (waits for CodeMirror)
-  renderExercises(lesson);
-  updateNavButtons();
-}
+      // Render exercises (waits for CodeMirror)
+      renderExercises(lesson);
+      updateNavButtons();
+    }
 
-// ── Render Exercises ──
-function renderExercises(lesson) {
-  const panel = document.getElementById('exercise-panel');
-  if (!panel) return;
+    // ── Render Exercises ──
+    function renderExercises(lesson) {
+      const panel = document.getElementById('exercise-panel');
+      if (!panel) return;
 
-  panel.innerHTML = `
+      panel.innerHTML = `
     <div class="exercise-section-header" style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--ink);">
       <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--cyan); margin: 0; display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 1.8rem;">🎯</span> ส่วนแบบฝึกหัด (${lesson.exercises.length} ข้อ)
@@ -364,28 +376,27 @@ function renderExercises(lesson) {
     </div>
   `;
 
-  // Render all exercise cards
-  lesson.exercises.forEach((ex, idx) => {
-    renderExerciseCard(lesson, idx, `wrapper-${ex.id}`);
-  });
-}
+      // Render all exercise cards
+      lesson.exercises.forEach((ex, idx) => {
+        renderExerciseCard(lesson, idx, `wrapper-${ex.id}`);
+      });
+    }
 
-// (Tab switching removed)
+    // (Tab switching removed)
 
-function renderExerciseCard(lesson, idx, containerId) {
-  const ex = lesson.exercises[idx];
-  const container = document.getElementById(containerId);
-  const editorId = `editor-${lesson.id}-${ex.id}`;
-  const savedCode = localStorage.getItem(`code-${lesson.id}-${ex.id}`) || ex.starterCode;
+    function renderExerciseCard(lesson, idx, containerId) {
+      const ex = lesson.exercises[idx];
+      const container = document.getElementById(containerId);
+      const editorId = `editor-${lesson.id}-${ex.id}`;
+      const savedCode = localStorage.getItem(`code-${lesson.id}-${ex.id}`) || ex.starterCode;
 
-  container.innerHTML = `
+      container.innerHTML = `
     <div class="exercise-card" id="ex-card-${ex.id}">
       <div class="exercise-desc">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid var(--ink);padding-bottom:12px;">
           <h3 style="margin:0; font-size:1.25rem; color:var(--text-primary);">ข้อ ${idx + 1}. ${ex.title}</h3>
-          <span class="difficulty-badge difficulty-${ex.difficulty}">${
-            ex.difficulty === 'easy' ? '🟢 ง่าย' : ex.difficulty === 'medium' ? '🟡 ปานกลาง' : '🔴 ยาก'
-          }</span>
+          <span class="difficulty-badge difficulty-${ex.difficulty}">${ex.difficulty === 'easy' ? '🟢 ง่าย' : ex.difficulty === 'medium' ? '🟡 ปานกลาง' : '🔴 ยาก'
+        }</span>
           ${isExerciseDone(lesson.id, ex.id) ? '<span style="color:var(--green);font-size:0.85rem;font-weight:700;">✅ ทำแล้ว</span>' : ''}
         </div>
         <p>${ex.description}</p>
@@ -451,198 +462,198 @@ function renderExerciseCard(lesson, idx, containerId) {
     </div>
   `;
 
-  // Mount textarea editor
-  const wrap = document.getElementById(editorId);
-  if (wrap) {
-    if (editors[editorId]) editors[editorId].destroy();
-    editors[editorId] = createEditor(wrap, savedCode);
-  }
-
-  // Sync toggle state with stored preference
-  const savedMode = getCheckMode();
-  setExerciseMode(ex.id, savedMode);
-}
-
-// ── Run Code ──
-async function runCode(lessonId, exId, editorId) {
-  if (!pyodideReady) {
-    showToast('Python กำลังโหลด... รอสักครู่', 'warning');
-    return;
-  }
-
-  const editor = editors[editorId];
-  if (!editor) return;
-  const code = getEditorCode(editor);
-
-  // Save code
-  localStorage.setItem(`code-${lessonId}-${exId}`, code);
-
-  const runBtn = document.getElementById(`run-btn-${exId}`);
-  const outputEl = document.getElementById(`output-${exId}`);
-  const statusEl = document.getElementById(`status-${exId}`);
-
-  runBtn.disabled = true;
-  runBtn.innerHTML = '<div class="spinner" style="width:14px;height:14px;margin:0"></div> กำลังรัน...';
-  outputEl.className = 'output-content';
-  outputEl.innerHTML = '<div class="output-loading"><div class="spinner"></div> กำลังรัน Python...</div>';
-  statusEl.textContent = '';
-  statusEl.className = 'output-status running';
-  statusEl.textContent = '⏳ Running...';
-
-  try {
-    const result = await runPython(
-      code,
-      (partialOutput) => {
-        outputEl.className = 'output-content';
-        outputEl.textContent = partialOutput || '(รอพิมพ์...)';
-      },
-      createInputDialog  // Input handler
-    );
-
-    lastRunOutput[exId] = result.output;
-    window.currentExerciseId = exId;
-
-    if (result.success) {
-      outputEl.className = 'output-content success';
-      outputEl.textContent = result.output || '(ไม่มี output)';
-      statusEl.className = 'output-status success';
-      statusEl.textContent = '✅ สำเร็จ';
-
-      // Sync progress to classroom server
-      if (window.ClassroomClient) {
-        window.ClassroomClient.syncProgress(lessonId, exId, true, 20, code, 'pass', null, null, result.output || '');
+      // Mount textarea editor
+      const wrap = document.getElementById(editorId);
+      if (wrap) {
+        if (editors[editorId]) editors[editorId].destroy();
+        editors[editorId] = createEditor(wrap, savedCode);
       }
 
-      // Auto-mark exercise done on successful run
-      if (markExerciseDone(lessonId, exId)) {
-        showToast(`+20 XP ทำโจทย์ "${currentLesson.exercises.find(e=>e.id===exId)?.title}" สำเร็จ!`, 'success');
-        // Update badge UI
-        const exTitle = document.querySelector(`#ex-card-${exId} h3`);
-        if (exTitle && !exTitle.innerHTML.includes('✅')) {
-           const badge = document.createElement('span');
-           badge.style.cssText = 'color:var(--green);font-size:0.85rem;font-weight:700;margin-left:8px;';
-           badge.textContent = '✅ ทำแล้ว';
-           exTitle.parentNode.appendChild(badge);
+      // Sync toggle state with stored preference
+      const savedMode = getCheckMode();
+      setExerciseMode(ex.id, savedMode);
+    }
+
+    // ── Run Code ──
+    async function runCode(lessonId, exId, editorId) {
+      if (!pyodideReady) {
+        showToast('Python กำลังโหลด... รอสักครู่', 'warning');
+        return;
+      }
+
+      const editor = editors[editorId];
+      if (!editor) return;
+      const code = getEditorCode(editor);
+
+      // Save code
+      localStorage.setItem(`code-${lessonId}-${exId}`, code);
+
+      const runBtn = document.getElementById(`run-btn-${exId}`);
+      const outputEl = document.getElementById(`output-${exId}`);
+      const statusEl = document.getElementById(`status-${exId}`);
+
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<div class="spinner" style="width:14px;height:14px;margin:0"></div> กำลังรัน...';
+      outputEl.className = 'output-content';
+      outputEl.innerHTML = '<div class="output-loading"><div class="spinner"></div> กำลังรัน Python...</div>';
+      statusEl.textContent = '';
+      statusEl.className = 'output-status running';
+      statusEl.textContent = '⏳ Running...';
+
+      try {
+        const result = await runPython(
+          code,
+          (partialOutput) => {
+            outputEl.className = 'output-content';
+            outputEl.textContent = partialOutput || '(รอพิมพ์...)';
+          },
+          createInputDialog  // Input handler
+        );
+
+        lastRunOutput[exId] = result.output;
+        window.currentExerciseId = exId;
+
+        if (result.success) {
+          outputEl.className = 'output-content success';
+          outputEl.textContent = result.output || '(ไม่มี output)';
+          statusEl.className = 'output-status success';
+          statusEl.textContent = '✅ สำเร็จ';
+
+          // Sync progress to classroom server
+          if (window.ClassroomClient) {
+            window.ClassroomClient.syncProgress(lessonId, exId, true, 20, code, 'pass', null, null, result.output || '');
+          }
+
+          // Auto-mark exercise done on successful run
+          if (markExerciseDone(lessonId, exId)) {
+            showToast(`+20 XP ทำโจทย์ "${currentLesson.exercises.find(e => e.id === exId)?.title}" สำเร็จ!`, 'success');
+            // Update badge UI
+            const exTitle = document.querySelector(`#ex-card-${exId} h3`);
+            if (exTitle && !exTitle.innerHTML.includes('✅')) {
+              const badge = document.createElement('span');
+              badge.style.cssText = 'color:var(--green);font-size:0.85rem;font-weight:700;margin-left:8px;';
+              badge.textContent = '✅ ทำแล้ว';
+              exTitle.parentNode.appendChild(badge);
+            }
+            renderSidebar();
+          }
+        } else {
+          outputEl.className = 'output-content error';
+          outputEl.textContent = result.output;
+          statusEl.className = 'output-status error';
+          statusEl.textContent = '❌ Error';
+
+          // Detect error type for classroom teacher analytics
+          const errMatch = (result.output || '').match(/([a-zA-Z0-9_]+Error):/);
+          const errorType = errMatch ? errMatch[1] : 'RuntimeError';
+          if (window.ClassroomClient) {
+            window.ClassroomClient.syncProgress(lessonId, exId, false, 0, code, 'fail', errorType, (result.output || '').slice(0, 300), result.output || '');
+          }
         }
-        renderSidebar();
+      } catch (e) {
+        outputEl.className = 'output-content error';
+        outputEl.textContent = e.message;
+        statusEl.className = 'output-status error';
+        statusEl.textContent = '❌ Error';
       }
-    } else {
-      outputEl.className = 'output-content error';
-      outputEl.textContent = result.output;
-      statusEl.className = 'output-status error';
-      statusEl.textContent = '❌ Error';
 
-      // Detect error type for classroom teacher analytics
-      const errMatch = (result.output || '').match(/([a-zA-Z0-9_]+Error):/);
-      const errorType = errMatch ? errMatch[1] : 'RuntimeError';
-      if (window.ClassroomClient) {
-        window.ClassroomClient.syncProgress(lessonId, exId, false, 0, code, 'fail', errorType, (result.output || '').slice(0, 300), result.output || '');
+      runBtn.disabled = false;
+      runBtn.innerHTML = '▶ Run';
+    }
+
+    // ── Set Exercise Check Mode ──
+    function setExerciseMode(exId, mode) {
+      setCheckMode(mode);
+      const aiBtn = document.getElementById(`mode-ai-${exId}`);
+      const autoBtn = document.getElementById(`mode-auto-${exId}`);
+      const iconEl = document.getElementById(`ai-panel-icon-${exId}`);
+      const labelEl = document.getElementById(`ai-panel-label-${exId}`);
+      const phEl = document.getElementById(`ai-placeholder-text-${exId}`);
+
+      if (mode === 'auto') {
+        aiBtn?.classList.remove('active');
+        autoBtn?.classList.add('active');
+        if (iconEl) iconEl.textContent = '⚡';
+        if (labelEl) labelEl.textContent = 'Auto ตรวจโค้ด (ไม่ใช้ AI)';
+        if (phEl) phEl.textContent = 'รันโค้ดแล้วกด “ตรวจโค้ด” เพื่อเช็คคะแนนแบบอัตโนมัติ (ไม่ต้องมี API Key)';
+      } else {
+        autoBtn?.classList.remove('active');
+        aiBtn?.classList.add('active');
+        if (iconEl) iconEl.textContent = '🤖';
+        if (labelEl) labelEl.textContent = 'AI ตรวจโค้ด & ให้คะแนน';
+        if (phEl) phEl.textContent = 'รันโค้ดแล้วกด “ตรวจโค้ด” เพื่อให้ AI วิเคราะห์และให้คะแนน';
       }
     }
-  } catch(e) {
-    outputEl.className = 'output-content error';
-    outputEl.textContent = e.message;
-    statusEl.className = 'output-status error';
-    statusEl.textContent = '❌ Error';
-  }
 
-  runBtn.disabled = false;
-  runBtn.innerHTML = '▶ Run';
-}
+    // ── AI Check (with Rate Limiting) ──
+    let _lastAICheckTime = 0;
+    const AI_CHECK_COOLDOWN = 5000; // 5 seconds
 
-// ── Set Exercise Check Mode ──
-function setExerciseMode(exId, mode) {
-  setCheckMode(mode);
-  const aiBtn  = document.getElementById(`mode-ai-${exId}`);
-  const autoBtn = document.getElementById(`mode-auto-${exId}`);
-  const iconEl  = document.getElementById(`ai-panel-icon-${exId}`);
-  const labelEl = document.getElementById(`ai-panel-label-${exId}`);
-  const phEl    = document.getElementById(`ai-placeholder-text-${exId}`);
+    async function runAICheck(lessonId, exId, editorId) {
+      // Rate limiting
+      const now = Date.now();
+      if (now - _lastAICheckTime < AI_CHECK_COOLDOWN) {
+        const remaining = Math.ceil((AI_CHECK_COOLDOWN - (now - _lastAICheckTime)) / 1000);
+        showToast(`กรุณารอ ${remaining} วินาทีก่อนตรวจอีกครั้ง`, 'warning');
+        return;
+      }
+      _lastAICheckTime = now;
 
-  if (mode === 'auto') {
-    aiBtn?.classList.remove('active');
-    autoBtn?.classList.add('active');
-    if (iconEl) iconEl.textContent = '⚡';
-    if (labelEl) labelEl.textContent = 'Auto ตรวจโค้ด (ไม่ใช้ AI)';
-    if (phEl) phEl.textContent = 'รันโค้ดแล้วกด “ตรวจโค้ด” เพื่อเช็คคะแนนแบบอัตโนมัติ (ไม่ต้องมี API Key)';
-  } else {
-    autoBtn?.classList.remove('active');
-    aiBtn?.classList.add('active');
-    if (iconEl) iconEl.textContent = '🤖';
-    if (labelEl) labelEl.textContent = 'AI ตรวจโค้ด & ให้คะแนน';
-    if (phEl) phEl.textContent = 'รันโค้ดแล้วกด “ตรวจโค้ด” เพื่อให้ AI วิเคราะห์และให้คะแนน';
-  }
-}
+      const editor = editors[editorId];
+      if (!editor) return;
+      const code = getEditorCode(editor);
+      const exercise = currentLesson.exercises.find(e => e.id === exId);
+      window.currentExerciseId = exId;
+      const aiResult = document.getElementById(`ai-result-${exId}`);
+      const aiBtn = document.getElementById(`ai-btn-${exId}`);
+      const mode = getCheckMode(); // 'ai' or 'auto'
 
-// ── AI Check (with Rate Limiting) ──
-let _lastAICheckTime = 0;
-const AI_CHECK_COOLDOWN = 5000; // 5 seconds
-
-async function runAICheck(lessonId, exId, editorId) {
-  // Rate limiting
-  const now = Date.now();
-  if (now - _lastAICheckTime < AI_CHECK_COOLDOWN) {
-    const remaining = Math.ceil((AI_CHECK_COOLDOWN - (now - _lastAICheckTime)) / 1000);
-    showToast(`กรุณารอ ${remaining} วินาทีก่อนตรวจอีกครั้ง`, 'warning');
-    return;
-  }
-  _lastAICheckTime = now;
-
-  const editor = editors[editorId];
-  if (!editor) return;
-  const code = getEditorCode(editor);
-  const exercise = currentLesson.exercises.find(e => e.id === exId);
-  window.currentExerciseId = exId;
-  const aiResult = document.getElementById(`ai-result-${exId}`);
-  const aiBtn = document.getElementById(`ai-btn-${exId}`);
-  const mode = getCheckMode(); // 'ai' or 'auto'
-
-  aiBtn.disabled = true;
-  aiResult.innerHTML = `
+      aiBtn.disabled = true;
+      aiResult.innerHTML = `
     <div class="ai-loading">
       <div class="ai-typing"><span></span><span></span><span></span></div>
       <span>${mode === 'auto' ? '⚡ กำลังตรวจโค้ดแบบอัตโนมัติ...' : 'AI กำลังวิเคราะห์โค้ดอย่างละเอียด...'}</span>
     </div>`;
 
-  try {
-    let fb;
-    if (mode === 'auto') {
-      // Auto mode: instant, no API key needed
-      await new Promise(r => setTimeout(r, 400));
-      fb = getAutoFeedback(
-        exercise.description,
-        code,
-        lastRunOutput[exId] || '',
-        exercise.solution || '',
-        exercise.hint || '',
-        exercise.starterCode || '',
-        exercise.difficulty || 'easy',
-        exercise.expectedOutput || ''
-      );
-    } else {
-      // AI mode: call Gemini
-      fb = await getAIFeedback(
-        currentLesson.title,
-        exercise.title,
-        exercise.description,
-        code,
-        lastRunOutput[exId] || '',
-        exercise.solution || '',
-        exercise.hint || '',
-        exercise.starterCode || '',
-        exercise.difficulty || 'easy',
-        exercise.expectedOutput || ''
-      );
-    }
+      try {
+        let fb;
+        if (mode === 'auto') {
+          // Auto mode: instant, no API key needed
+          await new Promise(r => setTimeout(r, 400));
+          fb = getAutoFeedback(
+            exercise.description,
+            code,
+            lastRunOutput[exId] || '',
+            exercise.solution || '',
+            exercise.hint || '',
+            exercise.starterCode || '',
+            exercise.difficulty || 'easy',
+            exercise.expectedOutput || ''
+          );
+        } else {
+          // AI mode: call Gemini
+          fb = await getAIFeedback(
+            currentLesson.title,
+            exercise.title,
+            exercise.description,
+            code,
+            lastRunOutput[exId] || '',
+            exercise.solution || '',
+            exercise.hint || '',
+            exercise.starterCode || '',
+            exercise.difficulty || 'easy',
+            exercise.expectedOutput || ''
+          );
+        }
 
-    // Use the new detailed renderer
-    renderAIResult(`ai-result-${exId}`, fb);
+        // Use the new detailed renderer
+        renderAIResult(`ai-result-${exId}`, fb);
 
-    if (fb.score >= 80) celebrate();
+        if (fb.score >= 80) celebrate();
 
-  } catch(e) {
-    const isClassroom = window.ClassroomClient && window.ClassroomClient.isInClassroom();
-    aiResult.innerHTML = `
+      } catch (e) {
+        const isClassroom = window.ClassroomClient && window.ClassroomClient.isInClassroom();
+        aiResult.innerHTML = `
       <div style="color:var(--red);font-size:0.875rem;padding:8px;">
         ❌ ${e.message}
         ${!isClassroom ? `
@@ -652,92 +663,97 @@ async function runAICheck(lessonId, exId, editorId) {
           🔑 ตั้งค่า API Key
         </button>` : ''}
       </div>`;
-  }
+      }
 
-  aiBtn.disabled = false;
-}
+      aiBtn.disabled = false;
+    }
 
 
-// ── Show Hint ──
-function showHint(exId) {
-  const ex = currentLesson.exercises.find(e => e.id === exId);
-  if (!ex) return;
+    // ── Show Hint ──
+    function showHint(exId) {
+      const ex = currentLesson.exercises.find(e => e.id === exId);
+      if (!ex) return;
 
-  const existing = document.querySelector('.hint-toast');
-  if (existing) existing.remove();
+      const existing = document.querySelector('.hint-toast');
+      if (existing) existing.remove();
 
-  const toast = document.createElement('div');
-  toast.className = 'hint-toast';
-  toast.innerHTML = `
+      const toast = document.createElement('div');
+      toast.className = 'hint-toast';
+      toast.innerHTML = `
     <div class="hint-toast-header">
       <div class="hint-toast-title">💡 คำใบ้โจทย์</div>
       <button class="hint-toast-close" onclick="this.closest('.hint-toast').remove()" title="ปิด">✕</button>
     </div>
     <div class="hint-toast-text">${escapeHtml(ex.hint)}</div>
   `;
-  document.body.appendChild(toast);
-  setTimeout(() => toast?.remove(), 9000);
-}
+      document.body.appendChild(toast);
+      setTimeout(() => toast?.remove(), 9000);
+    }
 
-// ── Reset Code ──
-function resetCode(lessonId, exId, editorId) {
-  const ex = currentLesson.exercises.find(e => e.id === exId);
-  if (!ex) return;
-  const editor = editors[editorId];
-  if (!editor) return;
-  setEditorCode(editor, ex.starterCode);
-  localStorage.removeItem(`code-${lessonId}-${exId}`);
-  showToast('รีเซ็ตโค้ดแล้ว', 'info');
-}
+    // ── Reset Code ──
+    function resetCode(lessonId, exId, editorId) {
+      const ex = currentLesson.exercises.find(e => e.id === exId);
+      if (!ex) return;
+      const editor = editors[editorId];
+      if (!editor) return;
+      setEditorCode(editor, ex.starterCode);
+      localStorage.removeItem(`code-${lessonId}-${exId}`);
+      showToast('รีเซ็ตโค้ดแล้ว', 'info');
+    }
 
-// ── Complete Lesson ──
-function completeLesson() {
-  const isNew = markLessonDone(currentLesson.id);
-  if (window.ClassroomClient) {
-    window.ClassroomClient.syncProgress(currentLesson.id, 'all', true, 50, '', 'pass', null, null, 'บทเรียนสำเร็จ');
-  }
-  if (isNew) {
-    celebrate();
-    showToast(`🏆 +50 XP ผ่านบท "${currentLesson.title}" แล้ว!`, 'success', 4000);
-    renderSidebar();
-    document.getElementById('stat-xp') && (document.getElementById('stat-xp').textContent = getXP());
-  } else {
-    showToast('คุณผ่านบทนี้ไปแล้ว!', 'info');
-  }
-  // Auto advance
-  setTimeout(() => goAdjacentLesson(1), 1500);
-}
+    // ── Complete Lesson ──
+    function completeLesson() {
+      const isNew = markLessonDone(currentLesson.id);
+      if (window.ClassroomClient) {
+        window.ClassroomClient.syncProgress(currentLesson.id, 'all', true, 50, '', 'pass', null, null, 'บทเรียนสำเร็จ');
+      }
+      if (isNew) {
+        celebrate();
+        showToast(`🏆 +50 XP ผ่านบท "${currentLesson.title}" แล้ว!`, 'success', 4000);
+        renderSidebar();
+        document.getElementById('stat-xp') && (document.getElementById('stat-xp').textContent = getXP());
+      } else {
+        showToast('คุณผ่านบทนี้ไปแล้ว!', 'info');
+      }
+      // Auto advance
+      setTimeout(() => goAdjacentLesson(1), 1500);
+    }
 
-// ── Navigate Lessons ──
-function goAdjacentLesson(direction) {
-  const allLessons = getActiveLessonsList();
-  const idx = allLessons.findIndex(l => l.id === currentLesson.id);
-  const next = allLessons[idx + direction];
-  if (next) {
-    location.href = `lesson.html?id=${next.id}`;
-  } else if (direction > 0) {
-    showToast('🎉 คุณเรียนจบทุกบทแล้ว!', 'success');
-    setTimeout(() => { location.href = 'index.html'; }, 2000);
-  }
-}
+    // ── Navigate Lessons ──
+    function goAdjacentLesson(direction) {
+      const allLessons = getActiveLessonsList();
+      const idx = allLessons.findIndex(l => l.id === currentLesson.id);
+      const next = allLessons[idx + direction];
+      if (next) {
+        location.href = `lesson.html?id=${next.id}`;
+      } else if (direction > 0) {
+        showToast('🎉 คุณเรียนจบทุกบทแล้ว!', 'success');
+        setTimeout(() => { location.href = 'index.html'; }, 2000);
+      }
+    }
 
-function updateNavButtons() {
-  const allLessons = getActiveLessonsList();
-  const idx = allLessons.findIndex(l => l.id === currentLesson.id);
-  const prevBtn = document.getElementById('btn-prev');
-  const nextBtn = document.getElementById('btn-next');
-  if (prevBtn) prevBtn.disabled = idx <= 0;
-  if (nextBtn) nextBtn.disabled = idx === -1 || idx === allLessons.length - 1;
-}
+    function updateNavButtons() {
+      const allLessons = getActiveLessonsList();
+      const idx = allLessons.findIndex(l => l.id === currentLesson.id);
+      const prevBtn = document.getElementById('btn-prev');
+      const nextBtn = document.getElementById('btn-next');
+      if (prevBtn) prevBtn.disabled = idx <= 0;
+      if (nextBtn) nextBtn.disabled = idx === -1 || idx === allLessons.length - 1;
+    }
 
-// Expose globals
-window.runCode = runCode;
-window.runAICheck = runAICheck;
-window.setExerciseMode = setExerciseMode;
-window.showHint = showHint;
-window.resetCode = resetCode;
-window.completeLesson = completeLesson;
-window.goAdjacentLesson = goAdjacentLesson;
-</script>
+    // Expose globals
+    window.runCode = runCode;
+    window.runAICheck = runAICheck;
+    window.setExerciseMode = setExerciseMode;
+    window.showHint = showHint;
+    window.resetCode = resetCode;
+    window.completeLesson = completeLesson;
+    window.goAdjacentLesson = goAdjacentLesson;
+  </script>
+  <button type="button" class="mobile-sidebar-toggle" onclick="document.body.classList.toggle('sidebar-open')">
+    📚 สารบัญบทเรียน
+  </button>
+  <div class="sidebar-backdrop" onclick="document.body.classList.remove('sidebar-open')"></div>
 </body>
+
 </html>

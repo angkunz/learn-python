@@ -588,7 +588,7 @@ async function handleCreateClassroom(e) {
   const geminiApiKey = document.getElementById('create-cls-key').value.trim();
   const modelSelect = document.getElementById('create-cls-model').value;
   const customModel = document.getElementById('create-cls-custom-model')?.value.trim() || '';
-  const geminiModel = (modelSelect === 'custom' && customModel) ? customModel : (modelSelect !== 'custom' ? modelSelect : 'gemini-2.5-flash');
+  const geminiModel = (modelSelect === 'custom' && customModel) ? customModel : (modelSelect !== 'custom' ? modelSelect : 'gemini-flash-latest');
 
   const btn = document.getElementById('btn-create-submit');
   const errBox = document.getElementById('create-cls-error');
@@ -633,7 +633,7 @@ function openEditClassroomModal(id) {
   const modelSel = document.getElementById('edit-cls-model');
   const customWrap = document.getElementById('edit-cls-custom-model-wrap');
   const customInp = document.getElementById('edit-cls-custom-model');
-  const currentModel = cls.gemini_model || 'gemini-2.5-flash';
+  const currentModel = cls.gemini_model || 'gemini-flash-latest';
 
   const hasOption = Array.from(modelSel.options).some(o => o.value === currentModel);
   if (hasOption) {
@@ -703,7 +703,7 @@ async function handleUpdateClassroom(e) {
   const keyInput = document.getElementById('edit-cls-key').value.trim();
   const modelSelect = document.getElementById('edit-cls-model').value;
   const customModel = document.getElementById('edit-cls-custom-model')?.value.trim() || '';
-  const geminiModel = (modelSelect === 'custom' && customModel) ? customModel : (modelSelect !== 'custom' ? modelSelect : 'gemini-2.5-flash');
+  const geminiModel = (modelSelect === 'custom' && customModel) ? customModel : (modelSelect !== 'custom' ? modelSelect : 'gemini-flash-latest');
 
   const btn = document.getElementById('btn-update-submit');
   const errBox = document.getElementById('edit-cls-error');

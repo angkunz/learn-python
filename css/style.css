@@ -3332,17 +3332,110 @@ footer {
   }
 }
 
-/* ── Responsive ── */
+/* ── Responsive & Mobile Off-Canvas Sidebar Drawer ── */
+.mobile-sidebar-toggle,
+.sidebar-backdrop,
+.sidebar-close-btn {
+  display: none;
+}
+
 @media (max-width: 768px) {
   :root {
     --bw: 2px;
     --shadow-sm: 2px 2px 0 var(--ink);
     --shadow: 3px 3px 0 var(--ink);
+    --shadow-md: 3px 3px 0 var(--ink);
     --shadow-lg: 4px 4px 0 var(--ink);
   }
 
+  .mobile-sidebar-toggle {
+    position: fixed;
+    bottom: 20px;
+    left: 16px;
+    z-index: 150;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--pill);
+    border: var(--bw) solid var(--ink);
+    background: var(--yellow);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .mobile-sidebar-toggle:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+  }
+
   .sidebar {
-    display: none;
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100dvh;
+    width: min(300px, 84vw);
+    z-index: 220;
+    transform: translateX(-105%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .sidebar.open,
+  body.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sidebar-search {
+    width: 100%;
+  }
+
+  .sidebar-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(3px);
+    z-index: 210;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    display: block;
+  }
+
+  .sidebar-backdrop.open,
+  body.sidebar-open .sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .lesson-main {
@@ -3354,7 +3447,7 @@ footer {
   }
 
   .lesson-layout {
-    padding-top: 60px;
+    padding-top: 62px;
   }
 
   .hero {
@@ -3405,93 +3498,6 @@ footer {
     grid-template-columns: 1fr;
   }
 
-  .nav-links {
-    display: none;
-  }
-
-  /* ── Mobile Navbar ── */
-  .navbar {
-    height: 60px;
-    padding: 0 12px;
-  }
-
-  .nav-progress-bar {
-    top: 60px;
-  }
-
-  .nav-logo {
-    font-size: 1.05rem;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .nav-logo-icon {
-    width: 34px;
-    height: 34px;
-    font-size: 0.95rem;
-    flex-shrink: 0;
-  }
-
-  .nav-actions {
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  .nav-actions>a[href*="playground.html"] {
-    display: none;
-  }
-
-  .nav-xp-badge {
-    padding: 4px 8px;
-    font-size: 0.76rem;
-    white-space: nowrap;
-    gap: 4px;
-    box-shadow: 1.5px 1.5px 0 var(--ink);
-  }
-
-  .theme-switch {
-    transform: scale(0.78);
-    transform-origin: center right;
-    margin: 0 -2px;
-    flex-shrink: 0;
-  }
-
-  .nav-btn {
-    padding: 6px 12px;
-    font-size: 0.78rem;
-    white-space: nowrap;
-    box-shadow: 2px 2px 0 var(--ink);
-  }
-
-  /* On small screens (<= 768px), hide separate classroom tag — info is in student profile pill */
-  .nav-classroom-tag {
-    display: none !important;
-  }
-
-  .nav-student-trigger {
-    padding: 4px 8px;
-    font-size: 0.76rem;
-    gap: 5px;
-  }
-
-  .nav-student-name {
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .nav-student-xp {
-    padding: 1px 6px;
-    font-size: 0.72rem;
-    white-space: nowrap;
-  }
-
-  .nav-student-menu {
-    width: min(290px, calc(100vw - 20px));
-    right: 0;
-  }
-
   .exercise-header {
     flex-direction: column;
     align-items: flex-start;
@@ -3504,100 +3510,12 @@ footer {
 }
 
 @media (max-width: 480px) {
-  .navbar {
-    padding: 0 8px;
-  }
-
-  .nav-logo {
-    font-size: 0.98rem;
-    gap: 6px;
-  }
-
-  .nav-logo-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 0.9rem;
-  }
-
-  .nav-actions {
-    gap: 5px;
-  }
-
-  .nav-xp-badge {
-    padding: 3px 6px;
-    font-size: 0.72rem;
-    gap: 3px;
-  }
-
-  .theme-switch {
-    transform: scale(0.74);
-    margin: 0 -3px;
-  }
-
-  .nav-btn {
-    padding: 5px 9px;
-    font-size: 0.75rem;
-  }
-
-  .nav-student-name {
-    max-width: 110px;
-  }
-
-  .nav-student-trigger {
-    padding: 3px 6px;
-    gap: 4px;
-  }
-
   .stat-item {
     padding: 0 6px;
   }
 
   .stat-number {
     font-size: 1.3rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .navbar {
-    padding: 0 6px;
-  }
-
-  .nav-logo {
-    font-size: 0.9rem;
-    gap: 4px;
-  }
-
-  .nav-logo-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 0.85rem;
-  }
-
-  .nav-actions {
-    gap: 4px;
-  }
-
-  .nav-xp-badge {
-    padding: 2px 5px;
-    font-size: 0.68rem;
-  }
-
-  .nav-btn {
-    padding: 4px 7px;
-    font-size: 0.72rem;
-  }
-
-  .theme-switch {
-    transform: scale(0.7);
-    margin: 0 -4px;
-  }
-
-  .nav-student-xp {
-    display: none;
-  }
-
-  .nav-student-name {
-    max-width: 50px;
   }
 }
 
@@ -3640,6 +3558,8 @@ html {
   --surface: #232936;
   /* ใช้แทน #fff ที่ hard-code ไว้ */
   --surface-2: #1B202B;
+  --bg-alt: #181C26;
+  --border: rgba(255, 255, 255, 0.12);
   --glass: #232936;
 
   /* ขอบ + เงา ยังเป็นดำสนิท เพราะการ์ดสว่างกว่าพื้นหลัง → outline ยังชัด */
@@ -4399,8 +4319,8 @@ html {
 }
 
 /* ============================================================
-   PyLearn Mobile Navbar & Header Responsive Optimization
-   Prevents overlapping, ensures crisp fit on all mobile screens
+   PyLearn Unified Mobile Navbar & Header Responsive System
+   Single source of truth (no redundant overrides or !important bloat)
    ============================================================ */
 
 .nav-btn-text-short {
@@ -4408,252 +4328,252 @@ html {
 }
 
 @media (max-width: 768px) {
-  .nav-links {
-    display: none !important;
-  }
-
   .navbar {
-    height: 62px !important;
-    padding: 0 14px !important;
+    height: 62px;
+    padding: 0 14px;
   }
 
   .nav-progress-bar {
-    top: 62px !important;
+    top: 62px;
+  }
+
+  .nav-links,
+  .nav-actions>a[href*="playground.html"],
+  .nav-classroom-tag {
+    display: none;
   }
 
   .nav-logo {
-    font-size: 1.05rem !important;
-    gap: 8px !important;
-    flex-shrink: 0 !important;
+    font-size: 1.05rem;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .nav-logo-icon {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 1rem !important;
-    flex-shrink: 0 !important;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    flex-shrink: 0;
   }
 
   .nav-actions {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    flex-shrink: 0 !important;
-  }
-
-  .nav-actions>a[href*="playground.html"] {
-    display: none !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .nav-xp-badge {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    padding: 4px 10px !important;
-    font-size: 0.78rem !important;
-    gap: 4px !important;
-    box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    gap: 4px;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
   }
 
   .nav-btn {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 6px 14px !important;
-    font-size: 0.82rem !important;
-    box-shadow: 2px 2px 0 var(--ink) !important;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .nav-student-trigger {
+    padding: 4px 8px;
+    font-size: 0.76rem;
+    gap: 5px;
+  }
+
+  .nav-student-name {
+    max-width: 130px;
+  }
+
+  .nav-student-xp {
+    padding: 1px 6px;
+    font-size: 0.72rem;
+  }
+
+  .nav-student-menu {
+    width: min(290px, calc(100vw - 20px));
+    right: 0;
   }
 }
 
 @media (max-width: 540px) {
   .nav-btn-text-full {
-    display: none !important;
+    display: none;
   }
 
   .nav-btn-text-short {
-    display: inline !important;
+    display: inline;
   }
 
   .navbar {
-    height: 58px !important;
-    padding: 0 10px !important;
+    height: 58px;
+    padding: 0 10px;
   }
 
   .nav-progress-bar {
-    top: 58px !important;
+    top: 58px;
   }
 
   .nav-logo {
-    font-size: 0.95rem !important;
-    gap: 7px !important;
+    font-size: 0.95rem;
+    gap: 7px;
   }
 
   .nav-logo-icon {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 0.9rem !important;
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
   }
 
   .nav-actions {
-    gap: 6px !important;
+    gap: 6px;
   }
 
   .nav-xp-badge {
-    padding: 3px 8px !important;
-    font-size: 0.74rem !important;
-    gap: 3px !important;
-    box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+    padding: 3px 8px;
+    font-size: 0.74rem;
+    gap: 3px;
   }
 
-  /* Compact theme switcher on mobile to eliminate blank footprint */
   .theme-switch {
-    width: 48px !important;
-    height: 26px !important;
-    margin: 0 !important;
-    transform: none !important;
-    flex-shrink: 0 !important;
+    width: 48px;
+    height: 26px;
+    margin: 0;
   }
 
   .theme-switch-slider {
-    border-radius: 26px !important;
-    padding: 0 5px !important;
-    box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+    border-radius: 26px;
+    padding: 0 5px;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
   }
 
   .theme-switch-slider .icon-sun,
   .theme-switch-slider .icon-moon {
-    font-size: 10px !important;
+    font-size: 10px;
   }
 
   .theme-switch-slider:before {
-    width: 18px !important;
-    height: 18px !important;
-    left: 2px !important;
-    bottom: 2px !important;
+    width: 18px;
+    height: 18px;
+    left: 2px;
+    bottom: 2px;
   }
 
   [data-theme="dark"] .theme-switch-slider:before {
-    transform: translateX(22px) !important;
+    transform: translateX(22px);
   }
 
   .nav-btn {
-    padding: 5px 10px !important;
-    font-size: 0.78rem !important;
-  }
-
-  /* Classroom navbar elements on mobile: hide separate tag to keep navbar clean */
-  .nav-classroom-tag {
-    display: none !important;
+    padding: 5px 10px;
+    font-size: 0.78rem;
   }
 
   .nav-student-trigger {
-    padding: 3px 6px !important;
-    font-size: 0.72rem !important;
-    gap: 3px !important;
+    padding: 3px 6px;
+    font-size: 0.72rem;
+    gap: 3px;
   }
 
   .nav-student-name {
-    max-width: 105px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
+    max-width: 105px;
   }
 }
 
 @media (max-width: 380px) {
   .navbar {
-    height: 54px !important;
-    padding: 0 6px !important;
+    height: 54px;
+    padding: 0 6px;
   }
 
   .nav-progress-bar {
-    top: 54px !important;
+    top: 54px;
   }
 
   .nav-logo {
-    font-size: 0.88rem !important;
-    gap: 5px !important;
+    font-size: 0.88rem;
+    gap: 5px;
   }
 
   .nav-logo-img {
-    height: 30px !important;
-    max-width: 115px !important;
+    height: 30px;
+    max-width: 115px;
   }
 
   .nav-logo-icon {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.82rem !important;
+    width: 28px;
+    height: 28px;
+    font-size: 0.82rem;
   }
 
   .nav-actions {
-    gap: 4px !important;
+    gap: 4px;
   }
 
   .nav-xp-badge {
-    padding: 2px 6px !important;
-    font-size: 0.68rem !important;
-    gap: 2px !important;
+    padding: 2px 6px;
+    font-size: 0.68rem;
+    gap: 2px;
   }
 
   .theme-switch {
-    width: 42px !important;
-    height: 23px !important;
+    width: 42px;
+    height: 23px;
   }
 
   .theme-switch-slider {
-    border-radius: 23px !important;
-    padding: 0 4px !important;
+    border-radius: 23px;
+    padding: 0 4px;
   }
 
   .theme-switch-slider .icon-sun,
   .theme-switch-slider .icon-moon {
-    font-size: 9px !important;
+    font-size: 9px;
   }
 
   .theme-switch-slider:before {
-    width: 15px !important;
-    height: 15px !important;
-    left: 2px !important;
-    bottom: 2px !important;
+    width: 15px;
+    height: 15px;
+    left: 2px;
+    bottom: 2px;
   }
 
   [data-theme="dark"] .theme-switch-slider:before {
-    transform: translateX(19px) !important;
+    transform: translateX(19px);
   }
 
   .nav-btn {
-    padding: 4px 8px !important;
-    font-size: 0.72rem !important;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+
+  .nav-student-xp {
+    display: none;
   }
 
   .nav-student-name {
-    max-width: 75px !important;
+    max-width: 70px;
   }
 }
 
 @media (max-width: 330px) {
   .navbar {
-    padding: 0 4px !important;
+    padding: 0 4px;
   }
 
   .nav-logo-img {
-    height: 26px !important;
-    max-width: 95px !important;
+    height: 26px;
+    max-width: 95px;
   }
 
   .nav-logo-icon {
-    width: 26px !important;
-    height: 26px !important;
+    width: 26px;
+    height: 26px;
   }
 
   .nav-xp-badge {
-    padding: 2px 4px !important;
-    font-size: 0.65rem !important;
+    padding: 2px 4px;
+    font-size: 0.65rem;
   }
 }
 

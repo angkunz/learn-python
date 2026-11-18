@@ -253,7 +253,7 @@ app.post('/api/teacher/test-api-key', authenticateTeacher, async (req, res) => {
 // ============================================================
 
 app.post('/api/teacher/classrooms', authenticateTeacher, async (req, res) => {
-  const { name, description = '', geminiApiKey = '', geminiModel = 'gemini-2.5-flash' } = req.body;
+  const { name, description = '', geminiApiKey = '', geminiModel = 'gemini-flash-latest' } = req.body;
   if (!name || name.trim() === '') {
     return res.status(400).json({ error: 'กรุณาระบุชื่อห้องเรียน' });
   }
@@ -1177,7 +1177,7 @@ app.post('/api/student/ai-feedback', authenticateStudent, async (req, res) => {
     });
   }
 
-  const model = student.gemini_model || 'gemini-2.5-flash';
+  const model = student.gemini_model || 'gemini-flash-latest';
   const codeLines = userCode.split('\n').map((l, i) => `${i + 1}: ${l}`).join('\n');
   const solutionLines = solution ? solution.replace(/\\n/g, '\n') : '';
   const starterLines = starterCode ? starterCode.replace(/\\n/g, '\n') : '';
@@ -1246,13 +1246,17 @@ ${runOutput || '(นักเรียนยังไม่ได้รันโ
 }
 `.trim();
 
-  const primaryModel = student.gemini_model || 'gemini-2.5-flash';
+  const primaryModel = (student.gemini_model && !['gemini-flash', 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'].includes(student.gemini_model))
+    ? student.gemini_model 
+    : 'gemini-flash-latest';
+
   const modelsToTry = [...new Set([
     primaryModel,
-    'gemini-2.5-flash',
-    'gemini-1.5-flash',
-    'gemini-2.0-flash',
-    'gemini-flash'
+    'gemini-flash-latest',
+    'gemini-3.8-flash',
+    'gemini-3.5-flash',
+    'gemini-flash-lite-latest',
+    'gemini-2.5-flash-lite'
   ])];
 
   let parsedResult = null;
