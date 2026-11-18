@@ -627,7 +627,7 @@ function openEditClassroomModal(id) {
   document.getElementById('edit-cls-name').value = cls.name;
   document.getElementById('edit-cls-desc').value = cls.description || '';
   document.getElementById('edit-cls-key').value = ''; // keep empty unless changed
-  document.getElementById('edit-cls-key').placeholder = cls.hasApiKey ? '(มี API Key อยู่แล้ว ใส่ใหม่หากต้องการเปลี่ยน)' : 'AIzaSy...';
+  document.getElementById('edit-cls-key').placeholder = cls.hasApiKey ? '(มี API Key อยู่แล้ว ใส่ใหม่หากต้องการเปลี่ยน)' : 'AIza... หรือ AQ...';
 
   // Handle Model dropdown selection & custom model
   const modelSel = document.getElementById('edit-cls-model');

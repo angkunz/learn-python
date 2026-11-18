@@ -207,9 +207,6 @@ app.post('/api/teacher/test-api-key', authenticateTeacher, async (req, res) => {
   }
 
   const cleanKey = apiKey.trim().replace(/[^\w\-\.]/g, '');
-  if (cleanKey.startsWith('AQ.')) {
-    return res.status(400).json({ error: 'คีย์แบบ AQ. เป็นคีย์ Vertex AI/Google Cloud ไม่รองรับ กรุณาใช้คีย์ AI Studio ที่ขึ้นต้นด้วย AIza' });
-  }
 
   try {
     const testUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${cleanKey}`;

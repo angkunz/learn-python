@@ -133,7 +133,7 @@ async function showApiKeyModal(onSave) {
           border-radius:8px;padding:5px 10px;font-size:0.75rem;cursor:pointer;transition:all 0.2s;">🗑️ ลบ</button>
       </div>` : ''}
       <input type="password" class="modal-input" id="api-key-input"
-        placeholder="${hasSaved ? 'กรอก key ใหม่เพื่อเปลี่ยน...' : 'AIza...'}" autocomplete="off">
+        placeholder="${hasSaved ? 'กรอก key ใหม่เพื่อเปลี่ยน...' : 'AIza... หรือ AQ...'}" autocomplete="off">
       <div id="api-key-error" style="color:var(--red); font-size:0.8rem; margin-top:8px; display:none; text-align:center;">API Key ไม่ถูกต้อง กรุณาลองใหม่</div>
       <label id="api-session-label" style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;
         padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);
@@ -212,11 +212,7 @@ async function showApiKeyModal(onSave) {
       saveBtn.disabled = false;
       saveBtn.innerHTML = '💾 บันทึก';
       input.style.borderColor = 'var(--red)';
-      if (key.startsWith('AQ.')) {
-        errorMsg.innerHTML = '❌ คีย์แบบ <b>AQ.</b> เป็นคีย์ของ Google Cloud/Vertex AI ซึ่งไม่รองรับครับ<br>กรุณารับคีย์ใหม่ที่ <b>aistudio.google.com</b> (คีย์ที่ถูกต้องจะขึ้นต้นด้วย <b>AIza</b>)';
-      } else {
-        errorMsg.textContent = '❌ คีย์ไม่ถูกต้อง หรือใช้งานไม่ได้ กรุณาตรวจสอบอีกครั้ง';
-      }
+      errorMsg.textContent = '❌ คีย์ไม่ถูกต้อง หรือไม่สามารถเชื่อมต่อ Gemini API ได้ กรุณาตรวจสอบอีกครั้ง';
       errorMsg.style.display = 'block';
     }
   };

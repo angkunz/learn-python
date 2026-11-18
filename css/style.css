@@ -63,6 +63,7 @@
   /* Hard shadows */
   --shadow-sm: 3px 3px 0 var(--ink);
   --shadow: 5px 5px 0 var(--ink);
+  --shadow-md: 5px 5px 0 var(--ink);
   --shadow-lg: 8px 8px 0 var(--ink);
   --shadow-glow: 5px 5px 0 var(--ink);
 
@@ -331,12 +332,14 @@ body.is-classroom-mode .hide-in-classroom {
   flex-shrink: 0;
   margin-left: 8px;
 }
+
 [data-theme="dark"] .nav-classroom-tag {
   background: #1e1b4b;
   border-color: #6366f1;
   color: #e0e7ff;
   box-shadow: 2px 2px 0 #6366f1;
 }
+
 .nav-classroom-tag .tag-code {
   background: var(--orange, #f97316);
   color: #fff;
@@ -352,6 +355,7 @@ body.is-classroom-mode .hide-in-classroom {
   position: relative;
   display: inline-block;
 }
+
 .nav-student-trigger {
   display: inline-flex;
   align-items: center;
@@ -368,24 +372,29 @@ body.is-classroom-mode .hide-in-classroom {
   box-shadow: 2px 2px 0 var(--ink);
   transition: all 0.15s ease;
 }
+
 .nav-student-trigger:hover {
   transform: translateY(-1px);
   box-shadow: 3px 3px 0 var(--ink);
 }
+
 [data-theme="dark"] .nav-student-trigger {
   background: var(--surface-2);
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
 }
+
 .nav-student-avatar {
   font-size: 0.95rem;
 }
+
 .nav-student-name {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .nav-student-xp {
   color: #ca8a04;
   background: rgba(234, 179, 8, 0.15);
@@ -394,9 +403,11 @@ body.is-classroom-mode .hide-in-classroom {
   font-size: 0.78rem;
   font-weight: 700;
 }
+
 [data-theme="dark"] .nav-student-xp {
   color: #facc15;
 }
+
 .nav-student-caret {
   font-size: 0.75rem;
   color: var(--text-secondary);
@@ -416,37 +427,51 @@ body.is-classroom-mode .hide-in-classroom {
   display: none;
   animation: dropIn 0.15s ease-out;
 }
+
 .nav-student-menu.open {
   display: block;
 }
+
 [data-theme="dark"] .nav-student-menu {
   background: #181b26;
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
+
 @keyframes dropIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .menu-header {
   margin-bottom: 12px;
 }
+
 .menu-name {
   font-weight: 800;
   font-size: 1rem;
   color: var(--text-primary);
   margin-bottom: 2px;
 }
+
 .menu-sub {
   font-size: 0.78rem;
   color: var(--text-secondary);
 }
+
 .menu-divider {
   height: 1px;
   background: var(--border, #e2e8f0);
   margin: 10px 0;
 }
+
 .menu-info-row {
   display: flex;
   justify-content: space-between;
@@ -454,13 +479,16 @@ body.is-classroom-mode .hide-in-classroom {
   font-size: 0.8rem;
   margin-bottom: 6px;
 }
+
 .menu-info-lbl {
   color: var(--text-secondary);
 }
+
 .menu-info-val {
   font-weight: 600;
   color: var(--text-primary);
 }
+
 .menu-link-btn {
   display: block;
   text-align: center;
@@ -474,9 +502,11 @@ body.is-classroom-mode .hide-in-classroom {
   margin-bottom: 8px;
   transition: opacity 0.15s;
 }
+
 .menu-link-btn:hover {
   opacity: 0.9;
 }
+
 .menu-leave-btn {
   width: 100%;
   padding: 8px 12px;
@@ -489,15 +519,27 @@ body.is-classroom-mode .hide-in-classroom {
   cursor: pointer;
   transition: background 0.15s;
 }
+
 .menu-leave-btn:hover {
   background: rgba(239, 68, 68, 0.1);
 }
 
 /* Fallback legacy badges */
-.classroom-nav-pill { display: none; }
-.student-identity-badge { display: none; }
-.badge-ai-ready { display: none; }
-.btn-leave-class { display: none; }
+.classroom-nav-pill {
+  display: none;
+}
+
+.student-identity-badge {
+  display: none;
+}
+
+.badge-ai-ready {
+  display: none;
+}
+
+.btn-leave-class {
+  display: none;
+}
 
 /* ── Hero Section ── */
 .hero {
@@ -1382,6 +1424,7 @@ footer {
   padding-bottom: 16px;
   border-bottom: 2px solid var(--border, #e2e8f0);
 }
+
 [data-theme="dark"] .theory-section-header {
   border-bottom-color: rgba(255, 255, 255, 0.1);
 }
@@ -1395,6 +1438,7 @@ footer {
   align-items: center;
   gap: 10px;
 }
+
 [data-theme="dark"] .theory-section-title {
   color: var(--primary-light, #818cf8);
 }
@@ -1406,12 +1450,13 @@ footer {
   font-size: 0.95rem;
   line-height: 1.5;
 }
+
 [data-theme="dark"] .theory-section-desc {
   color: #94a3b8;
 }
 
 /* When theory-content is inside section-container, remove redundant nested border/shadow */
-.section-container > .theory-content {
+.section-container>.theory-content {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -3329,7 +3374,7 @@ footer {
     gap: 12px;
   }
 
-  .hero-actions > * {
+  .hero-actions>* {
     width: 100%;
     justify-content: center;
   }
@@ -3392,7 +3437,7 @@ footer {
     flex-shrink: 0;
   }
 
-  .nav-actions > a[href*="playground.html"] {
+  .nav-actions>a[href*="playground.html"] {
     display: none;
   }
 
@@ -3710,16 +3755,21 @@ html {
   flex-shrink: 0;
   cursor: pointer;
 }
+
 .theme-switch input {
   opacity: 0;
   width: 0;
   height: 0;
   position: absolute;
 }
+
 .theme-switch-slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: var(--blue-soft);
   border: var(--bw) solid var(--ink);
   border-radius: 34px;
@@ -3730,12 +3780,14 @@ html {
   padding: 0 7px;
   box-shadow: var(--shadow-sm);
 }
-.theme-switch-slider .icon-sun, 
+
+.theme-switch-slider .icon-sun,
 .theme-switch-slider .icon-moon {
   font-size: 13px;
   z-index: 1;
   user-select: none;
 }
+
 .theme-switch-slider:before {
   position: absolute;
   content: "";
@@ -3763,6 +3815,7 @@ html {
   transform: translate(-2px, -2px);
   box-shadow: var(--shadow);
 }
+
 .theme-switch:active .theme-switch-slider {
   transform: translate(2px, 2px);
   box-shadow: 0 0 0 var(--ink);
@@ -3778,16 +3831,14 @@ html {
 }
 
 /* ── E. บังคับเปลี่ยนสีอักษรที่เคยถูกล็อคเป็นสีดำ (var(--ink)) ── */
-[data-theme="dark"] :is(
-  .nav-logo, .hero-title, .section-title, .feature-title,
+[data-theme="dark"] :is(.nav-logo, .hero-title, .section-title, .feature-title,
   .lesson-title-big, .theory-content h2, .theory-content h3,
   .exercise-title, .exercise-desc h3, .modal-title, .input-dialog-prompt,
   .ai-score-grade, .ai-feedback-text, .ai-feedback-section strong,
   .ai-bug-problem-text, .hint-toast-title, .hint-toast-text,
   .info-box p, .info-box div, .warning-box p, .warning-box div,
   .grade-btn-sub, .sidebar-lesson-title, .output-label, .output-status,
-  .ai-code-title, .modal-desc, .sidebar-search input, .ai-score-bar-label
-) {
+  .ai-code-title, .modal-desc, .sidebar-search input, .ai-score-bar-label) {
   color: var(--text-primary);
 }
 
@@ -3848,10 +3899,22 @@ html {
   bottom: 0;
   width: 6px;
 }
-.pylearn-toast-accent-success { background: var(--green, #22c55e); }
-.pylearn-toast-accent-error   { background: var(--red, #ef4444); }
-.pylearn-toast-accent-warning { background: var(--orange, #f97316); }
-.pylearn-toast-accent-info    { background: var(--blue, #3b82f6); }
+
+.pylearn-toast-accent-success {
+  background: var(--green, #22c55e);
+}
+
+.pylearn-toast-accent-error {
+  background: var(--red, #ef4444);
+}
+
+.pylearn-toast-accent-warning {
+  background: var(--orange, #f97316);
+}
+
+.pylearn-toast-accent-info {
+  background: var(--blue, #3b82f6);
+}
 
 /* Icon badge */
 .pylearn-toast-icon-wrap {
@@ -3867,10 +3930,22 @@ html {
   flex-shrink: 0;
   margin-top: 1px;
 }
-.pylearn-toast-icon-success { background: #dcfce7; }
-.pylearn-toast-icon-error   { background: #fee2e2; }
-.pylearn-toast-icon-warning { background: #fef3c7; }
-.pylearn-toast-icon-info    { background: #e0e7ff; }
+
+.pylearn-toast-icon-success {
+  background: #dcfce7;
+}
+
+.pylearn-toast-icon-error {
+  background: #fee2e2;
+}
+
+.pylearn-toast-icon-warning {
+  background: #fef3c7;
+}
+
+.pylearn-toast-icon-info {
+  background: #e0e7ff;
+}
 
 /* Toast content */
 .pylearn-toast-content {
@@ -3894,10 +3969,26 @@ html {
   border-radius: var(--pill, 100px);
   border: 1.5px solid var(--ink, #16161a);
 }
-.pylearn-toast-tag-success { background: #bbf7d0; color: #166534; }
-.pylearn-toast-tag-error   { background: #fecaca; color: #991b1b; }
-.pylearn-toast-tag-warning { background: #fde68a; color: #92400e; }
-.pylearn-toast-tag-info    { background: #c7d2fe; color: #3730a3; }
+
+.pylearn-toast-tag-success {
+  background: #bbf7d0;
+  color: #166534;
+}
+
+.pylearn-toast-tag-error {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.pylearn-toast-tag-warning {
+  background: #fde68a;
+  color: #92400e;
+}
+
+.pylearn-toast-tag-info {
+  background: #c7d2fe;
+  color: #3730a3;
+}
 
 .pylearn-toast-title {
   font-size: 0.88rem;
@@ -3933,6 +4024,7 @@ html {
   padding: 0;
   margin: -2px -2px 0 0;
 }
+
 .pylearn-toast-close:hover {
   background: rgba(0, 0, 0, 0.08);
   color: var(--ink);
@@ -3948,15 +4040,28 @@ html {
   height: 3.5px;
   background: rgba(0, 0, 0, 0.06);
 }
+
 .pylearn-toast-progress-bar {
   height: 100%;
   width: 100%;
   transform-origin: left center;
 }
-.pylearn-toast-bar-success { background: var(--green, #22c55e); }
-.pylearn-toast-bar-error   { background: var(--red, #ef4444); }
-.pylearn-toast-bar-warning { background: var(--orange, #f97316); }
-.pylearn-toast-bar-info    { background: var(--blue, #3b82f6); }
+
+.pylearn-toast-bar-success {
+  background: var(--green, #22c55e);
+}
+
+.pylearn-toast-bar-error {
+  background: var(--red, #ef4444);
+}
+
+.pylearn-toast-bar-warning {
+  background: var(--orange, #f97316);
+}
+
+.pylearn-toast-bar-info {
+  background: var(--blue, #3b82f6);
+}
 
 /* Dark mode toast adjustments */
 [data-theme="dark"] .pylearn-toast {
@@ -3964,21 +4069,56 @@ html {
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
 }
+
 [data-theme="dark"] .pylearn-toast:hover {
   box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.8);
 }
+
 [data-theme="dark"] .pylearn-toast-icon-wrap {
   border-color: rgba(255, 255, 255, 0.25);
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
 }
-[data-theme="dark"] .pylearn-toast-icon-success { background: #064e3b; }
-[data-theme="dark"] .pylearn-toast-icon-error   { background: #7f1d1d; }
-[data-theme="dark"] .pylearn-toast-icon-warning { background: #78350f; }
-[data-theme="dark"] .pylearn-toast-icon-info    { background: #1e1b4b; }
-[data-theme="dark"] .pylearn-toast-tag-success { background: #064e3b; color: #a7f3d0; border-color: rgba(255,255,255,0.2); }
-[data-theme="dark"] .pylearn-toast-tag-error   { background: #7f1d1d; color: #fecaca; border-color: rgba(255,255,255,0.2); }
-[data-theme="dark"] .pylearn-toast-tag-warning { background: #78350f; color: #fde68a; border-color: rgba(255,255,255,0.2); }
-[data-theme="dark"] .pylearn-toast-tag-info    { background: #1e1b4b; color: #c7d2fe; border-color: rgba(255,255,255,0.2); }
+
+[data-theme="dark"] .pylearn-toast-icon-success {
+  background: #064e3b;
+}
+
+[data-theme="dark"] .pylearn-toast-icon-error {
+  background: #7f1d1d;
+}
+
+[data-theme="dark"] .pylearn-toast-icon-warning {
+  background: #78350f;
+}
+
+[data-theme="dark"] .pylearn-toast-icon-info {
+  background: #1e1b4b;
+}
+
+[data-theme="dark"] .pylearn-toast-tag-success {
+  background: #064e3b;
+  color: #a7f3d0;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .pylearn-toast-tag-error {
+  background: #7f1d1d;
+  color: #fecaca;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .pylearn-toast-tag-warning {
+  background: #78350f;
+  color: #fde68a;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .pylearn-toast-tag-info {
+  background: #1e1b4b;
+  color: #c7d2fe;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 [data-theme="dark"] .pylearn-toast-close:hover {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
@@ -3991,6 +4131,7 @@ html {
     opacity: 0;
     transform: translateY(-20px) scale(0.92);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -4004,6 +4145,7 @@ html {
     max-height: 120px;
     margin-bottom: 0;
   }
+
   to {
     opacity: 0;
     transform: translateY(-16px) scale(0.9);
@@ -4024,6 +4166,7 @@ html {
     max-width: none;
     align-items: stretch;
   }
+
   .pylearn-toast {
     padding: 12px 14px 14px 12px;
     box-shadow: 3px 3px 0 var(--ink);
@@ -4082,10 +4225,21 @@ html {
   animation: pylearnBounce 0.5s ease;
 }
 
-.pylearn-dialog-icon-info    { background: var(--blue-soft, #e0e7ff); }
-.pylearn-dialog-icon-success { background: #dcfce7; }
-.pylearn-dialog-icon-warning { background: var(--yellow-soft, #fef3c7); }
-.pylearn-dialog-icon-danger  { background: #fee2e2; }
+.pylearn-dialog-icon-info {
+  background: var(--blue-soft, #e0e7ff);
+}
+
+.pylearn-dialog-icon-success {
+  background: #dcfce7;
+}
+
+.pylearn-dialog-icon-warning {
+  background: var(--yellow-soft, #fef3c7);
+}
+
+.pylearn-dialog-icon-danger {
+  background: #fee2e2;
+}
 
 .pylearn-dialog-title {
   font-size: 1.25rem;
@@ -4191,25 +4345,57 @@ html {
 }
 
 @keyframes pylearnShake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-5px); }
-  40%, 80% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 @keyframes pylearnFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes pylearnPopIn {
-  from { opacity: 0; transform: scale(0.85); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes pylearnBounce {
-  0% { transform: scale(0.5); }
-  60% { transform: scale(1.15); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.5);
+  }
+
+  60% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* ============================================================
@@ -4255,7 +4441,7 @@ html {
     flex-shrink: 0 !important;
   }
 
-  .nav-actions > a[href*="playground.html"] {
+  .nav-actions>a[href*="playground.html"] {
     display: none !important;
   }
 
@@ -4287,6 +4473,7 @@ html {
   .nav-btn-text-full {
     display: none !important;
   }
+
   .nav-btn-text-short {
     display: inline !important;
   }
