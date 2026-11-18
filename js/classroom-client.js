@@ -55,6 +55,10 @@ const ClassroomClient = {
     if (navXp) {
       navXp.textContent = `⭐ ${totalXp} XP`;
     }
+    const menuXp = document.getElementById('menu-student-xp');
+    if (menuXp) {
+      menuXp.textContent = totalXp;
+    }
     if (typeof renderSidebar === 'function') {
       renderSidebar();
     }
@@ -301,10 +305,6 @@ const ClassroomClient = {
     // 3. Compact Student Profile Dropdown in .nav-actions
     const navActions = navbar.querySelector('.nav-actions');
     if (navActions) {
-      // Hide loose XP badge if present in nav-actions to save space
-      const looseXp = navActions.querySelector('#nav-xp');
-      if (looseXp) looseXp.style.display = 'none';
-
       let dropdownWrap = navActions.querySelector('.nav-student-dropdown');
       if (!dropdownWrap) {
         dropdownWrap = document.createElement('div');
@@ -317,7 +317,6 @@ const ClassroomClient = {
         <button class="nav-student-trigger" onclick="ClassroomClient.toggleMenu(event)" title="ข้อมูลผู้เรียนและห้องเรียน">
           <span class="nav-student-avatar">👤</span>
           <span class="nav-student-name">${escapeHtml(studentLabel)}</span>
-          <span class="nav-student-xp">⭐ <span id="nav-xp-counter">${currentXp}</span> XP</span>
           <span class="nav-student-caret">▾</span>
         </button>
         <div class="nav-student-menu" id="nav-student-menu">
@@ -326,6 +325,10 @@ const ClassroomClient = {
             <div class="menu-sub">${student.gradeClass ? 'ชั้น ' + escapeHtml(student.gradeClass) : ''} ${student.studentNumber ? 'เลขที่ ' + escapeHtml(student.studentNumber) : ''} (รหัส: ${escapeHtml(student.studentIdCode || '-')})</div>
           </div>
           <div class="menu-divider"></div>
+          <div class="menu-info-row">
+            <span class="menu-info-lbl">⭐ คะแนนสะสม:</span>
+            <span class="menu-info-val" style="color:var(--yellow, #eab308);font-weight:700;"><span id="menu-student-xp">${currentXp}</span> XP</span>
+          </div>
           <div class="menu-info-row">
             <span class="menu-info-lbl">🏫 ห้องเรียน:</span>
             <span class="menu-info-val">${escapeHtml(classroom.name)} (${escapeHtml(classroom.code)})</span>

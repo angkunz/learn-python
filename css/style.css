@@ -4408,15 +4408,9 @@ html {
   }
 
   .nav-student-name {
-    max-width: 65px !important;
+    max-width: 95px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-
-  .nav-student-xp {
-    padding: 1px 4px !important;
-    font-size: 0.68rem !important;
     white-space: nowrap !important;
   }
 }
@@ -4489,11 +4483,7 @@ html {
   }
 
   .nav-student-name {
-    max-width: 50px !important;
-  }
-
-  .nav-student-xp {
-    display: none !important;
+    max-width: 75px !important;
   }
 }
 
