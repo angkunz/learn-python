@@ -267,11 +267,20 @@ const ClassroomClient = {
     document.body.classList.add('is-classroom-mode');
 
     // 1. In Classroom Mode: HIDE all redundant links in navbar
-    if (apiKeyBtn) apiKeyBtn.style.display = 'none';
+    if (apiKeyBtn) {
+      apiKeyBtn.style.setProperty('display', 'none', 'important');
+      apiKeyBtn.classList.add('hide-in-classroom');
+    }
+
+    const playgroundActionLink = navbar.querySelector('.nav-actions a[href*="playground.html"]');
+    if (playgroundActionLink) {
+      playgroundActionLink.style.setProperty('display', 'none', 'important');
+      playgroundActionLink.classList.add('hide-in-classroom');
+    }
 
     // Hide redundant navigation links (เข้าห้องเรียน, สำหรับครูผู้สอน)
     navbar.querySelectorAll('a[href*="join.html"], a[href*="teacher-login.html"]').forEach(el => {
-      el.style.display = 'none';
+      el.style.setProperty('display', 'none', 'important');
       el.classList.add('hide-in-classroom');
     });
 

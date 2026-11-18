@@ -4470,8 +4470,12 @@ html {
   }
 }
 
-/* Hide separate XP badge in Classroom Mode (XP is integrated into Student Profile Pill) */
+/* Hide redundant elements in Classroom Mode */
 body.is-classroom-mode .navbar .nav-xp-badge,
-body.is-classroom-mode .navbar #nav-xp {
+body.is-classroom-mode .navbar #nav-xp,
+body.is-classroom-mode #nav-api-key-btn,
+body.is-classroom-mode button[onclick*="showApiKeyModal"],
+body.is-classroom-mode .nav-actions a[href*="playground.html"],
+body.is-classroom-mode .hide-in-classroom {
   display: none !important;
 }
