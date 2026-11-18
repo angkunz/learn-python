@@ -33,6 +33,13 @@ print("ฉันชอบเรียน Python 🐍")</code></pre>
 <pre><code>print("⭐ ดาวดวงเดียวกัน")
 print("🌈 รุ้งสวยงาม")
 print("🐶🐱🐭 เพื่อนสัตว์")</code></pre>
+</div>
+<div class="info-box" style="margin-top:10px;">
+  <span class="info-icon">💡</span>
+  <div><strong>วิธีพิมพ์ Emoji บนแป้นพิมพ์:</strong><br>
+  • <b>Windows:</b> กดปุ่ม <kbd>Win</kbd> + <kbd>.</kbd> (จุด) หรือ <kbd>Win</kbd> + <kbd>;</kbd><br>
+  • <b>Mac:</b> กดปุ่ม <kbd>Cmd</kbd> + <kbd>Ctrl</kbd> + <kbd>Space</kbd><br>
+  • <b>มือถือ / แท็บเล็ต:</b> แตะปุ่มหน้ายิ้ม 😊 บนแป้นพิมพ์ได้เลย</div>
 </div>`,
     exercises: [
       {
@@ -55,7 +62,7 @@ print("🐶🐱🐭 เพื่อนสัตว์")</code></pre>
         id: "e1e3", title: "วาดสัตว์ด้วย Emoji", difficulty: "easy",
         description: "ใช้ print() วาดสัตว์ที่คุณชอบด้วย Emoji อย่างน้อย 3 บรรทัด ให้ดูสนุกและน่ารัก!",
         starterCode: "# วาดสัตว์ด้วย Emoji\n",
-        hint: "ลองใช้ emoji หลายตัวในบรรทัดเดียว เช่น print(\"🐶 หมาน้อย\")",
+        hint: "💡 วิธีพิมพ์ Emoji:\n• Windows: กดปุ่ม Win + . (จุด)\n• Mac: กดปุ่ม Cmd + Ctrl + Space\n📋 หรือคัดลอก Emoji ไปวางได้เลย:\n🐶 🐱 🐰 🐼 🦊 🦁 🐸 🐧 🐾 🌿 🦴 🐟 💖 ✨ ⭐\nตัวอย่าง:\nprint(\"✨ 🐱 🐱 ✨\")",
         solution: 'print("🐶🐾 หมาน้อยตัวน้อย")\nprint("🦮 ชื่อว่า ไทยสัน")\nprint("🏠 อยู่บ้านสุขสันต์")',
         expectedOutput: ""
       }

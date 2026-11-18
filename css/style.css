@@ -2359,6 +2359,7 @@ footer {
   font-weight: 500;
   color: var(--ink);
   line-height: 1.55;
+  white-space: pre-wrap;
 }
 
 [data-theme="dark"] .hint-toast-text {
