@@ -3418,25 +3418,9 @@ footer {
     box-shadow: 2px 2px 0 var(--ink);
   }
 
-  /* Classroom mode navbar */
+  /* On small screens (<= 768px), hide separate classroom tag — info is in student profile pill */
   .nav-classroom-tag {
-    padding: 2px 7px;
-    font-size: 0.74rem;
-    gap: 4px;
-    margin-left: 6px;
-    box-shadow: 1.5px 1.5px 0 var(--ink);
-  }
-
-  .nav-classroom-tag .tag-name {
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .nav-classroom-tag .tag-code {
-    padding: 1px 5px;
-    font-size: 0.7rem;
+    display: none !important;
   }
 
   .nav-student-trigger {
@@ -3446,7 +3430,7 @@ footer {
   }
 
   .nav-student-name {
-    max-width: 75px;
+    max-width: 130px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3510,17 +3494,8 @@ footer {
     font-size: 0.75rem;
   }
 
-  .nav-classroom-tag .tag-name {
-    display: none;
-  }
-
-  .nav-classroom-tag {
-    padding: 2px 6px;
-    margin-left: 4px;
-  }
-
   .nav-student-name {
-    max-width: 60px;
+    max-width: 110px;
   }
 
   .nav-student-trigger {
@@ -4383,22 +4358,9 @@ html {
     font-size: 0.78rem !important;
   }
 
-  /* Classroom navbar elements on mobile */
+  /* Classroom navbar elements on mobile: hide separate tag to keep navbar clean */
   .nav-classroom-tag {
-    padding: 2px 6px !important;
-    margin-left: 4px !important;
-    font-size: 0.72rem !important;
-    gap: 3px !important;
-    box-shadow: 1.5px 1.5px 0 var(--ink) !important;
-  }
-
-  .nav-classroom-tag .tag-name {
     display: none !important;
-  }
-
-  .nav-classroom-tag .tag-code {
-    padding: 1px 4px !important;
-    font-size: 0.68rem !important;
   }
 
   .nav-student-trigger {
@@ -4408,7 +4370,7 @@ html {
   }
 
   .nav-student-name {
-    max-width: 95px !important;
+    max-width: 105px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
