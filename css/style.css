@@ -1163,7 +1163,6 @@ footer {
   height: 100vh;
   padding-top: 72px;
   position: relative;
-  z-index: 1;
 }
 
 /* Sidebar */
@@ -3383,7 +3382,7 @@ footer {
     bottom: 0;
     height: 100dvh;
     width: min(300px, 84vw);
-    z-index: 220;
+    z-index: 9999;
     transform: translateX(-105%);
     transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     box-shadow: 6px 0 24px rgba(0, 0, 0, 0.25);
@@ -3392,6 +3391,7 @@ footer {
   .sidebar.open,
   body.sidebar-open .sidebar {
     transform: translateX(0);
+    z-index: 9999;
   }
 
   .sidebar-header {
@@ -3409,8 +3409,8 @@ footer {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 2px solid var(--ink);
     background: var(--surface);
@@ -3418,15 +3418,24 @@ footer {
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
-    margin-left: auto;
+    box-shadow: 2px 2px 0 var(--ink);
+    transition: var(--transition);
+  }
+
+  .sidebar-close-btn:hover {
+    background: var(--red-soft);
+    color: var(--ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
   }
 
   .sidebar-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(15, 23, 42, 0.55);
-    backdrop-filter: blur(3px);
-    z-index: 210;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9990;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease;
@@ -3449,6 +3458,12 @@ footer {
 
   .lesson-layout {
     padding-top: 62px;
+    position: static;
+  }
+
+  body.sidebar-open .lesson-layout {
+    position: static !important;
+    z-index: auto !important;
   }
 
   .hero {
