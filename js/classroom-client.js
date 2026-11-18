@@ -38,8 +38,16 @@ const ClassroomClient = {
       (p.exercisesCompleted || []).forEach(exId => {
         exMap[exId] = true;
       });
+
+      // ตรวจสอบว่าทำครบทุกข้อในบทเรียนจริงหรือไม่ก่อนตั้งค่า done
+      const lessonObj = (typeof getLessonById === 'function') ? getLessonById(p.lessonId) : null;
+      const requiredEx = Array.isArray(lessonObj?.exercises) ? lessonObj.exercises : [];
+      const hasAllExercises = requiredEx.length > 0
+        ? requiredEx.every(ex => !!exMap[ex.id])
+        : true;
+
       localProgress[p.lessonId] = {
-        done: !!p.completed,
+        done: !!(p.completed && hasAllExercises),
         exercises: exMap
       };
       totalXp += (p.xp || 0);
@@ -68,6 +76,9 @@ const ClassroomClient = {
     }
     if (typeof renderLevels === 'function') {
       renderLevels();
+    }
+    if (typeof syncCompleteButtonState === 'function') {
+      syncCompleteButtonState();
     }
   },
 
@@ -197,6 +208,20 @@ const ClassroomClient = {
     const session = this.getSession();
     if (!session || !session.token) return;
 
+    // ล็อกชั้นเซิร์ฟเวอร์ซิงค์: ห้ามส่ง completed = true หากยังทำโจทย์ย่อยในบทนั้นไม่ครบทุกข้อ
+    let verifiedCompleted = !!completed;
+    let verifiedXp = xpEarned;
+    if (verifiedCompleted && typeof areAllExercisesDone === 'function') {
+      if (!areAllExercisesDone(lessonId)) {
+        verifiedCompleted = false;
+        // หากเป็นคำขอที่กดปุ่มจบบทเรียนโดยไม่มี exerciseId ให้ตัด XP โบนัสจบบทออก
+        if (!exerciseId) {
+          verifiedXp = 0;
+          return;
+        }
+      }
+    }
+
     try {
       await fetch('/api/student/progress', {
         method: 'POST',
@@ -207,8 +232,8 @@ const ClassroomClient = {
         body: JSON.stringify({
           lessonId,
           exerciseId,
-          completed,
-          xpEarned,
+          completed: verifiedCompleted,
+          xpEarned: verifiedXp,
           code,
           status,
           errorType,
@@ -395,10 +420,10 @@ const ClassroomClient = {
   async confirmLeave() {
     const ok = window.pylearnConfirm
       ? await window.pylearnConfirm(
-          'คุณต้องการออกจากห้องเรียนนี้หรือไม่?\n(ความคืบหน้าและการส่งงานของคุณจะยังคงถูกบันทึกบนระบบของคุณครูอย่างปลอดภัย)',
-          'ออกจากห้องเรียน',
-          { type: 'warning', confirmText: 'ออกจากห้องเรียน', cancelText: 'อยู่ต่อ' }
-        )
+        'คุณต้องการออกจากห้องเรียนนี้หรือไม่?\n(ความคืบหน้าและการส่งงานของคุณจะยังคงถูกบันทึกบนระบบของคุณครูอย่างปลอดภัย)',
+        'ออกจากห้องเรียน',
+        { type: 'warning', confirmText: 'ออกจากห้องเรียน', cancelText: 'อยู่ต่อ' }
+      )
       : confirm('คุณต้องการออกจากห้องเรียนนี้หรือไม่? (ความคืบหน้าที่คุณทำไว้จะยังคงถูกบันทึกบนระบบของคุณครู)');
     if (ok) {
       this.clearSession();
