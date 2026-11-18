@@ -1,5 +1,5 @@
 // ================================================
-// Editor — Styled Textarea (ไม่ต้องพึ่ง CDN)
+// Editor — Styled Textarea & Pyodide Runner
 // ================================================
 
 // ── Create Editor ──
@@ -25,7 +25,7 @@ function createEditor(container, initialCode = '') {
   // Update line numbers
   function updateLineNumbers() {
     const lines = textarea.value.split('\n').length;
-    lineNumbers.innerHTML = Array.from({length: lines}, (_, i) =>
+    lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) =>
       `<span>${i + 1}</span>`
     ).join('');
   }
@@ -53,7 +53,6 @@ function createEditor(container, initialCode = '') {
       const spaces = '    ';
 
       if (start !== end) {
-        // Indent selected lines
         const before = textarea.value.substring(0, start);
         const selected = textarea.value.substring(start, end);
         const after = textarea.value.substring(end);
@@ -105,7 +104,6 @@ function createEditor(container, initialCode = '') {
 
   updateLineNumbers();
 
-  // Return a view-like object
   return {
     _textarea: textarea,
     _lineNumbers: lineNumbers,
@@ -119,7 +117,6 @@ function getEditorCode(view) {
 
 function setEditorCode(view, code) {
   view._textarea.value = code;
-  // trigger line number update
   view._textarea.dispatchEvent(new Event('input'));
 }
 
@@ -149,20 +146,82 @@ async function initPyodide(onProgress) {
   return pyodidePromise;
 }
 
+// ── Analyze Python AST Structure (Anti-Shortcut Helper for Exercise Grader) ──
+function analyzePythonStructure(code) {
+  if (!pyodide) return null;
+  try {
+    pyodide.globals.set('_inspect_code', String(code || ''));
+    const rawJson = pyodide.runPython(`
+import ast, json
+
+def _analyze(src):
+    try:
+        tree = ast.parse(src)
+    except Exception as err:
+        return json.dumps({"validSyntax": False, "error": str(err)})
+
+    features = {
+        "validSyntax": True,
+        "statementCount": len(tree.body),
+        "hasFor": False,
+        "hasWhile": False,
+        "hasIf": False,
+        "hasFunctionDef": False,
+        "hasClassDef": False,
+        "hasTry": False,
+        "hasListComp": False,
+        "hasDictComp": False,
+        "hasLambda": False,
+        "hasYield": False,
+        "callsInput": False,
+        "callsPrint": False
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.For): features["hasFor"] = True
+        elif isinstance(node, ast.While): features["hasWhile"] = True
+        elif isinstance(node, ast.If): features["hasIf"] = True
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)): features["hasFunctionDef"] = True
+        elif isinstance(node, ast.ClassDef): features["hasClassDef"] = True
+        elif isinstance(node, ast.Try): features["hasTry"] = True
+        elif isinstance(node, ast.ListComp): features["hasListComp"] = True
+        elif isinstance(node, ast.DictComp): features["hasDictComp"] = True
+        elif isinstance(node, ast.Lambda): features["hasLambda"] = True
+        elif isinstance(node, (ast.Yield, ast.YieldFrom)): features["hasYield"] = True
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            if node.func.id == "input": features["callsInput"] = True
+            elif node.func.id == "print": features["callsPrint"] = True
+    return json.dumps(features)
+
+_analyze(_inspect_code)
+`);
+    return JSON.parse(rawJson);
+  } catch {
+    return null;
+  } finally {
+    try { pyodide.runPython('del _inspect_code, _analyze'); } catch (_) {}
+  }
+}
+
 // ── Run Python Code ──
-async function runPython(code, onOutput, onInput, inputBuffer = []) {
+async function runPython(code, onOutput, onInput, inputBuffer = [], options = {}) {
   if (!pyodide) throw new Error('Pyodide ยังไม่พร้อม');
 
-  const isRerun = inputBuffer.length > 0;
+  const isFirstRun = inputBuffer.length === 0;
+  // กำหนดค่า seed สำหรับสุ่มใหม่ต่อการกดรัน 1 ครั้ง แต่คงค่าเดิมไว้หากมีการ re-run เพื่อรอรับ input() หลายบรรทัด
+  const runSeed = (options.runSeed !== undefined && options.runSeed !== null)
+    ? options.runSeed
+    : Math.floor(Date.now() % 1000000000) + Math.floor(Math.random() * 100000);
 
-  // Set up output capture & mocked input in Python
   pyodide.globals.set('_input_queue_js', inputBuffer);
+  pyodide.globals.set('_pylearn_seed', runSeed);
+  pyodide.globals.set('_is_first_run', isFirstRun);
 
   try {
     pyodide.runPython(`
 import builtins
 import sys
 import time
+import random
 
 _output_lines = []
 _input_idx = [0]
@@ -170,14 +229,13 @@ _input_q = list(_input_queue_js)
 _start_time = time.time()
 _timeout = 2.5
 
-# Save original print and input only once (avoid saving fakes on re-runs)
 if not hasattr(builtins, '_orig_print_saved'):
     builtins._orig_print_saved = builtins.print
 if not hasattr(builtins, '_orig_input_saved'):
     builtins._orig_input_saved = builtins.input
 
-import random
-random.seed(42)
+# ใช้ seed ประจำรอบการกด Run (ไม่ล็อกตายตัวที่ 42 เพื่อให้เกมสุ่มเลขได้ผลจริงไม่ซ้ำกันทั้งห้อง)
+random.seed(int(_pylearn_seed))
 
 def _fake_print(*args, sep=' ', end='\\n', **kwargs):
     text = sep.join(str(a) for a in args) + end
@@ -191,7 +249,6 @@ def _fake_input(prompt=''):
         _input_idx[0] += 1
         _output_lines.append(val + '\\n')
         return val
-    # Use standard ValueError to guarantee string conversion and traceback visibility in JS
     raise ValueError("INPUT_NEEDED:" + str(prompt))
 
 builtins.print = _fake_print
@@ -247,41 +304,38 @@ _compiled = compile(_tree, filename="<exec>", mode="exec")
 try:
     exec(_compiled, globals())
 except ValueError as e:
-    # Catch input signal exception internally to keep CPython state clean and avoid JS trampoline crashes
     if str(e).startswith("INPUT_NEEDED:"):
         _input_needed = True
         _input_prompt = str(e).split("INPUT_NEEDED:")[1]
     else:
         raise e
     `);
-    
-    // Check if Python flagged that it needs input
+
     const isInputNeeded = pyodide.globals.get('_input_needed');
     if (isInputNeeded) {
       let prompt = pyodide.globals.get('_input_prompt') || '';
       prompt = prompt.replace(/^['"]|['"]$/g, '');
-      
+
       const partialLines = pyodide.globals.get('_output_lines').toJs();
       if (onOutput) onOutput(partialLines.join(''));
-      
-      // Restore print before re-running so the next setup can save correctly
+
       try {
         pyodide.runPython(`
 builtins.print = builtins._orig_print_saved
 builtins.input = builtins._orig_input_saved
 try:
     del _fake_print, _fake_input, _output_lines, _input_idx, _input_q, _start_time, _timeout
-    del _user_code, _tree, _LoopProtector, _compiled, _input_needed, _input_prompt
+    del _user_code, _tree, _LoopProtector, _compiled, _input_needed, _input_prompt, _pylearn_seed, _is_first_run
 except:
     pass
 `);
       } catch (_) {}
-      
+
       if (onInput) {
         const userInput = await onInput(prompt);
         inputBuffer.push(String(userInput));
-        // Re-run the script with the new input buffer
-        return runPython(code, onOutput, onInput, inputBuffer);
+        // ส่ง runSeed เดิมต่อไปเพื่อให้เลขสุ่มในรอบการรันเดียวกันไม่เปลี่ยนกลางคันหลังป้อน input()
+        return runPython(code, onOutput, onInput, inputBuffer, { ...options, runSeed });
       } else {
         return { success: false, output: "Error: Input required but no input handler provided." };
       }
@@ -292,8 +346,6 @@ except:
     return { success: true, output };
   } catch (e) {
     console.error("Python execution error:", e);
-    console.log("Traceback details:", e.message || String(e));
-    
     let errMsg = e.message || String(e);
 
     if (e && (e.type === 'TimeoutError' || e.message?.includes('timeout') || e.message?.includes('TimeoutError'))) {
@@ -303,8 +355,7 @@ except:
     if (errMsg.includes('PythonError:')) {
       errMsg = errMsg.split('PythonError:').pop().trim();
     }
-    
-    // Clean internal wrapper lines from traceback to show only student code errors
+
     const lines = errMsg.split('\n');
     const cleanLines = [];
     let isTraceback = false;
@@ -314,17 +365,15 @@ except:
         isTraceback = true;
         continue;
       }
-      if (line.includes('exec(_compiled') || 
-          line.includes('ast.parse') || 
+      if (line.includes('exec(_compiled') ||
+          line.includes('ast.parse') ||
           line.includes('_LoopProtector') ||
-          line.includes('ast.fix_missing_locations') || 
+          line.includes('ast.fix_missing_locations') ||
           line.includes('__import__')) {
         continue;
       }
-      if (isTraceback) {
-        if (line.includes('File "/lib/python') || line.includes('return compile(')) {
-          continue;
-        }
+      if (isTraceback && (line.includes('File "/lib/python') || line.includes('return compile('))) {
+        continue;
       }
       cleanLines.push(line);
     }
@@ -337,7 +386,7 @@ builtins.print = builtins._orig_print_saved
 builtins.input = builtins._orig_input_saved
 try:
     del _fake_print, _fake_input, _output_lines, _input_idx, _input_q, _start_time, _timeout
-    del _user_code, _tree, _LoopProtector, _compiled, _input_needed, _input_prompt
+    del _user_code, _tree, _LoopProtector, _compiled, _input_needed, _input_prompt, _pylearn_seed, _is_first_run
 except:
     pass
       `);

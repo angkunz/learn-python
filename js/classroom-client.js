@@ -39,15 +39,14 @@ const ClassroomClient = {
         exMap[exId] = true;
       });
 
-      // ตรวจสอบว่าทำครบทุกข้อในบทเรียนจริงหรือไม่ก่อนตั้งค่า done
       const lessonObj = (typeof getLessonById === 'function') ? getLessonById(p.lessonId) : null;
       const requiredEx = Array.isArray(lessonObj?.exercises) ? lessonObj.exercises : [];
       const hasAllExercises = requiredEx.length > 0
         ? requiredEx.every(ex => !!exMap[ex.id])
-        : true;
+        : !!p.completed;
 
       localProgress[p.lessonId] = {
-        done: !!(p.completed && hasAllExercises),
+        done: !!((p.completed || hasAllExercises) && hasAllExercises),
         exercises: exMap
       };
       totalXp += (p.xp || 0);
@@ -80,6 +79,9 @@ const ClassroomClient = {
     if (typeof syncCompleteButtonState === 'function') {
       syncCompleteButtonState();
     }
+    if (typeof enforceSequentialLessonAccess === 'function') {
+      enforceSequentialLessonAccess();
+    }
   },
 
   isInClassroom() {
@@ -105,7 +107,7 @@ const ClassroomClient = {
     }
   },
 
-  // ── API: Student Login (Existing Account) ──
+  // ── API: Student Login ──
   async login(studentIdCode, password) {
     const res = await fetch('/api/student/login', {
       method: 'POST',
@@ -121,7 +123,7 @@ const ClassroomClient = {
     return data;
   },
 
-  // ── API: Student Register (Step 1: Create Account) ──
+  // ── API: Student Register ──
   async register(studentIdCode, name, gradeClass, studentNumber, password, classroomCode = '') {
     const res = await fetch('/api/student/register', {
       method: 'POST',
@@ -133,11 +135,11 @@ const ClassroomClient = {
       throw new Error(data.error || 'ลงทะเบียนไม่สำเร็จ');
     }
     this.setSession(data);
-    this.applyProgress([]); // Brand new student starts with 0 XP & clean progress
+    this.applyProgress([]);
     return data;
   },
 
-  // ── API: Join Classroom with Code (Step 2) ──
+  // ── API: Join Classroom with Code ──
   async joinClassroom(code) {
     const session = this.getSession();
     if (!session || !session.token) {
@@ -158,7 +160,6 @@ const ClassroomClient = {
     session.classroom = data.classroom;
     session.hasClassroom = true;
     this.setSession(session);
-    // Refresh student progress from server
     await this.checkSession();
     return data;
   },
@@ -208,18 +209,13 @@ const ClassroomClient = {
     const session = this.getSession();
     if (!session || !session.token) return;
 
-    // ล็อกชั้นเซิร์ฟเวอร์ซิงค์: ห้ามส่ง completed = true หากยังทำโจทย์ย่อยในบทนั้นไม่ครบทุกข้อ
-    let verifiedCompleted = !!completed;
+    // ตรวจสอบซ้ำก่อนส่ง: สถานะ completed จะเป็น true ได้เมื่อทำครบทุกข้อในบทเรียนเท่านั้น
+    const allDoneNow = (typeof areAllExercisesDone === 'function') ? areAllExercisesDone(lessonId) : !!completed;
+    let verifiedCompleted = !!(completed || allDoneNow) && allDoneNow;
     let verifiedXp = xpEarned;
-    if (verifiedCompleted && typeof areAllExercisesDone === 'function') {
-      if (!areAllExercisesDone(lessonId)) {
-        verifiedCompleted = false;
-        // หากเป็นคำขอที่กดปุ่มจบบทเรียนโดยไม่มี exerciseId ให้ตัด XP โบนัสจบบทออก
-        if (!exerciseId) {
-          verifiedXp = 0;
-          return;
-        }
-      }
+
+    if (!allDoneNow && completed && !exerciseId) {
+      return;
     }
 
     try {
@@ -241,6 +237,15 @@ const ClassroomClient = {
           output
         })
       });
+
+      // อัปเดตตัวเลข XP บนเมนูโปรไฟล์นักเรียนให้ตรงกันทันที
+      if (typeof getXP === 'function') {
+        const latestXp = getXP();
+        const navCounter = document.getElementById('nav-xp-counter');
+        const menuCounter = document.getElementById('menu-student-xp');
+        if (navCounter) navCounter.textContent = latestXp;
+        if (menuCounter) menuCounter.textContent = latestXp;
+      }
     } catch (e) {
       console.warn('Classroom sync skipped or offline:', e.message);
     }
@@ -275,7 +280,6 @@ const ClassroomClient = {
     const navbar = document.querySelector('.navbar');
     if (!navbar) return;
 
-    // Clean up any legacy injected elements
     document.getElementById('classroom-banner-container')?.remove();
     document.getElementById('nav-student-pill')?.remove();
     navbar.querySelectorAll('.classroom-nav-pill').forEach(el => el.remove());
@@ -288,10 +292,8 @@ const ClassroomClient = {
       return;
     }
 
-    // Set classroom mode on body
     document.body.classList.add('is-classroom-mode');
 
-    // 1. In Classroom Mode: HIDE all redundant links in navbar
     if (apiKeyBtn) {
       apiKeyBtn.style.setProperty('display', 'none', 'important');
       apiKeyBtn.classList.add('hide-in-classroom');
@@ -303,13 +305,11 @@ const ClassroomClient = {
       playgroundActionLink.classList.add('hide-in-classroom');
     }
 
-    // Hide redundant navigation links (เข้าห้องเรียน, สำหรับครูผู้สอน)
     navbar.querySelectorAll('a[href*="join.html"], a[href*="teacher-login.html"]').forEach(el => {
       el.style.setProperty('display', 'none', 'important');
       el.classList.add('hide-in-classroom');
     });
 
-    // Ensure .nav-links has clean, relevant links for student
     const navLinks = navbar.querySelector('.nav-links');
     if (navLinks) {
       let lessonLink = navLinks.querySelector('a[href="lesson.html"]');
@@ -326,7 +326,6 @@ const ClassroomClient = {
     const studentLabel = student.studentNumber ? `เลขที่ ${student.studentNumber}: ${student.name}` : student.name;
     const currentXp = (window.getXP && typeof window.getXP === 'function') ? window.getXP() : (student.totalXp || 0);
 
-    // 2. Compact Classroom Badge right next to Logo
     let tag = navbar.querySelector('.nav-classroom-tag');
     if (!tag) {
       tag = document.createElement('div');
@@ -340,14 +339,12 @@ const ClassroomClient = {
     `;
     tag.title = `ครูผู้สอน: ${classroom.teacherName}`;
 
-    // 3. Compact Student Profile Dropdown in .nav-actions
     const navActions = navbar.querySelector('.nav-actions');
     if (navActions) {
       let dropdownWrap = navActions.querySelector('.nav-student-dropdown');
       if (!dropdownWrap) {
         dropdownWrap = document.createElement('div');
         dropdownWrap.className = 'nav-student-dropdown';
-        // Prepend before theme switch
         navActions.prepend(dropdownWrap);
       }
 
@@ -373,7 +370,7 @@ const ClassroomClient = {
             <span class="menu-info-val">${escapeHtml(classroom.name)} (${escapeHtml(classroom.code)})</span>
           </div>
           <div class="menu-info-row">
-            <span class="menu-info-lbl">👩‍🏫 ครูผู้สอน:</span>
+            <span class="menu-info-lbl">👩🏫 ครูผู้สอน:</span>
             <span class="menu-info-val">${escapeHtml(classroom.teacherName)}</span>
           </div>
           <div class="menu-divider"></div>
@@ -394,7 +391,6 @@ const ClassroomClient = {
     }
   },
 
-  // Helper: get active curriculum lessons
   getCurriculumLessons(allLessons) {
     const session = this.getSession();
     if (!session || !session.classroom || !session.classroom.curriculum) {
@@ -412,7 +408,6 @@ const ClassroomClient = {
     return !!(session?.classroom?.curriculum?.sequential);
   },
 
-  // Backward compatible alias
   renderHeaderBanner() {
     this.integrateNavbar();
   },
@@ -420,10 +415,10 @@ const ClassroomClient = {
   async confirmLeave() {
     const ok = window.pylearnConfirm
       ? await window.pylearnConfirm(
-        'คุณต้องการออกจากห้องเรียนนี้หรือไม่?\n(ความคืบหน้าและการส่งงานของคุณจะยังคงถูกบันทึกบนระบบของคุณครูอย่างปลอดภัย)',
-        'ออกจากห้องเรียน',
-        { type: 'warning', confirmText: 'ออกจากห้องเรียน', cancelText: 'อยู่ต่อ' }
-      )
+          'คุณต้องการออกจากห้องเรียนนี้หรือไม่?\n(ความคืบหน้าและการส่งงานของคุณจะยังคงถูกบันทึกบนระบบของคุณครูอย่างปลอดภัย)',
+          'ออกจากห้องเรียน',
+          { type: 'warning', confirmText: 'ออกจากห้องเรียน', cancelText: 'อยู่ต่อ' }
+        )
       : confirm('คุณต้องการออกจากห้องเรียนนี้หรือไม่? (ความคืบหน้าที่คุณทำไว้จะยังคงถูกบันทึกบนระบบของคุณครู)');
     if (ok) {
       this.clearSession();
@@ -435,26 +430,14 @@ const ClassroomClient = {
   }
 };
 
-// Close dropdown on outside click
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.nav-student-dropdown')) {
     document.getElementById('nav-student-menu')?.classList.remove('open');
   }
 });
 
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
 window.ClassroomClient = ClassroomClient;
 
-// Auto-run integration on load if DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => ClassroomClient.integrateNavbar());
 } else {

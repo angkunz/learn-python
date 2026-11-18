@@ -1,5 +1,5 @@
 // ================================================
-// App — State, Progress, Navigation
+// App — State, Progress, Validation & Navigation
 // ================================================
 
 // ── HTML Escape Helper (XSS Prevention) ──
@@ -16,7 +16,7 @@ function escapeHtml(str) {
 const PROGRESS_KEY = 'python_progress_v2';
 const XP_KEY = 'python_xp';
 
-// ── Progress & Strict 3-Exercise Completion Guard ──
+// ── Progress & Strict 3-Exercise Completion System ──
 function getProgress() {
   try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); }
   catch { return {}; }
@@ -25,10 +25,6 @@ function saveProgress(data) {
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
 }
 
-/**
- * ตรวจสอบความคืบหน้ารายข้อของบทเรียนที่ระบุ
- * คืนค่าจำนวนข้อทั้งหมด, จำนวนข้อที่ผ่านแล้ว, รายการข้อที่ยังค้าง และสถานะว่าครบทุกข้อหรือยัง
- */
 function getLessonExerciseStats(lessonId) {
   const lesson = (typeof getLessonById === 'function') ? getLessonById(lessonId) : null;
   const exercises = Array.isArray(lesson?.exercises) ? lesson.exercises : [];
@@ -48,7 +44,6 @@ function getLessonExerciseStats(lessonId) {
 
   const total = exercises.length;
   const doneCount = completedIds.length;
-  // หากบทเรียนมีแบบฝึกหัด ต้องทำผ่านครบทุกข้อเท่านั้น (เช่น 3/3 ข้อ)
   const allDone = total > 0 ? doneCount >= total : true;
 
   return {
@@ -64,11 +59,78 @@ function areAllExercisesDone(lessonId) {
   return getLessonExerciseStats(lessonId).allDone;
 }
 
+/**
+ * ตรวจสอบความถูกต้องของโค้ดและผลรันระดับรายข้อ (ป้องกันโค้ดว่าง โค้ดค้าง # TODO และการพิมพ์ print ทางลัด)
+ */
+function validateExerciseSubmission(lessonId, exId, userCode, runResult) {
+  const lesson = (typeof getLessonById === 'function') ? getLessonById(lessonId) : null;
+  const ex = lesson?.exercises?.find(item => item.id === exId);
+
+  if (!runResult || !runResult.success) {
+    return { passed: false, reason: 'โค้ดยังมีข้อผิดพลาด (Error) กรุณาแก้ไขก่อนส่งตรวจ' };
+  }
+
+  const stripComments = (src) => String(src || '')
+    .split('\n')
+    .map(l => l.replace(/#.*$/, '').trim())
+    .filter(Boolean)
+    .join('\n');
+
+  const cleanUser = stripComments(userCode);
+  const cleanStarter = stripComments(ex?.starterCode || '');
+
+  if (!cleanUser) {
+    return { passed: false, reason: 'กรุณาเขียนโค้ดคำสั่ง Python ก่อนส่งตรวจ' };
+  }
+  if (userCode.includes('???') || /#\s*TODO/i.test(userCode)) {
+    return { passed: false, reason: 'ยังเติมโค้ดในจุด # TODO หรือ ??? ไม่ครบถ้วน' };
+  }
+  if (cleanStarter && cleanUser === cleanStarter) {
+    return { passed: false, reason: 'คุณยังไม่ได้แก้ไขหรือเติมโค้ดเพิ่มเติมจากโครงร่างตั้งต้น' };
+  }
+
+  // ตรวจโครงสร้างคำสั่งบังคับตามเฉลยต้นแบบ (ป้องกันการเขียน print() คำตอบลอยๆ)
+  if (ex?.solution) {
+    const sol = ex.solution;
+    const astInfo = (typeof analyzePythonStructure === 'function') ? analyzePythonStructure(userCode) : null;
+
+    const checks = [
+      { need: /\binput\s*\(/.test(sol), ok: astInfo ? astInfo.callsInput : /\binput\s*\(/.test(cleanUser), msg: 'โจทย์ข้อนี้กำหนดให้รับข้อมูลด้วยคำสั่ง input()' },
+      { need: /\bfor\s+\w+\s+in\b/.test(sol) && !/\[.+\bfor\b.+\]/.test(sol), ok: astInfo ? (astInfo.hasFor || astInfo.hasListComp) : /\bfor\b/.test(cleanUser), msg: 'โจทย์ข้อนี้ต้องการให้ฝึกใช้ลูป for' },
+      { need: /\bwhile\s+/.test(sol), ok: astInfo ? astInfo.hasWhile : /\bwhile\b/.test(cleanUser), msg: 'โจทย์ข้อนี้ต้องการให้ฝึกใช้ลูป while' },
+      { need: /\bdef\s+\w+/.test(sol), ok: astInfo ? astInfo.hasFunctionDef : /\bdef\s+\w+/.test(cleanUser), msg: 'โจทย์ข้อนี้กำหนดให้สร้างฟังก์ชันด้วย def' },
+      { need: /\bclass\s+\w+/.test(sol), ok: astInfo ? astInfo.hasClassDef : /\bclass\s+\w+/.test(cleanUser), msg: 'โจทย์ข้อนี้กำหนดให้สร้างคลาสด้วย class' },
+      { need: /\btry\s*:/.test(sol), ok: astInfo ? astInfo.hasTry : /\btry\s*:/.test(cleanUser), msg: 'โจทย์ข้อนี้กำหนดให้ดักจับข้อผิดพลาดด้วย try / except' },
+      { need: /\byield\b/.test(sol), ok: astInfo ? astInfo.hasYield : /\byield\b/.test(cleanUser), msg: 'โจทย์ข้อนี้กำหนดให้สร้าง Generator ด้วยคำสั่ง yield' }
+    ];
+
+    for (const rule of checks) {
+      if (rule.need && !rule.ok) {
+        return { passed: false, reason: rule.msg };
+      }
+    }
+  }
+
+  // ตรวจเทียบ expectedOutput (กรณีโจทย์มีผลลัพธ์ตายตัว)
+  const expected = String(ex?.expectedOutput || '').trim();
+  const actual = String(runResult.output || '').trim();
+
+  if (expected) {
+    const norm = (s) => s.split('\n').map(line => line.trimEnd()).join('\n').trim();
+    if (norm(actual) !== norm(expected)) {
+      return { passed: false, reason: 'ผลลัพธ์บนหน้าจอยังไม่ตรงตามที่โจทย์กำหนด' };
+    }
+  } else if (!actual) {
+    return { passed: false, reason: 'โปรแกรมยังไม่มีข้อความแสดงผลออกทางหน้าจอ (print)' };
+  }
+
+  return { passed: true, reason: 'ผ่านเกณฑ์ครบถ้วน' };
+}
+
 function markLessonDone(lessonId, options = {}) {
-  const { silent = false } = options;
+  const { silent = false, autoTriggered = false } = options;
   const stats = getLessonExerciseStats(lessonId);
 
-  // บังคับต้องทำแบบฝึกหัดผ่านครบทุกข้อก่อนจึงจะบันทึกจบบทเรียนได้
   if (!stats.allDone) {
     if (!silent) {
       const remainText = stats.missingNumbers.map(n => `ข้อที่ ${n}`).join(', ');
@@ -84,43 +146,54 @@ function markLessonDone(lessonId, options = {}) {
   }
 
   const p = getProgress();
-  if (!p[lessonId]) {
-    p[lessonId] = {};
-  }
+  if (!p[lessonId]) p[lessonId] = {};
+
   if (!p[lessonId].done) {
     p[lessonId].done = true;
     p[lessonId].ts = Date.now();
     saveProgress(p);
     addXP(50);
     syncCompleteButtonState(lessonId);
+    if (typeof renderSidebar === 'function') renderSidebar();
+
+    // ซิงค์สถานะจบบทเรียน (+50 XP) ขึ้นเซิร์ฟเวอร์ห้องเรียนอัตโนมัติ
+    if (window.ClassroomClient && ClassroomClient.isInClassroom()) {
+      ClassroomClient.syncProgress(lessonId, null, true, 50, '', 'completed', null, null, '');
+    }
+
+    if (autoTriggered && !silent) {
+      celebrate();
+      showToast(
+        `ยอดเยี่ยม! คุณทำแบบฝึกหัดครบทั้ง ${stats.total}/${stats.total} ข้อ ระบบบันทึกผ่านบทเรียนและมอบโบนัส +50 XP ให้เรียบร้อยแล้ว`,
+        'success',
+        4800,
+        'ผ่านบทเรียนสมบูรณ์ 🎉'
+      );
+    }
     return true;
   }
+
   syncCompleteButtonState(lessonId);
   return false;
 }
 
-function markExerciseDone(lessonId, exId) {
+function markExerciseDone(lessonId, exId, options = {}) {
+  const { autoCompleteLesson = true } = options;
   const p = getProgress();
   if (!p[lessonId]) p[lessonId] = {};
   if (!p[lessonId].exercises) p[lessonId].exercises = {};
+
   const isNew = !p[lessonId].exercises[exId];
   p[lessonId].exercises[exId] = true;
   saveProgress(p);
   if (isNew) addXP(20);
 
-  // อัปเดตสถานะปุ่ม "เรียนจบบทนี้" ทันทีเมื่อผ่านแบบฝึกหัดเพิ่ม
   syncCompleteButtonState(lessonId);
 
-  if (isNew) {
-    const stats = getLessonExerciseStats(lessonId);
-    if (stats.total > 0 && stats.allDone && !p[lessonId]?.done) {
-      showToast(
-        `ทำแบบฝึกหัดครบทั้ง ${stats.total}/${stats.total} ข้อแล้ว! กดปุ่ม "เรียนจบบทนี้" ด้านล่างเพื่อรับ +50 XP ได้เลย`,
-        'success',
-        4500,
-        'ปลดล็อกจบบทเรียนแล้ว 🔓'
-      );
-    }
+  // Auto-Complete บทเรียนทันทีเมื่อทำผ่านครบทุกข้อ (ป้องกันเด็กทำครบ 3 ข้อแล้วลืมกดปุ่มท้ายหน้า)
+  const stats = getLessonExerciseStats(lessonId);
+  if (autoCompleteLesson && stats.total > 0 && stats.allDone && !p[lessonId]?.done) {
+    markLessonDone(lessonId, { autoTriggered: true });
   }
   return isNew;
 }
@@ -141,7 +214,7 @@ function getLevelProgress(level) {
   return { done, total: lessons.length, pct: lessons.length ? Math.round(done / lessons.length * 100) : 0 };
 }
 
-// ── UI Lock Sync for .btn-complete on lesson.html ──
+// ── UI Lock & Sequential Guard on lesson.html ──
 function getCurrentPageLessonId() {
   if (window.currentLesson && window.currentLesson.id) {
     return window.currentLesson.id;
@@ -161,6 +234,36 @@ function getCurrentPageLessonId() {
     return LESSONS_DATA[0].id;
   }
   return null;
+}
+
+function enforceSequentialLessonAccess() {
+  if (!window.location.pathname.endsWith('lesson.html')) return;
+  if (!window.ClassroomClient || !ClassroomClient.isInClassroom() || !ClassroomClient.isSequential()) return;
+  if (typeof LESSONS_DATA === 'undefined' || !Array.isArray(LESSONS_DATA)) return;
+
+  const currentId = getCurrentPageLessonId();
+  if (!currentId) return;
+
+  const activeLessons = ClassroomClient.getCurriculumLessons(LESSONS_DATA);
+  const targetIdx = activeLessons.findIndex(l => l.id === currentId);
+  if (targetIdx <= 0) return;
+
+  // ค้นหาบทเรียนแรกสุดที่ยังทำไม่ผ่านครบทุกข้อ
+  for (let i = 0; i < targetIdx; i++) {
+    const prevLesson = activeLessons[i];
+    if (!isLessonDone(prevLesson.id)) {
+      showToast(
+        `ห้องเรียนนี้กำหนดให้เรียนตามลำดับ กรุณาทำบท "${prevLesson.title}" ให้ครบทั้ง 3 ข้อก่อนครับ`,
+        'warning',
+        3800,
+        'ล็อกลำดับบทเรียน 🔒'
+      );
+      setTimeout(() => {
+        window.location.replace(`lesson.html?id=${encodeURIComponent(prevLesson.id)}`);
+      }, 900);
+      return;
+    }
+  }
 }
 
 function injectCompletionLockStyles() {
@@ -212,7 +315,7 @@ function syncCompleteButtonState(targetLessonId = null) {
       btn.classList.add('is-locked');
       btn.setAttribute('aria-disabled', 'true');
       btn.innerHTML = `🔒 ทำแบบฝึกหัดให้ครบ (${stats.doneCount}/${stats.total} ข้อ)`;
-      btn.title = `ต้องทำแบบฝึกหัดผ่านครบทั้ง ${stats.total} ข้อก่อนจึงจะกดจบบทเรียนได้`;
+      btn.title = `ต้องทำแบบฝึกหัดผ่านครบทั้ง ${stats.total} ข้อก่อนจึงจะจบบทเรียนได้`;
     } else {
       btn.classList.remove('is-locked');
       btn.removeAttribute('aria-disabled');
@@ -238,6 +341,21 @@ function updateXPDisplay() {
 
 // ── Navigation ──
 function navigateToLesson(lessonId) {
+  if (window.ClassroomClient && ClassroomClient.isInClassroom() && ClassroomClient.isSequential() && typeof LESSONS_DATA !== 'undefined') {
+    const activeLessons = ClassroomClient.getCurriculumLessons(LESSONS_DATA);
+    const targetIdx = activeLessons.findIndex(l => l.id === lessonId);
+    for (let i = 0; i < targetIdx; i++) {
+      if (!isLessonDone(activeLessons[i].id)) {
+        showToast(
+          `กรุณาเรียนและทำแบบฝึกหัดบท "${activeLessons[i].title}" ให้ครบ 3 ข้อก่อนข้ามไปบทถัดไป`,
+          'warning',
+          3800,
+          'เรียนตามลำดับ 🔒'
+        );
+        return;
+      }
+    }
+  }
   window.location.href = `lesson.html?id=${lessonId}`;
 }
 function navigateToIndex() {
@@ -278,16 +396,15 @@ function showToast(message, type = 'info', duration = 3500, title = null) {
     document.body.appendChild(container);
   }
 
-  // Keep at most 3 simultaneous toasts to avoid clutter
   while (container.children.length >= 3) {
     container.firstElementChild.remove();
   }
 
   const typeConfig = {
     success: { icon: '✨', tag: 'สำเร็จ', defaultTitle: 'เยี่ยมมาก!' },
-    error: { icon: '🚨', tag: 'ข้อผิดพลาด', defaultTitle: 'เกิดข้อผิดพลาด' },
+    error:   { icon: '🚨', tag: 'ข้อผิดพลาด', defaultTitle: 'เกิดข้อผิดพลาด' },
     warning: { icon: '⚠️', tag: 'คำเตือน', defaultTitle: 'ข้อควรระวัง' },
-    info: { icon: '💡', tag: 'แจ้งเตือน', defaultTitle: 'ข้อมูล' }
+    info:    { icon: '💡', tag: 'แจ้งเตือน', defaultTitle: 'ข้อมูล' }
   };
   const cfg = typeConfig[type] || typeConfig.info;
 
@@ -333,7 +450,6 @@ function showToast(message, type = 'info', duration = 3500, title = null) {
     dismiss();
   });
 
-  // Progress bar countdown
   if (progressBar) {
     progressBar.style.transition = `width ${duration}ms linear`;
     requestAnimationFrame(() => {
@@ -343,7 +459,6 @@ function showToast(message, type = 'info', duration = 3500, title = null) {
 
   timer = setTimeout(dismiss, duration);
 
-  // Pause on hover
   toast.addEventListener('mouseenter', () => {
     if (timer) clearTimeout(timer);
     if (progressBar) {
@@ -367,7 +482,7 @@ function showToast(message, type = 'info', duration = 3500, title = null) {
 }
 
 // ── PyLearn Modern Dialog System (Alert & Confirm Modals) ──
-window.pylearnAlert = function (message, title = 'แจ้งเตือน', type = 'info') {
+window.pylearnAlert = function(message, title = 'แจ้งเตือน', type = 'info') {
   return new Promise((resolve) => {
     const existing = document.getElementById('pylearn-dialog-overlay');
     if (existing) existing.remove();
@@ -418,7 +533,7 @@ window.pylearnAlert = function (message, title = 'แจ้งเตือน', 
   });
 };
 
-window.pylearnConfirm = function (message, title = 'ยืนยันการทำรายการ', options = {}) {
+window.pylearnConfirm = function(message, title = 'ยืนยันการทำรายการ', options = {}) {
   return new Promise((resolve) => {
     const existing = document.getElementById('pylearn-dialog-overlay');
     if (existing) existing.remove();
@@ -512,9 +627,8 @@ function createInputDialog(promptText) {
   });
 }
 
-// ── Theme Toggle & Lesson Completion Button Guard ──
+// ── Theme Toggle, Sequential Guard & Completion Button Guard ──
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Theme Toggle
   const themeCheckboxes = document.querySelectorAll('.theme-switch-cb');
   const currentTheme = localStorage.getItem('theme') || 'light';
 
@@ -542,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 2. Intercept premature clicks on .btn-complete (Capturing Phase)
+  // ดักปุ่ม .btn-complete ไม่ให้กดข้ามหากยังทำไม่ครบ 3 ข้อ
   document.addEventListener('click', (e) => {
     const completeBtn = e.target.closest('.btn-complete, #btn-complete, #complete-btn');
     if (!completeBtn) return;
@@ -571,7 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, true);
 
-  // 3. Auto-sync .btn-complete whenever lesson DOM renders or changes
+  enforceSequentialLessonAccess();
   syncCompleteButtonState();
 
   const lessonObserverTarget = document.querySelector('.lesson-main') || document.body;

@@ -524,14 +524,29 @@
           statusEl.className = 'output-status success';
           statusEl.textContent = '✅ สำเร็จ';
 
-          // Sync progress to classroom server
-          if (window.ClassroomClient) {
-            window.ClassroomClient.syncProgress(lessonId, exId, true, 20, code, 'pass', null, null, result.output || '');
-          }
+          // ตรวจสอบความถูกต้องของโค้ดและผลรันระดับรายข้อ (ป้องกันโค้ดว่าง # TODO และ print คำตอบลอยๆ)
+          const check = validateExerciseSubmission(lessonId, exId, code, result);
+          if (check.passed) {
+            const isFirstPass = markExerciseDone(lessonId, exId);
+            if (window.ClassroomClient && ClassroomClient.isInClassroom()) {
+              ClassroomClient.syncProgress(
+                lessonId,
+                exId,
+                areAllExercisesDone(lessonId),
+                isFirstPass ? 20 : 0,
+                code,
+                'passed',
+                null,
+                null,
+                result.output || ''
+              );
+            }
 
-          // Auto-mark exercise done on successful run
-          if (markExerciseDone(lessonId, exId)) {
-            showToast(`+20 XP ทำโจทย์ "${currentLesson.exercises.find(e => e.id === exId)?.title}" สำเร็จ!`, 'success');
+            if (isFirstPass) {
+              const exObj = currentLesson.exercises.find(e => e.id === exId);
+              showToast(`+20 XP ทำโจทย์ "${exObj?.title || ''}" สำเร็จ!`, 'success');
+            }
+
             // Update badge UI
             const exTitle = document.querySelector(`#ex-card-${exId} h3`);
             if (exTitle && !exTitle.innerHTML.includes('✅')) {
@@ -541,6 +556,8 @@
               exTitle.parentNode.appendChild(badge);
             }
             renderSidebar();
+          } else {
+            showToast(check.reason, 'warning', 4000, 'ยังไม่ผ่านเกณฑ์ข้อนี้ 💡');
           }
         } else {
           outputEl.className = 'output-content error';
@@ -551,7 +568,7 @@
           // Detect error type for classroom teacher analytics
           const errMatch = (result.output || '').match(/([a-zA-Z0-9_]+Error):/);
           const errorType = errMatch ? errMatch[1] : 'RuntimeError';
-          if (window.ClassroomClient) {
+          if (window.ClassroomClient && ClassroomClient.isInClassroom()) {
             window.ClassroomClient.syncProgress(lessonId, exId, false, 0, code, 'fail', errorType, (result.output || '').slice(0, 300), result.output || '');
           }
         }
@@ -654,7 +671,46 @@
         // Use the new detailed renderer
         renderAIResult(`ai-result-${exId}`, fb);
 
-        if (fb.score >= 80) celebrate();
+        // ตรวจผลการประเมินจาก AI ร่วมกับ validateExerciseSubmission (เกณฑ์ AI >= 70, ไม่มี Critical Bug)
+        const AI_PASS_SCORE = 70;
+        const structCheck = validateExerciseSubmission(lessonId, exId, code, {
+          success: true,
+          output: lastRunOutput[exId] || 'AI_CHECK'
+        });
+        const hasCriticalBug = Array.isArray(fb?.bugs) &&
+          fb.bugs.some(b => String(b.severity).toLowerCase() === 'high' || String(b.severity).toLowerCase() === 'critical');
+
+        if (fb.score >= AI_PASS_SCORE && !hasCriticalBug && structCheck.passed) {
+          const isFirstPass = markExerciseDone(lessonId, exId);
+          if (window.ClassroomClient && ClassroomClient.isInClassroom()) {
+            ClassroomClient.syncProgress(
+              lessonId,
+              exId,
+              areAllExercisesDone(lessonId),
+              isFirstPass ? 20 : 0,
+              code,
+              'passed',
+              null,
+              null,
+              lastRunOutput[exId] || ''
+            );
+          }
+          if (isFirstPass) {
+            const exObj = currentLesson.exercises.find(e => e.id === exId);
+            showToast(`+20 XP AI โค้ชประเมินผ่านข้อ "${exObj?.title || ''}" (${fb.score}/100)`, 'success');
+          }
+          const exTitle = document.querySelector(`#ex-card-${exId} h3`);
+          if (exTitle && !exTitle.innerHTML.includes('✅')) {
+            const badge = document.createElement('span');
+            badge.style.cssText = 'color:var(--green);font-size:0.85rem;font-weight:700;margin-left:8px;';
+            badge.textContent = '✅ ทำแล้ว';
+            exTitle.parentNode.appendChild(badge);
+          }
+          renderSidebar();
+          if (fb.score >= 80) celebrate();
+        } else if (!structCheck.passed) {
+          showToast(structCheck.reason, 'warning', 4200, 'โครงสร้างโค้ดยังไม่ครบตามโจทย์');
+        }
 
       } catch (e) {
         const isClassroom = window.ClassroomClient && window.ClassroomClient.isInClassroom();

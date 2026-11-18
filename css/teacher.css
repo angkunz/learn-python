@@ -661,6 +661,11 @@
 }
 
 .status-dot.completed {
+  width: 22px;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 6px;
+  font-weight: 800;
   background: var(--green);
   color: #ffffff;
 }
@@ -670,10 +675,22 @@
   color: var(--ink);
 }
 
+.status-dot.has-fraction {
+  width: auto;
+  min-width: 28px;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
 .status-dot.empty {
   background: var(--bg-alt);
   border-color: var(--border);
-  color: transparent;
+  color: var(--text-muted);
   box-shadow: none;
 }
 

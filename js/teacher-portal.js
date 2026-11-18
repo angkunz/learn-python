@@ -320,6 +320,32 @@ async function loadClassroomMatrix(id) {
   }
 }
 
+function renderLessonProgressBadge(progressRecord, totalExercises = 3, lessonTitle = '') {
+  if (!progressRecord) {
+    return `<span class="status-dot empty" title="${escapeHtml(lessonTitle)}: ยังไม่เริ่มเรียน (0/${totalExercises} ข้อ)">-</span>`;
+  }
+
+  const doneList = Array.isArray(progressRecord.exercisesCompleted)
+    ? progressRecord.exercisesCompleted
+    : (Array.isArray(progressRecord.exercises_completed) ? progressRecord.exercises_completed : []);
+  const doneCount = doneList.length;
+  const isFullPass = !!(progressRecord.completed && doneCount >= totalExercises) || doneCount >= totalExercises;
+
+  if (isFullPass) {
+    return `<span class="status-dot completed" title="${escapeHtml(lessonTitle)}: ผ่านครบทั้งบทเรียนแล้ว (${totalExercises}/${totalExercises} ข้อ)">✓</span>`;
+  }
+
+  if (doneCount > 0) {
+    return `<span class="status-dot in-progress has-fraction" title="${escapeHtml(lessonTitle)}: กำลังทำ: ผ่านแล้ว ${doneCount} จาก ${totalExercises} ข้อ">${doneCount}/${totalExercises}</span>`;
+  }
+
+  if (progressRecord.attempts > 0) {
+    return `<span class="status-dot in-progress" title="${escapeHtml(lessonTitle)}: เริ่มทำแล้ว แต่ยังไม่ผ่านข้อใด (0/${totalExercises} ข้อ)">⏳</span>`;
+  }
+
+  return `<span class="status-dot empty" title="${escapeHtml(lessonTitle)}: เปิดดูบทเรียนแล้ว แต่ยังไม่ผ่านแบบฝึกหัด (0/${totalExercises} ข้อ)">-</span>`;
+}
+
 function renderMatrixTable(students) {
   const tbody = document.getElementById('matrix-table-body');
   if (!tbody) return;
@@ -350,9 +376,8 @@ function renderMatrixTable(students) {
     if (activeLessons.length > 0) {
       dotsHtml = activeLessons.map(l => {
         const prog = s.progress && s.progress[l.id];
-        if (prog && prog.completed) return `<span class="status-dot completed" title="${l.title}: สำเร็จแล้ว">✓</span>`;
-        if (prog && prog.attempts > 0) return `<span class="status-dot in-progress" title="${l.title}: กำลังทำ">⏳</span>`;
-        return `<span class="status-dot empty" title="${l.title}: ยังไม่เริ่ม">•</span>`;
+        const exCount = (l.exercises && l.exercises.length) ? l.exercises.length : 3;
+        return renderLessonProgressBadge(prog, exCount, l.title);
       }).join('');
     } else {
       dotsHtml = `<span>${s.completed_lessons_count || 0} บท</span>`;

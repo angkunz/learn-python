@@ -532,19 +532,22 @@ app.get('/api/teacher/classrooms/:id/matrix', authenticateTeacher, async (req, r
 
     // Get all progress rows for this classroom
     const progressRows = await db.prepare(`
-      SELECT student_id, lesson_id, completed, xp, attempts, updated_at
+      SELECT student_id, lesson_id, completed, xp, attempts, exercises_completed, updated_at
       FROM student_progress
       WHERE classroom_id = ?
     `).all(id);
 
-    // Map progress by student_id -> { lesson_id: { completed, xp, attempts } }
+    // Map progress by student_id -> { lesson_id: { completed, xp, attempts, exercisesCompleted } }
     const progressMap = {};
     progressRows.forEach(row => {
+      let exList = [];
+      try { exList = JSON.parse(row.exercises_completed || '[]'); } catch (_) {}
       if (!progressMap[row.student_id]) progressMap[row.student_id] = {};
       progressMap[row.student_id][row.lesson_id] = {
         completed: row.completed === 1,
         xp: row.xp,
-        attempts: row.attempts
+        attempts: row.attempts,
+        exercisesCompleted: exList
       };
     });
 
@@ -1095,11 +1098,11 @@ app.post('/api/student/progress', authenticateStudent, async (req, res) => {
   const student = req.student;
   const { 
     lessonId, 
-    exerciseId = 'ex_1', 
+    exerciseId = null, 
     completed = false, 
     xpEarned = 0, 
     code = '', 
-    status = 'pass', // 'pass' or 'fail'
+    status = 'pass', // 'pass' or 'passed' or 'fail'
     errorType = null, 
     errorMessage = null, 
     output = '' 
@@ -1109,38 +1112,61 @@ app.post('/api/student/progress', authenticateStudent, async (req, res) => {
     return res.status(400).json({ error: 'Missing lessonId' });
   }
 
+  const REQUIRED_EXERCISES_PER_LESSON = 3;
+  const XP_PER_EXERCISE = 20;
+  const XP_LESSON_BONUS = 50;
+
+  function computeVerifiedLessonProgress(existingExercises = [], incomingExerciseId = null, runStatus = '') {
+    const completedSet = new Set(Array.isArray(existingExercises) ? existingExercises : []);
+
+    const isPassed = runStatus === 'passed' || runStatus === 'pass' || runStatus === 'completed';
+    if (incomingExerciseId && isPassed) {
+      completedSet.add(String(incomingExerciseId));
+    }
+
+    const exercisesCompleted = Array.from(completedSet);
+    const verifiedCompleted = exercisesCompleted.length >= REQUIRED_EXERCISES_PER_LESSON;
+    const verifiedLessonXp = (exercisesCompleted.length * XP_PER_EXERCISE) +
+      (verifiedCompleted ? XP_LESSON_BONUS : 0);
+
+    return {
+      exercisesCompleted,
+      completed: verifiedCompleted ? 1 : 0,
+      xp: verifiedLessonXp
+    };
+  }
+
   try {
     // 1. Log code submission history for Teacher code inspector & error analytics
-    const subId = 'sub_' + crypto.randomBytes(8).toString('hex');
-    await db.prepare(`
-      INSERT INTO code_submissions (id, student_id, classroom_id, lesson_id, exercise_id, code, status, error_type, error_message, output)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(subId, student.id, student.classroom_id, lessonId, exerciseId, code, status, errorType, errorMessage, output);
+    if (code || exerciseId) {
+      const subId = 'sub_' + crypto.randomBytes(8).toString('hex');
+      await db.prepare(`
+        INSERT INTO code_submissions (id, student_id, classroom_id, lesson_id, exercise_id, code, status, error_type, error_message, output)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(subId, student.id, student.classroom_id, lessonId, exerciseId || 'ex_1', code, status, errorType, errorMessage, output);
+    }
 
-    // 2. Upsert student_progress
+    // 2. Upsert student_progress with verified values
     const existing = await db.prepare('SELECT * FROM student_progress WHERE student_id = ? AND lesson_id = ?').get(student.id, lessonId);
     
     if (existing) {
-      let exList = JSON.parse(existing.exercises_completed || '[]');
-      if (status === 'pass' && !exList.includes(exerciseId)) {
-        exList.push(exerciseId);
-      }
-      const isComplete = (existing.completed === 1 || completed) ? 1 : 0;
-      const updatedXp = existing.xp + (xpEarned || 0);
+      const existingExList = JSON.parse(existing.exercises_completed || '[]');
+      const verified = computeVerifiedLessonProgress(existingExList, exerciseId, status);
       const attempts = existing.attempts + 1;
 
       await db.prepare(`
         UPDATE student_progress 
         SET completed = ?, xp = ?, exercises_completed = ?, last_exercise_id = ?, attempts = ?, updated_at = datetime('now', 'localtime')
         WHERE id = ?
-      `).run(isComplete, updatedXp, JSON.stringify(exList), exerciseId, attempts, existing.id);
+      `).run(verified.completed, verified.xp, JSON.stringify(verified.exercisesCompleted), exerciseId || existing.last_exercise_id, attempts, existing.id);
     } else {
       const progId = 'prg_' + crypto.randomBytes(8).toString('hex');
-      const exList = (status === 'pass') ? [exerciseId] : [];
+      const verified = computeVerifiedLessonProgress([], exerciseId, status);
+
       await db.prepare(`
         INSERT INTO student_progress (id, student_id, classroom_id, lesson_id, completed, xp, exercises_completed, last_exercise_id, attempts)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
-      `).run(progId, student.id, student.classroom_id, lessonId, completed ? 1 : 0, xpEarned || 0, JSON.stringify(exList), exerciseId);
+      `).run(progId, student.id, student.classroom_id, lessonId, verified.completed, verified.xp, JSON.stringify(verified.exercisesCompleted), exerciseId || 'ex_1');
     }
 
     res.json({ success: true });
