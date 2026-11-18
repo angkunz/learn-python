@@ -396,6 +396,23 @@ function filterMatrixStudents() {
   renderMatrixTable(filtered);
 }
 
+function formatThaiDateTime(isoStr) {
+  if (!isoStr) return '-';
+  try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const day = d.getDate();
+    const month = months[d.getMonth()];
+    const year = d.getFullYear() + 543;
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${day} ${month} ${year} ${hours}:${mins} น.`;
+  } catch {
+    return isoStr;
+  }
+}
+
 // ── Individual Student Diagnostics Modal ──
 async function openStudentDiagnosticsModal(studentId) {
   const modal = document.getElementById('student-modal');
@@ -410,76 +427,103 @@ async function openStudentDiagnosticsModal(studentId) {
     const { student, diagnosis, recentSubmissions, studentErrors, aiQueries } = data;
 
     body.innerHTML = `
-      <div style="border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-        <div>
-          <h2 style="margin:0 0 4px;font-size:1.3rem;color:var(--text-primary);">
-            👤 ${escapeHtml(student.name)}
-          </h2>
-          <div style="font-size:0.88rem;color:var(--cyan);font-weight:600;margin-bottom:4px;">
-            เลขประจำตัว: ${student.student_id_code || '-'} | ชั้น: ${student.grade_class || '-'} | เลขที่: ${student.student_number || '-'}
-          </div>
-          <div style="font-size:0.85rem;color:var(--text-secondary);">
-            สะสม <b>${student.total_xp} XP</b> | ผ่านแล้ว <b>${student.completed_lessons_count} บทเรียน</b> | ใช้งานล่าสุด: ${student.last_active || '-'}
+      <div class="student-modal-header">
+        <div class="student-profile-left">
+          <div class="student-avatar-badge">👤</div>
+          <div>
+            <h2 style="margin:0 0 2px;font-size:1.35rem;font-weight:800;color:var(--text-primary);">
+              ${escapeHtml(student.name)}
+            </h2>
+            <div class="student-meta-pills">
+              <span class="student-meta-pill">🆔 ${student.student_id_code || '-'}</span>
+              <span class="student-meta-pill">🏫 ชั้น: ${student.grade_class || '-'}</span>
+              <span class="student-meta-pill">🔢 เลขที่: ${student.student_number || '-'}</span>
+            </div>
+            <div style="font-size:0.84rem;color:var(--text-secondary);font-weight:600;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;">
+              <span>⚡ สะสม <b>${student.total_xp} XP</b></span>
+              <span>•</span>
+              <span>🏆 ผ่านแล้ว <b>${student.completed_lessons_count} บทเรียน</b></span>
+              <span>•</span>
+              <span>🕒 ใช้งานล่าสุด: <b>${formatThaiDateTime(student.last_active)}</b></span>
+            </div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="background:rgba(99,102,241,0.15);padding:6px 14px;border-radius:10px;border:1px solid rgba(99,102,241,0.3);">
-            <span style="font-size:0.75rem;color:#818cf8;display:block;">ระดับความสามารถ</span>
-            <b style="color:var(--primary-light);font-size:0.95rem;">${diagnosis.skillLevel}</b>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div class="cls-badge-code" style="font-size:0.85rem;padding:6px 14px;display:flex;flex-direction:column;align-items:flex-start;">
+            <span style="font-size:0.7rem;opacity:0.85;display:block;">ระดับความสามารถ</span>
+            <b style="font-size:0.95rem;">${diagnosis.skillLevel}</b>
           </div>
-          <button onclick="promptResetStudentPassword('${student.id}', '${escapeHtml(student.name)}')" class="btn-inspect" style="background:rgba(234,179,8,0.15);border-color:#eab308;color:#eab308;padding:8px 12px;" title="รีเซ็ตรหัสผ่านเมื่อนักเรียนลืม">
+          <button onclick="promptResetStudentPassword('${student.id}', '${escapeHtml(student.name)}')" class="btn-inspect" style="padding:10px 16px;background:var(--yellow);font-weight:800;" title="รีเซ็ตรหัสผ่านเมื่อนักเรียนลืม">
             🔑 รีเซ็ตรหัสผ่าน
           </button>
         </div>
       </div>
 
       <!-- AI Diagnosis Card -->
-      <div style="background:linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(139,92,246,0.06) 100%);border:1px solid rgba(99,102,241,0.3);border-radius:14px;padding:18px;margin-bottom:20px;">
-        <div style="font-weight:700;color:#a5b4fc;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+      <div class="student-diag-box">
+        <div class="student-diag-title-pill">
           <span>🧠 บทวิเคราะห์พัฒนาการผู้เรียน (AI Diagnosis)</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;">
-          <div>
-            <span style="font-size:0.82rem;font-weight:700;color:#4ade80;">🌟 จุดเด่น / พัฒนาการที่ดี:</span>
-            <ul style="margin:4px 0 0;padding-left:18px;font-size:0.85rem;color:var(--text-primary);line-height:1.5;">
-              ${diagnosis.strengths.map(s => `<li>${s}</li>`).join('') || '<li>เพิ่งเริ่มเรียนรู้</li>'}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:12px;">
+          <div style="background:var(--surface);border:1.5px solid var(--ink);border-radius:var(--radius);padding:14px;box-shadow:1.5px 1.5px 0 var(--ink);">
+            <div style="font-size:0.88rem;font-weight:800;color:#15803d;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+              <span>🌟 จุดเด่น / พัฒนาการที่ดี:</span>
+            </div>
+            <ul style="margin:0;padding-left:18px;font-size:0.88rem;color:var(--text-primary);line-height:1.6;">
+              ${diagnosis.strengths.map(s => `<li>${escapeHtml(s)}</li>`).join('') || '<li>เพิ่งเริ่มเรียนรู้</li>'}
             </ul>
           </div>
-          <div>
-            <span style="font-size:0.82rem;font-weight:700;color:#f87171;">⚠️ จุดเน้นที่ต้องพัฒนา:</span>
-            <ul style="margin:4px 0 0;padding-left:18px;font-size:0.85rem;color:var(--text-primary);line-height:1.5;">
-              ${diagnosis.areasForGrowth.map(a => `<li>${a}</li>`).join('') || '<li>ไม่มีข้อผิดพลาดเด่นชัด</li>'}
+          <div style="background:var(--surface);border:1.5px solid var(--ink);border-radius:var(--radius);padding:14px;box-shadow:1.5px 1.5px 0 var(--ink);">
+            <div style="font-size:0.88rem;font-weight:800;color:#c2410c;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+              <span>⚠️ จุดเน้นที่ต้องพัฒนา:</span>
+            </div>
+            <ul style="margin:0;padding-left:18px;font-size:0.88rem;color:var(--text-primary);line-height:1.6;">
+              ${diagnosis.areasForGrowth.map(a => `<li>${escapeHtml(a)}</li>`).join('') || '<li>ไม่มีข้อผิดพลาดเด่นชัด</li>'}
             </ul>
           </div>
         </div>
         ${diagnosis.coachingTip ? `
-          <div style="border-top:1px solid rgba(99,102,241,0.2);padding-top:10px;margin-top:10px;font-size:0.85rem;color:#e0e7ff;">
-            💡 <b>คำแนะนำสำหรับครูผู้สอน:</b> ${diagnosis.coachingTip}
+          <div class="student-tip-box">
+            <span style="font-size:1.2rem;line-height:1;">💡</span>
+            <div>
+              <b style="color:var(--ink);">คำแนะนำสำหรับครูผู้สอน:</b>
+              <span style="margin-left:4px;color:var(--ink);">${escapeHtml(diagnosis.coachingTip)}</span>
+            </div>
           </div>
         ` : ''}
       </div>
 
       <!-- Code Inspector (โค้ดจริงที่นักเรียนเขียน) -->
       <div style="margin-bottom:24px;">
-        <h3 style="font-size:1.05rem;margin:0 0 12px;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+        <h3 style="font-size:1.08rem;font-weight:800;margin:0 0 12px;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
           <span>📝 ประวัติการเขียนโค้ดและส่งตรวจล่าสุด</span>
+          <span style="font-size:0.8rem;background:var(--yellow-soft);border:1.5px solid var(--ink);padding:1px 8px;border-radius:var(--pill);box-shadow:1px 1px 0 var(--ink);">${recentSubmissions.length} รายการ</span>
         </h3>
-        ${recentSubmissions.length === 0 ? '<div style="color:var(--text-secondary);font-size:0.85rem;">ยังไม่มีประวัติการส่งโค้ด</div>' : `
+        ${recentSubmissions.length === 0 ? `
+          <div class="empty-state-box">
+            <span style="font-size:1.8rem;display:block;margin-bottom:6px;">💻</span>
+            <span style="font-weight:700;color:var(--text-primary);">ยังไม่มีประวัติการส่งโค้ด</span>
+            <p style="margin:4px 0 0;font-size:0.82rem;color:var(--text-secondary);">เมื่อนักเรียนกดรันหรือส่งโค้ดตรวจ ผลการทำโจทย์จะปรากฏที่นี่</p>
+          </div>
+        ` : `
           <div style="display:flex;flex-direction:column;gap:12px;max-height:340px;overflow-y:auto;padding-right:4px;">
             ${recentSubmissions.map(sub => {
               const statusBadge = sub.status === 'pass' 
-                ? '<span style="color:#4ade80;font-weight:700;font-size:0.8rem;">✅ ผ่าน (Pass)</span>' 
-                : `<span style="color:#ef4444;font-weight:700;font-size:0.8rem;">❌ ไม่ผ่าน (${sub.error_type || 'Error'})</span>`;
+                ? '<span style="color:#15803d;background:var(--green-soft);border:1.5px solid var(--ink);padding:2px 8px;border-radius:var(--pill);font-weight:800;font-size:0.75rem;box-shadow:1px 1px 0 var(--ink);">✅ ผ่าน (Pass)</span>' 
+                : `<span style="color:#b91c1c;background:var(--red-soft);border:1.5px solid var(--ink);padding:2px 8px;border-radius:var(--pill);font-weight:800;font-size:0.75rem;box-shadow:1px 1px 0 var(--ink);">❌ ไม่ผ่าน (${escapeHtml(sub.error_type || 'Error')})</span>`;
               return `
-                <div style="background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;padding:12px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <div class="student-code-item">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                     <div>
-                      <b>บทเรียน:</b> <span style="color:var(--cyan);">${sub.lesson_id}</span> (${sub.exercise_id})
+                      <b>บทเรียน:</b> <span style="color:var(--orange);font-weight:800;">${escapeHtml(sub.lesson_id)}</span> (${escapeHtml(sub.exercise_id)})
                     </div>
-                    <div>${statusBadge} <small style="color:var(--text-secondary);margin-left:8px;">${sub.created_at || ''}</small></div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      ${statusBadge}
+                      <small style="color:var(--text-secondary);font-weight:600;">${formatThaiDateTime(sub.created_at)}</small>
+                    </div>
                   </div>
                   <div class="code-preview-box">${escapeHtml(sub.code)}</div>
-                  ${sub.output ? `<div style="font-size:0.75rem;color:var(--text-secondary);margin-top:6px;"><b>ผลการรัน:</b> ${escapeHtml(sub.output.slice(0, 200))}</div>` : ''}
+                  ${sub.output ? `<div style="font-size:0.78rem;color:var(--text-secondary);margin-top:8px;background:var(--bg-alt);padding:6px 10px;border-radius:6px;border:1px solid var(--border);"><b>ผลการรัน:</b> ${escapeHtml(sub.output.slice(0, 200))}</div>` : ''}
                 </div>
               `;
             }).join('')}
@@ -489,11 +533,18 @@ async function openStudentDiagnosticsModal(studentId) {
 
       <!-- AI Interactions -->
       <div>
-        <h3 style="font-size:1.05rem;margin:0 0 12px;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+        <h3 style="font-size:1.08rem;font-weight:800;margin:0 0 12px;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
           <span>🤖 ประวัติการขอคำแนะนำจาก AI</span>
+          <span style="font-size:0.8rem;background:var(--yellow-soft);border:1.5px solid var(--ink);padding:1px 8px;border-radius:var(--pill);box-shadow:1px 1px 0 var(--ink);">${aiQueries.length} ครั้ง</span>
         </h3>
-        ${aiQueries.length === 0 ? '<div style="color:var(--text-secondary);font-size:0.85rem;">นักเรียนยังไม่เคยขอคำแนะนำจาก AI</div>' : `
-          <div style="display:flex;flex-direction:column;gap:10px;max-height:220px;overflow-y:auto;">
+        ${aiQueries.length === 0 ? `
+          <div class="empty-state-box">
+            <span style="font-size:1.8rem;display:block;margin-bottom:6px;">🤖</span>
+            <span style="font-weight:700;color:var(--text-primary);">นักเรียนยังไม่เคยขอคำแนะนำจาก AI</span>
+            <p style="margin:4px 0 0;font-size:0.82rem;color:var(--text-secondary);">เมื่อนักเรียนกดปุ่มขอความช่วยเหลือจาก AI ในบทเรียน คำถามและคำแนะนำจะถูกบันทึกที่นี่</p>
+          </div>
+        ` : `
+          <div style="display:flex;flex-direction:column;gap:10px;max-height:220px;overflow-y:auto;padding-right:4px;">
             ${aiQueries.map(ai => {
               let fbSummary = '';
               try {
@@ -501,12 +552,12 @@ async function openStudentDiagnosticsModal(studentId) {
                 fbSummary = parsed.summary || parsed.hint || '';
               } catch { fbSummary = ai.ai_feedback.slice(0, 150); }
               return `
-                <div style="background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:0.85rem;">
-                  <div style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:0.78rem;margin-bottom:4px;">
-                    <span>บทเรียน ${ai.lesson_id}</span>
-                    <span>${ai.created_at || ''}</span>
+                <div class="student-ai-item">
+                  <div style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:0.78rem;margin-bottom:6px;">
+                    <span><b>บทเรียน:</b> ${escapeHtml(ai.lesson_id)}</span>
+                    <span>${formatThaiDateTime(ai.created_at)}</span>
                   </div>
-                  <div style="color:var(--text-primary);"><b>คำแนะนำจาก AI:</b> ${escapeHtml(fbSummary)}</div>
+                  <div style="color:var(--text-primary);line-height:1.5;"><b>คำแนะนำจาก AI:</b> ${escapeHtml(fbSummary)}</div>
                 </div>
               `;
             }).join('')}
