@@ -425,6 +425,8 @@ async function openStudentDiagnosticsModal(studentId) {
     if (!res.ok) throw new Error('Failed to load student diagnosis');
     const data = await res.json();
     const { student, diagnosis, recentSubmissions, studentErrors, aiQueries } = data;
+    const skillLevelText = diagnosis.skillLevel || 'เริ่มต้น (Novice)';
+    const skillIcon = skillLevelText.includes('ขั้นสูง') ? '🚀' : skillLevelText.includes('กลาง') ? '⚡' : '🌱';
 
     body.innerHTML = `
       <div class="student-modal-header">
@@ -449,9 +451,9 @@ async function openStudentDiagnosticsModal(studentId) {
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-          <div class="cls-badge-code" style="font-size:0.85rem;padding:6px 14px;display:flex;flex-direction:column;align-items:flex-start;">
-            <span style="font-size:0.7rem;opacity:0.85;display:block;">ระดับความสามารถ</span>
-            <b style="font-size:0.95rem;">${diagnosis.skillLevel}</b>
+          <div class="student-skill-badge">
+            <span class="skill-label">ระดับความสามารถ</span>
+            <span class="skill-value">${skillIcon} ${escapeHtml(skillLevelText)}</span>
           </div>
           <button onclick="promptResetStudentPassword('${student.id}', '${escapeHtml(student.name)}')" class="btn-inspect" style="padding:10px 16px;background:var(--yellow);font-weight:800;" title="รีเซ็ตรหัสผ่านเมื่อนักเรียนลืม">
             🔑 รีเซ็ตรหัสผ่าน
