@@ -897,12 +897,21 @@ function applyCurriculumPreset(type) {
   let targetIds = [];
   if (type === 'all') {
     targetIds = LESSONS_DATA.map(l => l.id);
+  } else if (type === 'elementary' || type === 'primary') {
+    // ประถมศึกษา (e1-e5) 5 บท
+    targetIds = LESSONS_DATA.filter(l => l.level === 'elementary').map(l => l.id);
   } else if (type === 'junior') {
-    targetIds = LESSONS_DATA.slice(0, 6).map(l => l.id);
+    // พื้นฐาน ม.ต้น (บทที่ 1-6) -> b1-b6 (6 บท)
+    targetIds = LESSONS_DATA.filter(l => l.level === 'beginner').slice(0, 6).map(l => l.id);
+  } else if (type === 'middle') {
+    // ม.ต้น ครบชุด (10 บท) -> b1-b10 (10 บท)
+    targetIds = LESSONS_DATA.filter(l => l.level === 'beginner').map(l => l.id);
   } else if (type === 'high') {
-    targetIds = LESSONS_DATA.slice(0, 10).map(l => l.id);
+    // มัธยมปลาย (15 บท) -> beginner (10 บท) + intermediate (5 บท)
+    targetIds = LESSONS_DATA.filter(l => l.level === 'beginner' || l.level === 'intermediate').map(l => l.id);
   } else if (type === 'advanced') {
-    targetIds = LESSONS_DATA.slice(0, 12).map(l => l.id);
+    // มัธยมปลาย ขั้นสูง (ทั้งหมด 23 บท)
+    targetIds = LESSONS_DATA.map(l => l.id);
   } else if (type === 'none') {
     targetIds = [];
   }
@@ -918,6 +927,11 @@ function updateCurriculumSummary() {
   const checked = document.querySelectorAll('.curr-lesson-cb:checked');
   const count = checked.length;
   document.getElementById('curr-selected-count').textContent = count;
+
+  const totalEl = document.getElementById('curr-total-count');
+  if (totalEl && typeof LESSONS_DATA !== 'undefined') {
+    totalEl.textContent = LESSONS_DATA.length;
+  }
 
   let exSum = 0;
   if (typeof LESSONS_DATA !== 'undefined') {

@@ -373,10 +373,11 @@
     <!-- Presets -->
     <div style="flex-shrink:0; display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border);">
       <span style="font-size:0.82rem; font-weight:700; color:var(--text-primary); align-self:center;">เทมเพลตด่วน:</span>
-      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('all')" style="padding:4px 10px; font-size:0.8rem;">⚡ ทั้งหมด (15 บท)</button>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('all')" style="padding:4px 10px; font-size:0.8rem;">⚡ ทั้งหมด (23 บท)</button>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('elementary')" style="padding:4px 10px; font-size:0.8rem;">🌸 ประถม (5 บท)</button>
       <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('junior')" style="padding:4px 10px; font-size:0.8rem;">🌱 พื้นฐาน ม.ต้น (บทที่ 1-6)</button>
-      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('high')" style="padding:4px 10px; font-size:0.8rem;">🚀 เขียนโค้ด ม.ปลาย (บทที่ 1-10)</button>
-      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('advanced')" style="padding:4px 10px; font-size:0.8rem;">⚡ ม.ปลาย ขั้นสูง (บทที่ 1-12)</button>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('middle')" style="padding:4px 10px; font-size:0.8rem;">🌿 ม.ต้น ครบชุด (10 บท)</button>
+      <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('high')" style="padding:4px 10px; font-size:0.8rem;">🚀 ม.ปลาย (15 บท)</button>
       <button type="button" class="btn-secondary" onclick="applyCurriculumPreset('none')" style="padding:4px 10px; font-size:0.8rem; color:var(--red);">ล้างทั้งหมด</button>
     </div>
 
@@ -393,7 +394,7 @@
       </label>
 
       <div style="font-size:0.88rem; color:var(--text-secondary);">
-        เปิดสอน: <b id="curr-selected-count" style="color:var(--primary-light);">15</b> จาก 15 บท (<span id="curr-selected-exercises">45</span> โจทย์)
+        เปิดสอน: <b id="curr-selected-count" style="color:var(--orange);">0</b> จาก <span id="curr-total-count">23</span> บท (<span id="curr-selected-exercises">0</span> โจทย์)
       </div>
     </div>
 

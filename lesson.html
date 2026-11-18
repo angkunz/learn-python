@@ -116,7 +116,10 @@
       const session = window.ClassroomClient?.getSession();
       const curr = session?.classroom?.curriculum;
       if (curr && curr.lessonIds && Array.isArray(curr.lessonIds) && curr.lessonIds.length > 0) {
-        return LESSONS_DATA.filter(l => curr.lessonIds.includes(l.id)).sort((a, b) => a.order - b.order);
+        const lo = { elementary: 0, beginner: 1, intermediate: 2, advanced: 3 };
+        return LESSONS_DATA.filter(l => curr.lessonIds.includes(l.id)).sort((a, b) => {
+          return (lo[a.level] ?? 99) - (lo[b.level] ?? 99) || a.order - b.order;
+        });
       }
       const grade = getGradeLevel();
       const visibleLevels = getLevelsByGrade(grade);
@@ -219,7 +222,9 @@
       }
 
       const grade = getGradeLevel();
-      const levels = getLevelsByGrade(grade);
+      const levels = isClassroom
+        ? ['elementary', 'beginner', 'intermediate', 'advanced'].filter(lvl => activeLessons.some(l => l.level === lvl))
+        : getLevelsByGrade(grade);
       const colors = {
         elementary: '#f472b6',
         beginner: 'var(--green)',
