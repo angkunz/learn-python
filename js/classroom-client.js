@@ -55,6 +55,10 @@ const ClassroomClient = {
     if (navXp) {
       navXp.textContent = `⭐ ${totalXp} XP`;
     }
+    const studentXpCounter = document.getElementById('nav-xp-counter');
+    if (studentXpCounter) {
+      studentXpCounter.textContent = totalXp;
+    }
     const menuXp = document.getElementById('menu-student-xp');
     if (menuXp) {
       menuXp.textContent = totalXp;
@@ -317,6 +321,7 @@ const ClassroomClient = {
         <button class="nav-student-trigger" onclick="ClassroomClient.toggleMenu(event)" title="ข้อมูลผู้เรียนและห้องเรียน">
           <span class="nav-student-avatar">👤</span>
           <span class="nav-student-name">${escapeHtml(studentLabel)}</span>
+          <span class="nav-student-xp">⭐ <span id="nav-xp-counter">${currentXp}</span> XP</span>
           <span class="nav-student-caret">▾</span>
         </button>
         <div class="nav-student-menu" id="nav-student-menu">

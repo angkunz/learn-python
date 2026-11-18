@@ -4507,3 +4507,9 @@ html {
     font-size: 0.65rem !important;
   }
 }
+
+/* Hide separate XP badge in Classroom Mode (XP is integrated into Student Profile Pill) */
+body.is-classroom-mode .navbar .nav-xp-badge,
+body.is-classroom-mode .navbar #nav-xp {
+  display: none !important;
+}
